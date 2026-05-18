@@ -132,6 +132,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .doc-ic{color:var(--text-muted);flex-shrink:0;}
 .doc-nm{font-size:13px;flex:1;}
 .doc-badge{font-size:10px;color:var(--text-muted);background:var(--stone);padding:2px 8px;border-radius:10px;}
+/* VAULT CARDS */
+.vault-card{background:var(--dark-card);border-radius:var(--r);padding:18px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;}
+.vault-card::after{content:"";position:absolute;right:-20px;top:-20px;width:110px;height:110px;border-radius:50%;border:24px solid rgba(255,255,255,0.05);pointer-events:none;}
+.vault-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.vault-card-actions{display:flex;gap:6px;}
+.vault-card-btn{background:rgba(255,255,255,.12);border:none;border-radius:6px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.8);cursor:pointer;font-family:var(--sans);}
+.vault-card-btn:hover{background:rgba(255,255,255,.2);}
+.vault-card-btn.del{background:rgba(139,58,82,.35);color:#f0c0c8;}
+.vault-em-card{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px;}
+.vault-em-row{display:flex;align-items:center;gap:12px;}
+.vault-em-info{flex:1;}
+.vault-em-name{font-size:13px;font-weight:500;color:var(--text-primary);}
+.vault-em-sub{font-size:11px;color:var(--text-muted);}
+.vault-em-ph{font-size:12px;color:var(--text-secondary);margin-right:8px;}
+.vault-em-acts{display:flex;gap:5px;flex-shrink:0;}
+.vault-doc-card{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.vault-doc-nm{font-size:13px;flex:1;}
+.vault-doc-acts{display:flex;gap:5px;align-items:center;}
+.mini-btn{padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer;font-family:var(--sans);border:1px solid var(--stone);background:none;color:var(--text-secondary);}
+.mini-btn.del{border-color:var(--burgundy);color:var(--burgundy);}
+.mini-btn.edit-btn{border-color:var(--text-muted);}
 /* JOURNAL */
 .j-tabs{display:flex;background:var(--stone);border-radius:var(--r-sm);padding:3px;margin-bottom:16px;}
 .j-tab{flex:1;padding:8px;border:none;background:none;cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--text-secondary);border-radius:8px;transition:all .2s;}
@@ -336,54 +357,32 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 
 <!-- VAULT -->
 <div class="screen" id="s-vault">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-    <div class="eyebrow" style="margin:0;">Stored Offline</div>
-    <button id="btn-vault-add" style="background:none;border:none;cursor:pointer;color:var(--burgundy);font-size:22px;font-family:var(--sans);line-height:1;padding:0 4px;">+</button>
-  </div>
+  <div class="eyebrow">Stored Offline</div>
   <div class="big-title">Vault</div>
-  <div class="card-dark">
-    <div class="vault-ins-lbl">Travel Insurance</div>
-    <div class="vault-ins-name">AXA Schengen</div>
-    <div class="vault-ins-row">
-      <div><div class="vault-f-lbl">Policy</div><div class="vault-f-val">AX &middot; 7720 &middot; 8841</div></div>
-      <div style="text-align:right;"><div class="vault-f-lbl">Expires</div><div class="vault-f-val">09 / 24</div></div>
-    </div>
-    <div class="active-pill">ACTIVE</div>
+
+  <!-- Vault tabs -->
+  <div class="j-tabs" style="margin-bottom:18px;">
+    <button class="j-tab active" id="vaultab-ins">Insurance</button>
+    <button class="j-tab" id="vaultab-em">Emergency</button>
+    <button class="j-tab" id="vaultab-doc">Documents</button>
   </div>
-  <div class="sec-row">
-    <div class="eyebrow" style="margin:0;">Emergency</div>
-    <button id="btn-vault-edit" class="link-btn">Add Contact</button>
+
+  <!-- INSURANCE panel -->
+  <div id="vault-panel-ins">
+    <div id="vault-ins-list"></div>
+    <button id="btn-add-ins" class="btn-p" style="margin-top:4px;">+ Add Insurance</button>
   </div>
-  <div class="card" style="padding:4px 16px;" id="em-list">
-    <div class="em-item">
-      <div class="em-icon ic-pink"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>
-      <div><div class="em-name">Air Doctor 24/7</div><div class="em-sub">Worldwide medical</div></div>
-      <div class="em-ph">+1 800 224 1100</div>
-    </div>
-    <div class="em-item">
-      <div class="em-icon ic-stone"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-      <div><div class="em-name">AXA Claims</div><div class="em-sub">English line</div></div>
-      <div class="em-ph">+33 1 55 92 26 92</div>
-    </div>
-    <div class="em-item">
-      <div class="em-icon ic-cream"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
-      <div><div class="em-name">Ship reception</div><div class="em-sub">Dial from cabin</div></div>
-      <div class="em-ph">Ext. 0</div>
-    </div>
-    <div class="em-item" style="border:none;">
-      <div class="em-icon ic-pink"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>
-      <div><div class="em-name">Family &mdash; Anna</div><div class="em-sub">Spouse</div></div>
-      <div class="em-ph">+1 917 555 0144</div>
-    </div>
+
+  <!-- EMERGENCY panel -->
+  <div id="vault-panel-em" style="display:none;">
+    <div id="vault-em-list"></div>
+    <button id="btn-add-em" class="btn-p" style="margin-top:4px;">+ Add Contact</button>
   </div>
-  <div class="sec-row">
-    <div class="eyebrow" style="margin:0;">Documents</div>
-    <button id="btn-vault-doc" class="link-btn">Add</button>
-  </div>
-  <div class="card" id="doc-list" style="padding:4px 16px;">
-    <div class="doc-item"><svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="doc-nm">Passport &middot; M. Halden</span><span class="doc-badge">Verified</span></div>
-    <div class="doc-item"><svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="doc-nm">Boarding pass &middot; Day 1</span><span class="doc-badge">PDF</span></div>
-    <div class="doc-item" style="border:none;"><svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="doc-nm">Cabin 221 receipt</span><span class="doc-badge">PDF</span></div>
+
+  <!-- DOCUMENTS panel -->
+  <div id="vault-panel-doc" style="display:none;">
+    <div id="vault-doc-list"></div>
+    <button id="btn-add-doc" class="btn-p" style="margin-top:4px;">+ Add Document</button>
   </div>
 </div>
 
@@ -737,55 +736,251 @@ function closeModal(){overlay.style.display='none';mBody.innerHTML='';}
 g('modal-close').addEventListener('click',closeModal);
 overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
 
-// ── VAULT ──
-g('btn-vault-add').addEventListener('click',function(){
-  openModal('Add to Vault',
-    '<div style="display:flex;gap:8px;margin-bottom:16px;">'
-    +'<button id="vt-ins" style="flex:1;padding:9px;border:1px solid var(--burgundy);border-radius:var(--r-sm);background:var(--burgundy);color:#fff;font-family:var(--sans);font-size:13px;cursor:pointer;">Insurance</button>'
-    +'<button id="vt-doc" style="flex:1;padding:9px;border:1px solid var(--stone);border-radius:var(--r-sm);background:none;color:var(--text-secondary);font-family:var(--sans);font-size:13px;cursor:pointer;">Document</button>'
-    +'</div>'
-    +'<div id="ins-form"><input id="vi-provider" class="m-inp" type="text" placeholder="Provider name"><input id="vi-policy" class="m-inp" type="text" placeholder="Policy number"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;"><input id="vi-from" class="m-inp" type="date" style="margin:0;"><input id="vi-to" class="m-inp" type="date" style="margin:0;"></div><button id="vi-save" class="btn-p">Save Insurance</button></div>'
-    +'<div id="doc-form" style="display:none;"><input id="vd-name" class="m-inp" type="text" placeholder="Document name"><select id="vd-type" class="m-inp" style="appearance:auto;-webkit-appearance:auto;"><option>PDF</option><option>Verified</option><option>Scan</option></select><button id="vd-save" class="btn-p">Save Document</button></div>'
-  ,function(){
-    function sw(t){g('ins-form').style.display=t==='ins'?'block':'none';g('doc-form').style.display=t==='doc'?'block':'none';g('vt-ins').style.cssText='flex:1;padding:9px;border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;cursor:pointer;border:1px solid '+(t==='ins'?'var(--burgundy);background:var(--burgundy);color:#fff':'var(--stone);background:none;color:var(--text-secondary)')+';';g('vt-doc').style.cssText='flex:1;padding:9px;border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;cursor:pointer;border:1px solid '+(t==='doc'?'var(--burgundy);background:var(--burgundy);color:#fff':'var(--stone);background:none;color:var(--text-secondary)')+';';}
-    g('vt-ins').addEventListener('click',function(){sw('ins');});
-    g('vt-doc').addEventListener('click',function(){sw('doc');});
-    g('vi-save').addEventListener('click',function(){if(!(g('vi-provider').value||"").trim()){g('vi-provider').focus();return;}mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Insurance saved.</div></div>';setTimeout(closeModal,1800);});
-    g('vd-save').addEventListener('click',function(){var nm=(g('vd-name').value||"").trim();if(!nm){g('vd-name').focus();return;}addDocRow(nm,g('vd-type').value);mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';setTimeout(closeModal,1800);});
+// ── VAULT DATA ──
+var vaultIns=[
+  {id:0,provider:'AXA Schengen',policy:'AX · 7720 · 8841',from:'2024-01-01',to:'2024-09-30',active:true}
+];
+var vaultEm=[
+  {id:0,name:'Air Doctor 24/7',sub:'Worldwide medical',phone:'+1 800 224 1100'},
+  {id:1,name:'AXA Claims',sub:'English line',phone:'+33 1 55 92 26 92'},
+  {id:2,name:'Ship reception',sub:'Dial from cabin',phone:'Ext. 0'},
+  {id:3,name:'Family — Anna',sub:'Spouse',phone:'+1 917 555 0144'}
+];
+var vaultDocs=[
+  {id:0,name:'Passport · M. Halden',type:'Verified'},
+  {id:1,name:'Boarding pass · Day 1',type:'PDF'},
+  {id:2,name:'Cabin 221 receipt',type:'PDF'}
+];
+var nextVid=10;
+
+// Vault tab switching
+function switchVaultTab(name){
+  ['ins','em','doc'].forEach(function(n){
+    g('vaultab-'+n).classList.toggle('active',n===name);
+    g('vault-panel-'+n).style.display=n===name?'block':'none';
   });
-});
-g('btn-vault-edit').addEventListener('click',function(){
-  openModal('Add Emergency Contact',
-    '<input id="ec-name" class="m-inp" type="text" placeholder="Name"><input id="ec-sub" class="m-inp" type="text" placeholder="Label (e.g. Spouse)"><input id="ec-phone" class="m-inp" type="tel" placeholder="Phone number"><button id="ec-save" class="btn-p">Save Contact</button>'
+  if(name==='ins')renderVaultIns();
+  if(name==='em')renderVaultEm();
+  if(name==='doc')renderVaultDoc();
+}
+g('vaultab-ins').addEventListener('click',function(){switchVaultTab('ins');});
+g('vaultab-em').addEventListener('click',function(){switchVaultTab('em');});
+g('vaultab-doc').addEventListener('click',function(){switchVaultTab('doc');});
+
+// ── RENDER INSURANCE ──
+function renderVaultIns(){
+  var el=g('vault-ins-list');if(!el)return;
+  if(!vaultIns.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center;">No insurance added yet.</div>';return;}
+  var h='';
+  vaultIns.forEach(function(ins){
+    h+='<div class="vault-card">';
+    h+='<div class="vault-card-header">';
+    h+='<div><div class="vault-ins-lbl">Travel Insurance</div><div class="vault-ins-name" style="margin-bottom:0;">'+ins.provider+'</div></div>';
+    h+='<div class="vault-card-actions">';
+    h+='<button class="vault-card-btn vins-edit" data-id="'+ins.id+'">Edit</button>';
+    h+='<button class="vault-card-btn del vins-del" data-id="'+ins.id+'">Delete</button>';
+    h+='</div></div>';
+    h+='<div class="vault-ins-row"><div><div class="vault-f-lbl">Policy</div><div class="vault-f-val">'+ins.policy+'</div></div>';
+    h+='<div style="text-align:right;"><div class="vault-f-lbl">Expires</div><div class="vault-f-val">'+ins.to.substring(5).replace('-','/')+'</div></div></div>';
+    if(ins.active)h+='<div class="active-pill" style="position:static;display:inline-block;margin-top:10px;">ACTIVE</div>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+  el.querySelectorAll('.vins-edit').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(btn.getAttribute('data-id'));
+      var ins=vaultIns.find(function(x){return x.id===id;});if(!ins)return;
+      openModal('Edit Insurance',
+        '<input id="vi2-provider" class="m-inp" type="text" value="'+ins.provider+'" placeholder="Provider">'
+        +'<input id="vi2-policy" class="m-inp" type="text" value="'+ins.policy+'" placeholder="Policy number">'
+        +'<label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Start date</label>'
+        +'<input id="vi2-from" class="m-inp" type="date" value="'+ins.from+'">'
+        +'<label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Expiry date</label>'
+        +'<input id="vi2-to" class="m-inp" type="date" value="'+ins.to+'">'
+        +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="vi2-active"'+(ins.active?' checked':'')+'>Mark as Active</label>'
+        +'<button id="vi2-save" class="btn-p">Save Changes</button>'
+      ,function(){
+        g('vi2-save').addEventListener('click',function(){
+          ins.provider=(g('vi2-provider').value||ins.provider).trim();
+          ins.policy=(g('vi2-policy').value||ins.policy).trim();
+          ins.from=g('vi2-from').value||ins.from;
+          ins.to=g('vi2-to').value||ins.to;
+          ins.active=g('vi2-active').checked;
+          renderVaultIns();
+          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Insurance updated.</div></div>';
+          setTimeout(closeModal,1500);
+        });
+      });
+    });
+  });
+  el.querySelectorAll('.vins-del').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(btn.getAttribute('data-id'));
+      if(!confirm('Delete this insurance record?'))return;
+      vaultIns=vaultIns.filter(function(x){return x.id!==id;});
+      renderVaultIns();
+    });
+  });
+}
+
+// ── ADD INSURANCE ──
+g('btn-add-ins').addEventListener('click',function(){
+  openModal('Add Insurance',
+    '<input id="vi-provider" class="m-inp" type="text" placeholder="Provider (e.g. AXA Schengen)">'
+    +'<input id="vi-policy" class="m-inp" type="text" placeholder="Policy number">'
+    +'<label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Start date</label>'
+    +'<input id="vi-from" class="m-inp" type="date">'
+    +'<label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Expiry date</label>'
+    +'<input id="vi-to" class="m-inp" type="date">'
+    +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="vi-active" checked>Mark as Active</label>'
+    +'<button id="vi-save" class="btn-p">Save Insurance</button>'
   ,function(){
-    g('ec-save').addEventListener('click',function(){
-      var nm=(g('ec-name').value||"").trim(),sub=(g('ec-sub').value||"").trim(),ph=(g('ec-phone').value||"").trim();
-      if(!nm||!ph)return;
-      var list=g('em-list');
-      list.querySelectorAll('.em-item').forEach(function(i){i.style.borderBottom='1px solid var(--stone)';});
-      var row=document.createElement('div');row.className='em-item';row.style.borderBottom='none';
-      row.innerHTML='<div class="em-icon ic-cream"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>'
-        +'<div><div class="em-name">'+nm+'</div><div class="em-sub">'+sub+'</div></div><div class="em-ph">'+ph+'</div>';
-      list.appendChild(row);
-      mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';
-      setTimeout(closeModal,1800);
+    g('vi-save').addEventListener('click',function(){
+      var prov=(g('vi-provider').value||'').trim();
+      if(!prov){g('vi-provider').focus();return;}
+      vaultIns.push({id:nextVid++,provider:prov,policy:(g('vi-policy').value||'').trim(),from:g('vi-from').value||'',to:g('vi-to').value||'',active:g('vi-active').checked});
+      renderVaultIns();
+      mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Insurance saved.</div></div>';
+      setTimeout(closeModal,1500);
     });
   });
 });
-function addDocRow(nm,badge){
-  var list=g('doc-list');if(!list)return;
-  list.querySelectorAll('.doc-item').forEach(function(i){i.style.borderBottom='1px solid var(--stone)';});
-  var row=document.createElement('div');row.className='doc-item';row.style.borderBottom='none';
-  row.innerHTML='<svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="doc-nm">'+nm+'</span><span class="doc-badge">'+badge+'</span>';
-  list.appendChild(row);
+
+// ── RENDER EMERGENCY ──
+function renderVaultEm(){
+  var el=g('vault-em-list');if(!el)return;
+  if(!vaultEm.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center;">No contacts yet.</div>';return;}
+  var h='';
+  vaultEm.forEach(function(em){
+    h+='<div class="vault-em-card">';
+    h+='<div class="vault-em-row">';
+    h+='<div class="em-icon ic-pink" style="flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>';
+    h+='<div class="vault-em-info"><div class="vault-em-name">'+em.name+'</div><div class="vault-em-sub">'+em.sub+'</div></div>';
+    h+='<div class="vault-em-ph">'+em.phone+'</div>';
+    h+='<div class="vault-em-acts">';
+    h+='<button class="mini-btn edit-btn vem-edit" data-id="'+em.id+'">Edit</button>';
+    h+='<button class="mini-btn del vem-del" data-id="'+em.id+'">Del</button>';
+    h+='</div></div></div>';
+  });
+  el.innerHTML=h;
+  el.querySelectorAll('.vem-edit').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(btn.getAttribute('data-id'));
+      var em=vaultEm.find(function(x){return x.id===id;});if(!em)return;
+      openModal('Edit Contact',
+        '<input id="ec2-name" class="m-inp" type="text" value="'+em.name+'" placeholder="Name">'
+        +'<input id="ec2-sub" class="m-inp" type="text" value="'+em.sub+'" placeholder="Label (e.g. Spouse)">'
+        +'<input id="ec2-phone" class="m-inp" type="tel" value="'+em.phone+'" placeholder="Phone">'
+        +'<button id="ec2-save" class="btn-p">Save Changes</button>'
+      ,function(){
+        g('ec2-save').addEventListener('click',function(){
+          em.name=(g('ec2-name').value||em.name).trim();
+          em.sub=(g('ec2-sub').value||'').trim();
+          em.phone=(g('ec2-phone').value||em.phone).trim();
+          renderVaultEm();
+          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Contact updated.</div></div>';
+          setTimeout(closeModal,1500);
+        });
+      });
+    });
+  });
+  el.querySelectorAll('.vem-del').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(btn.getAttribute('data-id'));
+      if(!confirm('Delete this contact?'))return;
+      vaultEm=vaultEm.filter(function(x){return x.id!==id;});
+      renderVaultEm();
+    });
+  });
 }
-g('btn-vault-doc').addEventListener('click',function(){
-  openModal('Add Document',
-    '<input id="vd2-name" class="m-inp" type="text" placeholder="Document name"><select id="vd2-type" class="m-inp" style="appearance:auto;-webkit-appearance:auto;"><option>PDF</option><option>Verified</option><option>Scan</option></select><button id="vd2-save" class="btn-p">Save Document</button>'
+
+// ── ADD EMERGENCY CONTACT ──
+g('btn-add-em').addEventListener('click',function(){
+  openModal('Add Emergency Contact',
+    '<input id="ec-name" class="m-inp" type="text" placeholder="Name (e.g. Air Doctor)">'
+    +'<input id="ec-sub" class="m-inp" type="text" placeholder="Label (e.g. Worldwide medical)">'
+    +'<input id="ec-phone" class="m-inp" type="tel" placeholder="Phone number">'
+    +'<button id="ec-save" class="btn-p">Save Contact</button>'
   ,function(){
-    g('vd2-save').addEventListener('click',function(){var nm=(g('vd2-name').value||"").trim();if(!nm){g('vd2-name').focus();return;}addDocRow(nm,g('vd2-type').value);mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';setTimeout(closeModal,1800);});
+    g('ec-save').addEventListener('click',function(){
+      var nm=(g('ec-name').value||'').trim(),ph=(g('ec-phone').value||'').trim();
+      if(!nm||!ph)return;
+      vaultEm.push({id:nextVid++,name:nm,sub:(g('ec-sub').value||'').trim(),phone:ph});
+      renderVaultEm();
+      mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';
+      setTimeout(closeModal,1500);
+    });
   });
 });
+
+// ── RENDER DOCUMENTS ──
+function renderVaultDoc(){
+  var el=g('vault-doc-list');if(!el)return;
+  if(!vaultDocs.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center;">No documents yet.</div>';return;}
+  var h='';
+  vaultDocs.forEach(function(doc){
+    h+='<div class="vault-doc-card">';
+    h+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    h+='<span class="vault-doc-nm">'+doc.name+'</span>';
+    h+='<div class="vault-doc-acts">';
+    h+='<span class="doc-badge">'+doc.type+'</span>';
+    h+='<button class="mini-btn edit-btn vdoc-edit" data-id="'+doc.id+'" style="margin-left:6px;">Edit</button>';
+    h+='<button class="mini-btn del vdoc-del" data-id="'+doc.id+'">Del</button>';
+    h+='</div></div>';
+  });
+  el.innerHTML=h;
+  el.querySelectorAll('.vdoc-edit').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(btn.getAttribute('data-id'));
+      var doc=vaultDocs.find(function(x){return x.id===id;});if(!doc)return;
+      openModal('Edit Document',
+        '<input id="vd2-name" class="m-inp" type="text" value="'+doc.name+'" placeholder="Document name">'
+        +'<select id="vd2-type" class="m-inp" style="appearance:auto;-webkit-appearance:auto;">'
+        +'<option'+(doc.type==='PDF'?' selected':'')+'>PDF</option>'
+        +'<option'+(doc.type==='Verified'?' selected':'')+'>Verified</option>'
+        +'<option'+(doc.type==='Scan'?' selected':'')+'>Scan</option>'
+        +'</select>'
+        +'<button id="vd2-save" class="btn-p">Save Changes</button>'
+      ,function(){
+        g('vd2-save').addEventListener('click',function(){
+          doc.name=(g('vd2-name').value||doc.name).trim();
+          doc.type=g('vd2-type').value;
+          renderVaultDoc();
+          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Document updated.</div></div>';
+          setTimeout(closeModal,1500);
+        });
+      });
+    });
+  });
+  el.querySelectorAll('.vdoc-del').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(btn.getAttribute('data-id'));
+      if(!confirm('Delete this document?'))return;
+      vaultDocs=vaultDocs.filter(function(x){return x.id!==id;});
+      renderVaultDoc();
+    });
+  });
+}
+
+// ── ADD DOCUMENT ──
+g('btn-add-doc').addEventListener('click',function(){
+  openModal('Add Document',
+    '<input id="vd-name" class="m-inp" type="text" placeholder="Document name (e.g. Passport)">'
+    +'<select id="vd-type" class="m-inp" style="appearance:auto;-webkit-appearance:auto;"><option>PDF</option><option>Verified</option><option>Scan</option></select>'
+    +'<button id="vd-save" class="btn-p">Save Document</button>'
+  ,function(){
+    g('vd-save').addEventListener('click',function(){
+      var nm=(g('vd-name').value||'').trim();if(!nm){g('vd-name').focus();return;}
+      vaultDocs.push({id:nextVid++,name:nm,type:g('vd-type').value});
+      renderVaultDoc();
+      mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' saved.</div></div>';
+      setTimeout(closeModal,1500);
+    });
+  });
+});
+
+// Init vault on first show
+switchVaultTab('ins');
 
 // ── JOURNAL ──
 // internal journal store
@@ -929,9 +1124,19 @@ g('btn-parse').addEventListener('click',function(){
   out.innerHTML=h;
   g('btn-confirm').addEventListener('click',function(){
     var data=JSON.parse(decodeURIComponent(this.getAttribute('data-pl')));
-    data.forEach(function(item){if(!stops.some(function(x){return x.place===item.place&&x.date===item.date;}))stops.push(item);});
+    var added=0;
+    data.forEach(function(item){
+      if(!stops.some(function(x){return x.place===item.place&&x.date===item.date;})){
+        item.day=stops.length+1;
+        stops.push(item);
+        added++;
+      }
+    });
+    // re-number all days
+    stops.forEach(function(s,i){s.day=i+1;});
     renderItin();
-    out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+data.length+' stops added.</div></div>';
+    if(typeof renderItinEdit==='function')renderItinEdit();
+    out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+added+' stop'+(added!==1?'s':'')+' added to Voyage!</div><div style="margin-top:8px;"><button class="btn-sm primary" onclick="document.querySelector('[data-s=voyage]').click()" style="width:100%;">View Itinerary &#8594;</button></div></div>';
     g('imp-input').value='';
   });
 });
