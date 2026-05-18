@@ -10,10 +10,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="VoyageKeeper">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon-precomposed" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon-precomposed" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <meta name="apple-touch-fullscreen" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileImage" content="icon-192.png">
+<meta name="msapplication-TileColor" content="#f5f0eb">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -148,6 +155,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .vault-em-ph{font-size:12px;color:var(--text-secondary);margin-right:8px;}
 .vault-em-acts{display:flex;gap:5px;flex-shrink:0;}
 .vault-doc-card{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+/* VAULT NOTES */
+.vault-note-card{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:14px;margin-bottom:10px;}
+.vault-note-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.vault-note-title{font-weight:500;font-size:14px;color:var(--text-primary);}
+.vault-note-body{font-size:13px;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap;}
+.vault-note-acts{display:flex;gap:5px;flex-shrink:0;margin-left:8px;}
 .vault-doc-nm{font-size:13px;flex:1;}
 .vault-doc-acts{display:flex;gap:5px;align-items:center;}
 .mini-btn{padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer;font-family:var(--sans);border:1px solid var(--stone);background:none;color:var(--text-secondary);}
@@ -360,11 +373,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
   <div class="eyebrow">Stored Offline</div>
   <div class="big-title">Vault</div>
 
-  <!-- Vault tabs -->
+  <!-- Vault tabs — Insurance / Emergency / Notes -->
   <div class="j-tabs" style="margin-bottom:18px;">
     <button class="j-tab active" id="vaultab-ins">Insurance</button>
     <button class="j-tab" id="vaultab-em">Emergency</button>
-    <button class="j-tab" id="vaultab-doc">Documents</button>
+    <button class="j-tab" id="vaultab-notes">Notes</button>
   </div>
 
   <!-- INSURANCE panel -->
@@ -379,10 +392,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
     <button id="btn-add-em" class="btn-p" style="margin-top:4px;">+ Add Contact</button>
   </div>
 
-  <!-- DOCUMENTS panel -->
-  <div id="vault-panel-doc" style="display:none;">
-    <div id="vault-doc-list"></div>
-    <button id="btn-add-doc" class="btn-p" style="margin-top:4px;">+ Add Document</button>
+  <!-- NOTES panel — plain typed notes, no file upload needed -->
+  <div id="vault-panel-notes" style="display:none;">
+    <div class="eyebrow">Travel Notes &amp; References</div>
+    <div id="vault-notes-list"></div>
+    <!-- Inline add form — no modal needed -->
+    <div id="vault-notes-form" class="card" style="margin-top:8px;">
+      <div class="eyebrow" style="margin-bottom:10px;">Add Note</div>
+      <input id="vn-title" class="m-inp" type="text" placeholder="Title (e.g. Passport No, Cabin, Policy)">
+      <textarea id="vn-body" class="imp-ta" style="min-height:70px;" placeholder="Details&#8230;"></textarea>
+      <button id="btn-add-note" class="btn-p" style="margin-top:8px;">Save Note</button>
+    </div>
   </div>
 </div>
 
@@ -443,13 +463,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
   </div>
   <div id="panel-text">
     <div class="eyebrow">Paste your cruise itinerary</div>
-    <textarea id="imp-input" class="imp-ta" placeholder="Paste any itinerary text here &#8212; email confirmation, PDF text, booking summary, etc.
+    <textarea id="imp-input" class="imp-ta" placeholder="Paste any cruise itinerary here. Supported formats:
 
-Example:
-Day 1 &#8211; Sep 14 &#8211; Barcelona, Spain (Dep 18:00)
-Day 2 &#8211; Sep 15 &#8211; At sea
-Day 3 &#8211; Sep 16 &#8211; Naples, Italy (Arr 08:00, Dep 19:00)
-Day 4 &#8211; Sep 17 &#8211; Santorini, Greece (Arr 07:00, Dep 18:00)"></textarea>
+&#x2022; 10-Jun Southampton, England 11-Jun At Sea 12-Jun Lisbon, Portugal
+&#x2022; Day 1 &#8211; Sep 14 &#8211; Barcelona, Spain (Dep 18:00)
+&#x2022; Sep 14 Naples, Italy Arr 08:00 Dep 19:00
+&#x2022; 14 September &#8211; Lisbon, Portugal. Depart 18:00
+
+Multiple voyages and accented characters supported."></textarea>
     <div class="imp-hint">Supports most cruise booking formats. Parser reads dates, ports, arrival and departure times.</div>
     <button id="btn-parse" class="btn-p">Parse Itinerary</button>
     <div id="parse-out"></div>
@@ -517,6 +538,13 @@ document.querySelectorAll('#nav button').forEach(function(btn){
     document.querySelectorAll('#nav button').forEach(function(b){b.classList.remove('active');});
     var sc=g('s-'+id);if(sc)sc.classList.add('active');
     btn.classList.add('active');
+    // Re-render dynamic screens when navigated to
+    if(id==='vault'){
+      // find which vault tab is currently active and re-render it
+      var activeVTab='ins';
+      ['ins','em','doc'].forEach(function(n){if(g('vaultab-'+n)&&g('vaultab-'+n).classList.contains('active'))activeVTab=n;});
+      switchVaultTab(activeVTab);
+    }
   });
 });
 
@@ -755,17 +783,17 @@ var nextVid=10;
 
 // Vault tab switching
 function switchVaultTab(name){
-  ['ins','em','doc'].forEach(function(n){
+  ['ins','em','notes'].forEach(function(n){
     g('vaultab-'+n).classList.toggle('active',n===name);
     g('vault-panel-'+n).style.display=n===name?'block':'none';
   });
   if(name==='ins')renderVaultIns();
   if(name==='em')renderVaultEm();
-  if(name==='doc')renderVaultDoc();
+  if(name==='notes')renderVaultNotes();
 }
 g('vaultab-ins').addEventListener('click',function(){switchVaultTab('ins');});
 g('vaultab-em').addEventListener('click',function(){switchVaultTab('em');});
-g('vaultab-doc').addEventListener('click',function(){switchVaultTab('doc');});
+g('vaultab-notes').addEventListener('click',function(){switchVaultTab('notes');});
 
 // ── RENDER INSURANCE ──
 function renderVaultIns(){
@@ -914,73 +942,102 @@ g('btn-add-em').addEventListener('click',function(){
 });
 
 // ── RENDER DOCUMENTS ──
-function renderVaultDoc(){
-  var el=g('vault-doc-list');if(!el)return;
-  if(!vaultDocs.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center;">No documents yet.</div>';return;}
+// ── NOTES DATA ──
+var vaultNotes=[
+  {id:0, title:'Cabin', body:'Deck 8, Cabin 221'},
+  {id:1, title:'Emergency Policy', body:'AX · 7720 · 8841 — AXA Schengen. Call +1 800 224 1100 (Air Doctor) or +33 1 55 92 26 92 (AXA Claims).'},
+  {id:2, title:'Passport', body:'M. Halden — expires Sep 2028'}
+];
+
+function renderVaultNotes(){
+  var el=g('vault-notes-list'); if(!el) return;
+  if(!vaultNotes.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">No notes yet. Add one below.</div>';
+    return;
+  }
   var h='';
-  vaultDocs.forEach(function(doc){
-    h+='<div class="vault-doc-card">';
-    h+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
-    h+='<span class="vault-doc-nm">'+doc.name+'</span>';
-    h+='<div class="vault-doc-acts">';
-    h+='<span class="doc-badge">'+doc.type+'</span>';
-    h+='<button class="mini-btn edit-btn vdoc-edit" data-id="'+doc.id+'" style="margin-left:6px;">Edit</button>';
-    h+='<button class="mini-btn del vdoc-del" data-id="'+doc.id+'">Del</button>';
+  vaultNotes.forEach(function(n){
+    h+='<div class="vault-note-card" id="vnc-'+n.id+'">';
+    // View mode
+    h+='<div class="vault-note-view" id="vnv-'+n.id+'">';
+    h+='<div class="vault-note-header">';
+    h+='<div class="vault-note-title">'+escHtml(n.title)+'</div>';
+    h+='<div class="vault-note-acts">';
+    h+='<button class="mini-btn edit-btn vn-edit" data-id="'+n.id+'">Edit</button>';
+    h+='<button class="mini-btn del vn-del" data-id="'+n.id+'">Delete</button>';
     h+='</div></div>';
+    h+='<div class="vault-note-body">'+escHtml(n.body)+'</div>';
+    h+='</div>';
+    // Edit mode (hidden)
+    h+='<div class="vault-note-edit" id="vne-'+n.id+'" style="display:none;">';
+    h+='<input class="itin-ed-inp vn-title-inp" data-id="'+n.id+'" type="text" value="'+escAttr(n.title)+'" placeholder="Title">';
+    h+='<textarea class="itin-ed-inp vn-body-inp" data-id="'+n.id+'" style="min-height:70px;resize:vertical;">'+escHtml(n.body)+'</textarea>';
+    h+='<div style="display:flex;gap:8px;">';
+    h+='<button class="btn-sm primary vn-save" data-id="'+n.id+'" style="flex:1;">Save</button>';
+    h+='<button class="btn-sm ghost vn-cancel" data-id="'+n.id+'" style="flex:1;">Cancel</button>';
+    h+='</div></div>';
+    h+='</div>';
   });
   el.innerHTML=h;
-  el.querySelectorAll('.vdoc-edit').forEach(function(btn){
+
+  // Wire edit toggles
+  el.querySelectorAll('.vn-edit').forEach(function(btn){
     btn.addEventListener('click',function(){
       var id=parseInt(btn.getAttribute('data-id'));
-      var doc=vaultDocs.find(function(x){return x.id===id;});if(!doc)return;
-      openModal('Edit Document',
-        '<input id="vd2-name" class="m-inp" type="text" value="'+doc.name+'" placeholder="Document name">'
-        +'<select id="vd2-type" class="m-inp" style="appearance:auto;-webkit-appearance:auto;">'
-        +'<option'+(doc.type==='PDF'?' selected':'')+'>PDF</option>'
-        +'<option'+(doc.type==='Verified'?' selected':'')+'>Verified</option>'
-        +'<option'+(doc.type==='Scan'?' selected':'')+'>Scan</option>'
-        +'</select>'
-        +'<button id="vd2-save" class="btn-p">Save Changes</button>'
-      ,function(){
-        g('vd2-save').addEventListener('click',function(){
-          doc.name=(g('vd2-name').value||doc.name).trim();
-          doc.type=g('vd2-type').value;
-          renderVaultDoc();
-          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Document updated.</div></div>';
-          setTimeout(closeModal,1500);
-        });
-      });
+      g('vnv-'+id).style.display='none';
+      g('vne-'+id).style.display='block';
     });
   });
-  el.querySelectorAll('.vdoc-del').forEach(function(btn){
+  el.querySelectorAll('.vn-cancel').forEach(function(btn){
     btn.addEventListener('click',function(){
       var id=parseInt(btn.getAttribute('data-id'));
-      if(!confirm('Delete this document?'))return;
-      vaultDocs=vaultDocs.filter(function(x){return x.id!==id;});
-      renderVaultDoc();
+      g('vnv-'+id).style.display='block';
+      g('vne-'+id).style.display='none';
+    });
+  });
+  el.querySelectorAll('.vn-save').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(btn.getAttribute('data-id'));
+      var note=vaultNotes.find(function(x){return x.id===id;});if(!note)return;
+      var newTitle=el.querySelector('.vn-title-inp[data-id="'+id+'"]').value.trim();
+      var newBody=el.querySelector('.vn-body-inp[data-id="'+id+'"]').value.trim();
+      if(!newTitle)return;
+      note.title=newTitle; note.body=newBody;
+      renderVaultNotes();
+    });
+  });
+  el.querySelectorAll('.vn-del').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=parseInt(btn.getAttribute('data-id'));
+      if(!confirm('Delete this note?'))return;
+      vaultNotes=vaultNotes.filter(function(x){return x.id!==id;});
+      renderVaultNotes();
     });
   });
 }
 
-// ── ADD DOCUMENT ──
-g('btn-add-doc').addEventListener('click',function(){
-  openModal('Add Document',
-    '<input id="vd-name" class="m-inp" type="text" placeholder="Document name (e.g. Passport)">'
-    +'<select id="vd-type" class="m-inp" style="appearance:auto;-webkit-appearance:auto;"><option>PDF</option><option>Verified</option><option>Scan</option></select>'
-    +'<button id="vd-save" class="btn-p">Save Document</button>'
-  ,function(){
-    g('vd-save').addEventListener('click',function(){
-      var nm=(g('vd-name').value||'').trim();if(!nm){g('vd-name').focus();return;}
-      vaultDocs.push({id:nextVid++,name:nm,type:g('vd-type').value});
-      renderVaultDoc();
-      mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' saved.</div></div>';
-      setTimeout(closeModal,1500);
-    });
-  });
+// ── ADD NOTE (inline, no modal) ──
+g('btn-add-note').addEventListener('click',function(){
+  var title=(g('vn-title').value||'').trim();
+  var body=(g('vn-body').value||'').trim();
+  if(!title){g('vn-title').focus();return;}
+  vaultNotes.push({id:nextVid++, title:title, body:body});
+  g('vn-title').value='';
+  g('vn-body').value='';
+  renderVaultNotes();
 });
 
-// Init vault on first show
-switchVaultTab('ins');
+// Allow Enter in title to move to body
+g('vn-title').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();g('vn-body').focus();}});
+
+// ── HTML ESCAPE HELPERS ──
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escAttr(s){return (s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// Init vault — pre-render all panels so data is ready regardless of display state
+renderVaultIns();
+renderVaultEm();
+renderVaultNotes();
 
 // ── JOURNAL ──
 // internal journal store
@@ -1096,49 +1153,175 @@ g('itab-text').addEventListener('click',function(){showPanel('text');});
 g('itab-manual').addEventListener('click',function(){showPanel('manual');});
 g('itab-tpl').addEventListener('click',function(){showPanel('tpl');});
 
-// ── PARSE ──
-g('btn-parse').addEventListener('click',function(){
-  var raw=(g('imp-input').value||"").trim();
-  if(!raw)return;
-  var lines=raw.split('\n').filter(function(l){return l.trim();});
-  var results=[];
-  lines.forEach(function(line,i){
-    var lo=line.toLowerCase();
-    var isSea=lo.indexOf('at sea')!==-1||lo.indexOf('sea day')!==-1;
-    var pm=line.match(/(?:[\u2013\-]|\d\.\s*)([A-Z][a-zA-Z\u00C0-\u017E\s,]+?)(?:\s*[,([\u2013\-]|$)]/);
-    var dm=line.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}/i);
-    var am=line.match(/Arr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i);
-    var dem=line.match(/Dep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i);
-    var rng=line.match(/\((\d{1,2}:\d{2})\s*[-\u2013]\s*(\d{1,2}:\d{2})\)/);
-    if(pm||isSea){
-      results.push({day:i+1,place:isSea?'At sea':(pm?pm[1].trim():'?'),date:dm?dm[0]:'Day '+(i+1),arr:am?am[1]:(rng?rng[1]:null),dep:dem?dem[1]:(rng?rng[2]:null),sea:isSea,country:''});
+// ── SMART PARSER ──
+// Handles formats like: "10-Jun Southampton, England 11-Jun At Sea 12-Jun Lisbon, Portugal"
+// Works with entries glued together on one line or split across lines
+// Also handles: "Day 1 - Barcelona, Spain (Dep 18:00)", "Sep 14 Naples Italy Arr 08:00"
+function smartParse(raw) {
+  var results = [];
+  var dayNum = 1;
+  var MONTHS = 'Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec';
+
+  // ── FORMAT 1: DD-Mon PlaceName (cruise line inline format) ──
+  // Matches: 10-Jun Southampton, England   01-Jul At Sea   etc.
+  var inlinePat = new RegExp(
+    '(\\d{1,2}-(?:' + MONTHS + '))\\s+' +
+    '((?:(?!\\d{1,2}-(?:' + MONTHS + ')).)+)',
+    'gi'
+  );
+  var m1 = inlinePat.exec(raw);
+  if (m1) {
+    // This format detected — parse all matches
+    inlinePat.lastIndex = 0;
+    var match;
+    while ((match = inlinePat.exec(raw)) !== null) {
+      var dateRaw = match[1];
+      var placeRaw = match[2].trim();
+      var isSea = /\bat\s*sea\b/i.test(placeRaw);
+      var place, country, arr = null, dep = null;
+
+      // Extract arr/dep times if present
+      var arrM = placeRaw.match(/\bArr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i);
+      var depM = placeRaw.match(/\bDep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i);
+      if (arrM) arr = arrM[1];
+      if (depM) dep = depM[1];
+
+      if (isSea) {
+        place = 'At Sea'; country = '';
+      } else {
+        // Remove parentheticals like "(Iraklion)" 
+        var clean = placeRaw.replace(/\s*\([^)]*\)/g, '').trim();
+        // Remove arr/dep snippets
+        clean = clean.replace(/\b(?:Arr|Dep)(?:ival|arture)?[:\s]+\d{1,2}:\d{2}/gi, '').trim();
+        var parts = clean.split(',').map(function(p){return p.trim();}).filter(Boolean);
+        if (parts.length >= 2) {
+          place = parts[0]; country = parts[parts.length-1];
+        } else {
+          place = clean; country = '';
+        }
+      }
+
+      // Format date: "10-Jun" -> "Jun 10"
+      var dm = dateRaw.match(/(\d{1,2})-(\w+)/);
+      var dateFmt = dm ? (dm[2].charAt(0).toUpperCase()+dm[2].slice(1).toLowerCase()+' '+dm[1]) : dateRaw;
+
+      results.push({day:dayNum++, date:dateFmt, place:place, country:country, sea:isSea, arr:arr, dep:dep});
+    }
+    return results;
+  }
+
+  // ── FORMAT 2: Line-by-line formats ──
+  // Handles: "Day 1 - Barcelona, Spain", "Sep 14 Naples", "14 September – Lisbon"
+  var lines = raw.split(/\n/).map(function(l){return l.trim();}).filter(Boolean);
+  lines.forEach(function(line) {
+    var lo = line.toLowerCase();
+    // Skip obvious header lines (no date or place content)
+    if (/^[jJ]\s*\d{3}/.test(line)) return;  // voyage code like "J 607"
+    if (/^[a-zA-Z\s]+[jJ]\s*\d{3}/.test(line)) return; // "June Arcadia J 606"
+
+    var isSea = /\bat\s*sea\b/.test(lo);
+    var arr = null, dep = null;
+
+    // Extract times
+    var arrM = line.match(/\bArr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i);
+    var depM = line.match(/\bDep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i);
+    var rng  = line.match(/\((\d{1,2}:\d{2})\s*[-\u2013]\s*(\d{1,2}:\d{2})\)/);
+    if (arrM) arr = arrM[1];
+    if (depM) dep = depM[1];
+    if (!arr && rng) arr = rng[1];
+    if (!dep && rng) dep = rng[2];
+
+    // Extract date: "Sep 14", "14 Sep", "14-Sep", "14 September"
+    var dm = line.match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})\b/i)
+           || line.match(/\b(\d{1,2})\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/i);
+    var dateFmt = '';
+    if (dm) {
+      var mo = dm[1].charAt(0).toUpperCase()+dm[1].slice(1,3).toLowerCase();
+      var dy = dm[2] || dm[0].match(/\d+/)[0];
+      if (/^\d/.test(dm[1])) { mo = dm[2].charAt(0).toUpperCase()+dm[2].slice(1,3).toLowerCase(); dy = dm[1]; }
+      dateFmt = mo+' '+dy;
+    }
+
+    if (isSea) {
+      if (dateFmt) results.push({day:dayNum++,date:dateFmt,place:'At Sea',country:'',sea:true,arr:null,dep:null});
+      return;
+    }
+
+    // Extract place: remove date, day numbers, times, keywords
+    var placePart = line
+      .replace(/\b(?:Day|Cruise|Port)\s*\d+\b/gi,'')
+      .replace(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}\b/gi,'')
+      .replace(/\b\d{1,2}\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/gi,'')
+      .replace(/\s*\([^)]*\)/g,'')
+      .replace(/\b(?:Arr(?:ival)?|Dep(?:arture)?)[:\s]+\d{1,2}:\d{2}/gi,'')
+      .replace(/\(?\d{1,2}:\d{2}\s*[-\u2013]\s*\d{1,2}:\d{2}\)?/g,'')
+      .replace(/[-\u2013\u2014]/g,' ').trim();
+
+    var parts = placePart.split(',').map(function(p){return p.trim();}).filter(function(p){return p.length>1;});
+    var place = parts[0] || '';
+    var country = parts.length>=2 ? parts[parts.length-1] : '';
+
+    if (place.length > 1) {
+      results.push({day:dayNum++,date:dateFmt||('Day '+dayNum),place:place,country:country,sea:false,arr:arr,dep:dep});
     }
   });
+
+  return results;
+}
+
+g('btn-parse').addEventListener('click',function(){
+  var raw=(g('imp-input').value||'').trim();
+  if(!raw)return;
+  var results=smartParse(raw);
   var out=g('parse-out');
-  if(!results.length){out.innerHTML='<div class="parsed-box" style="text-align:center;padding:14px;"><span style="font-size:13px;color:var(--text-muted);">Could not parse. Try Manual or a Template.</span></div>';return;}
-  var h='<div class="parsed-box"><div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">'+results.length+' stops found</div>';
-  results.forEach(function(r){h+='<div class="parsed-row"><span class="p-lbl">'+r.day+'. '+r.place+'</span><span class="p-val">'+r.date+(r.arr?' \u00b7 Arr '+r.arr:'')+(r.dep?' \u00b7 Dep '+r.dep:'')+'</span></div>';});
+  if(!results.length){
+    out.innerHTML='<div class="parsed-box" style="text-align:center;padding:14px;font-size:13px;color:var(--text-muted);">Could not detect stops. Try the Manual tab or check the format.</div>';
+    return;
+  }
+  var h='<div class="parsed-box">'
+    +'<div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">'+results.length+' stops detected — review before adding</div>';
+  results.forEach(function(r){
+    h+='<div class="parsed-row">'
+      +'<span class="p-lbl">'+(r.sea?'&#9652;':r.day+'.') +' '+r.place+(r.country?', '+r.country:'')+'</span>'
+      +'<span class="p-val">'+r.date+(r.arr?' Arr '+r.arr:'')+(r.dep?' Dep '+r.dep:'')+'</span>'
+      +'</div>';
+  });
   h+='</div>';
-  var enc=encodeURIComponent(JSON.stringify(results));
-  h+='<button class="btn-d" id="btn-confirm" data-pl="'+enc+'">Add to Voyage &#8599;</button>';
+  // REPLACE button — clears existing stops
+  h+='<div style="display:flex;gap:8px;margin-top:10px;">'
+    +'<button class="btn-p" id="btn-confirm-replace" style="flex:1;background:var(--burgundy);">Replace Itinerary</button>'
+    +'<button class="btn-d" id="btn-confirm-add" style="flex:1;">Append to Existing</button>'
+    +'</div>';
   out.innerHTML=h;
-  g('btn-confirm').addEventListener('click',function(){
-    var data=JSON.parse(decodeURIComponent(this.getAttribute('data-pl')));
+
+  function doImport(replace) {
+    if(replace){
+      stops.length=0;
+    }
     var added=0;
-    data.forEach(function(item){
+    results.forEach(function(item){
       if(!stops.some(function(x){return x.place===item.place&&x.date===item.date;})){
-        item.day=stops.length+1;
-        stops.push(item);
-        added++;
+        stops.push(item);added++;
       }
     });
-    // re-number all days
     stops.forEach(function(s,i){s.day=i+1;});
     renderItin();
     if(typeof renderItinEdit==='function')renderItinEdit();
-    out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+added+' stop'+(added!==1?'s':'')+' added to Voyage!</div><div style="margin-top:8px;"><button class="btn-sm primary" onclick="document.querySelector('[data-s=voyage]').click()" style="width:100%;">View Itinerary &#8594;</button></div></div>';
+    out.innerHTML='<div class="ok-wrap">'
+      +'<div class="ok-check">&#10003;</div>'
+      +'<div class="ok-txt">'+added+' stop'+(added!==1?'s':'')+' '+(replace?'loaded':'added')+'!</div>'
+      +'<div style="margin-top:10px;">'
+      +'<button class="btn-sm primary" id="btn-go-voyage" style="width:100%;padding:12px;">View Itinerary &#8594;</button>'
+      +'</div></div>';
     g('imp-input').value='';
-  });
+    g('btn-go-voyage').addEventListener('click',function(){
+      var vBtn=document.querySelector('#nav button[data-s="voyage"]');
+      if(vBtn)vBtn.click();
+    });
+  }
+
+  g('btn-confirm-replace').addEventListener('click',function(){doImport(true);});
+  g('btn-confirm-add').addEventListener('click',function(){doImport(false);});
 });
 
 // ── MANUAL ──
