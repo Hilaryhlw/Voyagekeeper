@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VoyageKeeper</title>
+<meta name="description" content="Your offline cruise companion">
+<meta name="theme-color" content="#f5f0eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="VoyageKeeper">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0eb;
+    --cream-dark: #ede7df;
+    --stone: #e8e2da;
+    --muted: #c8bfb5;
+    --burgundy: #8b3a52;
+    --burgundy-light: #b5606e;
+    --burgundy-pale: #f0e4e7;
+    --text-primary: #2a2420;
+    --text-secondary: #7a6f68;
+    --text-muted: #a89f98;
+    --card-bg: #fdfaf7;
+    --dark-card: #2a2420;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: var(--cream);
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app {
+    display: flex; flex-direction: column;
+    height: 100%; max-width: 430px; margin: 0 auto;
+    position: relative; overflow: hidden;
+  }
+
+  /* SCREENS */
+  .screen {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    padding: calc(var(--safe-top) + 16px) 20px calc(var(--safe-bottom) + 80px);
+    display: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen.active { display: block; }
+  .screen::-webkit-scrollbar { display: none; }
+
+  /* BOTTOM NAV */
+  nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--card-bg);
+    border-top: 1px solid var(--stone);
+    padding: 8px 0 calc(var(--safe-bottom) + 8px);
+    display: flex; z-index: 100;
+  }
+  nav button {
+    flex: 1; background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 6px 0; color: var(--text-muted);
+    font-family: var(--font-sans); font-size: 10px; font-weight: 400;
+    transition: color 0.2s;
+  }
+  nav button.active { color: var(--burgundy); }
+  nav button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+  /* TYPOGRAPHY */
+  .screen-title {
+    font-family: var(--font-serif); font-size: 42px; font-weight: 300;
+    color: var(--text-primary); line-height: 1.1; margin-bottom: 4px;
+  }
+  .section-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card-bg); border-radius: var(--radius);
+    border: 1px solid var(--stone); padding: 16px; margin-bottom: 12px;
+  }
+  .card-dark {
+    background: var(--dark-card); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 12px; color: #fff; position: relative; overflow: hidden;
+  }
+
+  /* HERO CARD */
+  .hero-card {
+    border-radius: var(--radius); overflow: hidden;
+    margin-bottom: 20px; position: relative; height: 200px;
+    background: linear-gradient(180deg, #e8d5d8 0%, #c4b3bc 40%, #a89aaa 70%, #8a8090 100%);
+  }
+  .hero-illustration { position: absolute; inset: 0; }
+  .hero-info {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 14px 16px; display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .hero-location { font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.7); text-transform: uppercase; }
+  .hero-port { font-family: var(--font-serif); font-size: 20px; color: #fff; font-weight: 400; }
+  .departs-badge {
+    background: var(--card-bg); border-radius: 20px;
+    padding: 5px 12px; font-size: 12px; color: var(--text-secondary);
+  }
+  .departs-badge strong { color: var(--text-primary); font-weight: 500; }
+
+  /* CLOCKS */
+  .clocks-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--stone); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
+  .clock-cell { background: var(--card-bg); padding: 14px 12px; text-align: center; }
+  .clock-label { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .clock-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+  .dot-ship { background: var(--burgundy); }
+  .dot-port { background: #8b7355; }
+  .dot-home { background: var(--text-muted); }
+  .clock-time { font-family: var(--font-serif); font-size: 22px; font-weight: 400; color: var(--text-primary); }
+  .clock-tz { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  /* MOVEMENT BAR */
+  .movement-card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--stone); padding: 16px; margin-bottom: 20px; }
+  .movement-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .movement-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+  .anchor-icon { color: var(--burgundy); }
+  .movement-time { font-family: var(--font-serif); font-size: 36px; font-weight: 300; color: var(--text-primary); line-height: 1; }
+  .movement-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+  .progress-bar { position: relative; height: 3px; background: var(--stone); border-radius: 2px; margin-bottom: 8px; }
+  .progress-fill { height: 100%; background: var(--burgundy); border-radius: 2px; }
+  .progress-thumb { position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%; background: var(--burgundy); transform: translate(-50%, -50%); }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); }
+
+  /* ITINERARY */
+  .itin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .itin-title { font-family: var(--font-serif); font-size: 11px; font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); }
+  .itin-item { display: flex; gap: 16px; position: relative; padding-bottom: 4px; }
+  .itin-item:not(:last-child)::before {
+    content: ''; position: absolute; left: 14px; top: 28px; bottom: -4px;
+    width: 1px; background: var(--stone);
+  }
+  .itin-num {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--stone);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--text-muted); flex-shrink: 0; background: var(--card-bg);
+    margin-top: 2px;
+  }
+  .itin-num.today { background: var(--burgundy); border-color: var(--burgundy); color: #fff; font-weight: 500; }
+  .itin-body { flex: 1; padding-bottom: 16px; }
+  .itin-row { display: flex; justify-content: space-between; align-items: flex-start; }
+  .itin-place { font-family: var(--font-serif); font-size: 20px; font-weight: 400; }
+  .itin-place.at-sea { font-style: italic; color: var(--text-secondary); }
+  .itin-date { font-size: 12px; color: var(--text-muted); }
+  .itin-country { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .itin-times { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .itin-time { font-size: 11px; color: var(--text-muted); }
+  .itin-time span { color: var(--text-secondary); }
+  .today-badge {
+    background: var(--burgundy-pale); color: var(--burgundy);
+    font-size: 10px; font-weight: 500; letter-spacing: 0.05em;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .itin-card-highlight {
+    background: var(--card-bg); border: 1px solid var(--stone);
+    border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 4px;
+  }
+
+  /* CLOCKS SCREEN */
+  .analog-clock { width: 100px; height: 100px; flex-shrink: 0; }
+  .clock-big-card { display: flex; gap: 20px; align-items: center; }
+  .clock-big-info .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .clock-big-info .big-time { font-family: var(--font-serif); font-size: 48px; font-weight: 300; line-height: 1; color: var(--text-primary); }
+  .clock-big-info .sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .other-tz-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--stone); }
+  .other-tz-item:last-child { border-bottom: none; }
+  .tz-name { font-size: 13px; color: var(--text-secondary); }
+  .tz-offset { font-size: 10px; color: var(--text-muted); }
+  .tz-time { font-family: var(--font-serif); font-size: 22px; font-weight: 400; }
+  .tomorrow-card { background: var(--cream-dark); border-radius: var(--radius-sm); padding: 14px; display: flex; align-items: center; gap: 12px; }
+  .arrow-right { color: var(--burgundy); font-size: 16px; flex-shrink: 0; }
+  .tomorrow-text { font-size: 13px; color: var(--text-secondary); }
+  .tomorrow-text strong { color: var(--burgundy); font-weight: 500; }
+
+  /* VAULT */
+  .vault-card-dark { background: #2a2420; border-radius: var(--radius); padding: 22px; margin-bottom: 12px; color: #fff; position: relative; overflow: hidden; }
+  .vault-card-dark::after { content: ''; position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; border-radius: 50%; border: 25px solid rgba(255,255,255,0.05); }
+  .vault-ins-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+  .vault-ins-name { font-family: var(--font-serif); font-size: 28px; font-weight: 300; color: #fff; margin-bottom: 16px; font-style: italic; }
+  .vault-ins-row { display: flex; justify-content: space-between; align-items: flex-end; }
+  .vault-field-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); }
+  .vault-field-value { font-size: 14px; color: rgba(255,255,255,0.85); margin-top: 2px; letter-spacing: 0.05em; }
+  .active-badge { background: var(--burgundy-pale); color: var(--burgundy); font-size: 10px; padding: 3px 10px; border-radius: 20px; position: absolute; top: 18px; right: 18px; font-weight: 500; }
+  .emergency-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--stone); }
+  .emergency-item:last-child { border-bottom: none; }
+  .emergency-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .icon-pink { background: #f5e0e5; }
+  .icon-stone { background: var(--stone); }
+  .icon-cream { background: var(--cream-dark); }
+  .emergency-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .emergency-sub { font-size: 11px; color: var(--text-muted); }
+  .emergency-phone { font-size: 12px; color: var(--text-secondary); margin-left: auto; }
+  .doc-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--stone); }
+  .doc-item:last-child { border-bottom: none; }
+  .doc-icon { color: var(--text-muted); }
+  .doc-name { font-size: 13px; flex: 1; }
+  .doc-badge { font-size: 10px; color: var(--text-muted); background: var(--stone); padding: 2px 8px; border-radius: 10px; }
+
+  /* JOURNAL */
+  .journal-card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--stone); overflow: hidden; margin-bottom: 16px; }
+  .journal-hero { height: 140px; background: linear-gradient(180deg, #e8d5d8 0%, #a89aaa 100%); position: relative; overflow: hidden; }
+  .journal-body { padding: 16px; }
+  .journal-date { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 6px; }
+  .journal-place { font-family: var(--font-serif); font-size: 24px; font-weight: 400; margin-bottom: 8px; }
+  .journal-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; }
+  .journal-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { background: var(--cream-dark); color: var(--text-secondary); font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+  .pin-icon { position: absolute; top: 12px; right: 12px; color: var(--text-muted); }
+
+  /* IMPORT SCREEN */
+  .import-tabs { display: flex; gap: 0; background: var(--stone); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 20px; }
+  .import-tab {
+    flex: 1; padding: 8px; border: none; background: none; cursor: pointer;
+    font-family: var(--font-sans); font-size: 13px; color: var(--text-secondary);
+    border-radius: 8px; transition: all 0.2s;
+  }
+  .import-tab.active { background: var(--card-bg); color: var(--text-primary); font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .import-textarea {
+    width: 100%; min-height: 180px; border: 1px solid var(--stone); border-radius: var(--radius-sm);
+    background: var(--card-bg); padding: 14px; font-family: var(--font-sans); font-size: 13px;
+    color: var(--text-primary); resize: vertical; outline: none; line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+  .import-textarea:focus { border-color: var(--burgundy); }
+  .import-textarea::placeholder { color: var(--text-muted); }
+  .parse-btn {
+    width: 100%; padding: 14px; border-radius: var(--radius-sm); border: none;
+    background: var(--burgundy); color: #fff; font-family: var(--font-sans);
+    font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 12px;
+    transition: opacity 0.2s;
+  }
+  .parse-btn:active { opacity: 0.85; }
+  .parse-hint { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: 10px; }
+  .parsed-preview { background: var(--card-bg); border: 1px solid var(--stone); border-radius: var(--radius-sm); padding: 16px; margin-top: 16px; }
+  .parsed-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--stone); font-size: 13px; }
+  .parsed-row:last-child { border-bottom: none; }
+  .parsed-label { color: var(--text-muted); }
+  .confirm-btn {
+    width: 100%; padding: 14px; border-radius: var(--radius-sm); border: none;
+    background: var(--text-primary); color: #fff; font-family: var(--font-sans);
+    font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 12px;
+    transition: opacity 0.2s;
+  }
+  .confirm-btn:active { opacity: 0.85; }
+  .success-msg { text-align: center; padding: 24px 0; }
+  .success-msg .check { font-size: 32px; color: var(--burgundy); margin-bottom: 12px; }
+  .success-msg p { font-size: 14px; color: var(--text-secondary); }
+
+  /* HEADER */
+  .screen-header { margin-bottom: 24px; }
+  .screen-header .eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 4px; }
+  .header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+  .plus-btn { background: none; border: none; cursor: pointer; color: var(--burgundy); font-size: 24px; line-height: 1; padding: 0; }
+
+  /* SVG WAVE */
+  .wave-svg { position: absolute; bottom: 0; left: 0; right: 0; }
+  .sailboat { position: absolute; bottom: 30%; left: 55%; transform: translateX(-50%); }
+
+  /* INSTALL BANNER */
+  #install-banner {
+    display: none; background: var(--dark-card); color: #fff;
+    padding: 12px 20px; align-items: center; justify-content: space-between;
+    font-size: 13px; gap: 12px; flex-shrink: 0;
+  }
+  #install-banner button { background: var(--burgundy); color: #fff; border: none; border-radius: 20px; padding: 6px 16px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Install banner -->
+  <div id="install-banner">
+    <span>Add to Home Screen for offline use</span>
+    <button onclick="installPWA()">Install</button>
+  </div>
+
+  <!-- TODAY SCREEN -->
+  <div class="screen active" id="screen-today">
+    <div class="screen-header">
+      <div class="eyebrow">Today in</div>
+      <div class="header-row">
+        <div class="screen-title" style="font-style:italic; color: var(--burgundy)" id="today-place">Santorini</div>
+      </div>
+    </div>
+
+    <!-- Hero illustration -->
+    <div class="hero-card">
+      <svg class="hero-illustration" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8d0d4"/>
+            <stop offset="60%" stop-color="#c4adb6"/>
+            <stop offset="100%" stop-color="#9e8a98"/>
+          </linearGradient>
+        </defs>
+        <rect width="400" height="200" fill="url(#skyGrad)"/>
+        <circle cx="200" cy="70" r="28" fill="#e8b8a8" opacity="0.9"/>
+        <ellipse cx="200" cy="72" rx="28" ry="4" fill="#d4906e" opacity="0.3"/>
+        <!-- Islands -->
+        <ellipse cx="80" cy="145" rx="100" ry="22" fill="#7a6875" opacity="0.7"/>
+        <ellipse cx="320" cy="150" rx="90" ry="18" fill="#7a6875" opacity="0.6"/>
+        <ellipse cx="200" cy="155" rx="130" ry="20" fill="#6b5e6a" opacity="0.8"/>
+        <!-- Waves -->
+        <path d="M0 165 Q50 160 100 165 Q150 170 200 165 Q250 160 300 165 Q350 170 400 165 L400 200 L0 200Z" fill="#9e8a98" opacity="0.5"/>
+        <path d="M0 172 Q50 168 100 172 Q150 176 200 172 Q250 168 300 172 Q350 176 400 172 L400 200 L0 200Z" fill="#8a7890" opacity="0.6"/>
+        <path d="M0 180 Q50 177 100 180 Q150 183 200 180 Q250 177 300 180 Q350 183 400 180 L400 200 L0 200Z" fill="#7a6880" opacity="0.7"/>
+        <!-- Sailboat -->
+        <polygon points="215,148 215,120 235,148" fill="rgba(139,58,82,0.8)"/>
+        <line x1="215" y1="148" x2="235" y2="148" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+      </svg>
+      <div class="hero-info">
+        <div>
+          <div class="hero-location" id="hero-country">GREECE · GMT+3</div>
+          <div class="hero-port" id="hero-ports">Thira · Oia</div>
+        </div>
+        <div class="departs-badge">Departs <strong id="hero-dep">18:00</strong></div>
+      </div>
+    </div>
+
+    <!-- Clocks -->
+    <div class="section-label">Clocks</div>
+    <div class="clocks-row">
+      <div class="clock-cell">
+        <div class="clock-label"><span class="clock-dot dot-ship"></span> SHIP</div>
+        <div class="clock-time" id="ship-time">14:32</div>
+        <div class="clock-tz" id="ship-tz">CEST</div>
+      </div>
+      <div class="clock-cell">
+        <div class="clock-label"><span class="clock-dot dot-port"></span> PORT</div>
+        <div class="clock-time" id="port-time">15:32</div>
+        <div class="clock-tz" id="port-tz">EEST</div>
+      </div>
+      <div class="clock-cell">
+        <div class="clock-label"><span class="clock-dot dot-home"></span> HOME</div>
+        <div class="clock-time" id="home-time-today">08:32</div>
+        <div class="clock-tz" id="home-tz">EST</div>
+      </div>
+    </div>
+
+    <!-- Next Movement -->
+    <div class="section-label">Next Movement</div>
+    <div class="movement-card">
+      <div class="movement-header">
+        <div>
+          <div class="movement-label">All aboard</div>
+          <div class="movement-time" id="allboard-time">17:30</div>
+          <div class="movement-sub" id="allboard-sub">Ship time · in 2h 58m</div>
+        </div>
+        <svg class="anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="5" r="2"/><path d="M12 7v14M5 12H2l3-3-3 3 3 3M19 12h3l-3-3 3 3-3 3"/><path d="M5 15a7 7 0 0014 0"/></svg>
+      </div>
+      <div class="progress-bar" id="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 65%"></div>
+        <div class="progress-thumb" id="progress-thumb" style="left: 65%"></div>
+      </div>
+      <div class="progress-labels">
+        <span id="arr-time">Arrived 07:00</span>
+        <span id="dep-time">Depart 18:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOYAGE / ITINERARY SCREEN -->
+  <div class="screen" id="screen-voyage">
+    <div class="section-label" style="margin-bottom:4px">The Voyage</div>
+    <div class="screen-title" style="margin-bottom:24px">Itinerary</div>
+    <div id="itinerary-list"></div>
+  </div>
+
+  <!-- CLOCKS SCREEN -->
+  <div class="screen" id="screen-clocks">
+    <div class="section-label">Three Skies</div>
+    <div class="screen-title" style="margin-bottom:20px">Clocks</div>
+    <div class="card">
+      <div class="clock-big-card">
+        <canvas class="analog-clock" id="analog-clock" width="100" height="100"></canvas>
+        <div class="clock-big-info">
+          <div class="label"><span class="clock-dot dot-ship" style="width:6px;height:6px;display:inline-block"></span> SHIP TIME</div>
+          <div class="big-time" id="ship-big-time">14:32</div>
+          <div class="sub">Mediterranean<br><span style="color:var(--text-muted);font-size:11px">GMT+2 · CEST</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">Other Timezones</div>
+    <div class="card" style="padding: 4px 16px;">
+      <div class="other-tz-item">
+        <div>
+          <div class="tz-name">Port · Santorini · EEST</div>
+          <div class="tz-offset">GMT+3</div>
+        </div>
+        <div class="tz-time" id="port-big-time">15:32</div>
+      </div>
+      <div class="other-tz-item">
+        <div>
+          <div class="tz-name">Home · New York · EST</div>
+          <div class="tz-offset">GMT-5</div>
+        </div>
+        <div class="tz-time" id="home-big-time">08:32</div>
+      </div>
+    </div>
+    <div class="section-label" style="margin-top:8px">Tomorrow</div>
+    <div class="tomorrow-card">
+      <span class="arrow-right">→</span>
+      <div class="tomorrow-text">Set ship clock <strong>+1 hour</strong> at 02:00<br><span style="font-size:11px;color:var(--text-muted)">Arrival in Mykonos · EEST</span></div>
+    </div>
+  </div>
+
+  <!-- VAULT SCREEN -->
+  <div class="screen" id="screen-vault">
+    <div class="header-row" style="margin-bottom:4px">
+      <div class="section-label">Stored Offline</div>
+      <button class="plus-btn" onclick="alert('Add insurance/document coming soon')">+</button>
+    </div>
+    <div class="screen-title" style="margin-bottom:20px">Vault</div>
+
+    <div class="vault-card-dark">
+      <div class="vault-ins-label">Travel Insurance</div>
+      <div class="vault-ins-name">AXA Schengen</div>
+      <div class="vault-ins-row">
+        <div>
+          <div class="vault-field-label">Policy</div>
+          <div class="vault-field-value">AX · 7720 · 8841</div>
+        </div>
+        <div style="text-align:right">
+          <div class="vault-field-label">Expires</div>
+          <div class="vault-field-value">09 / 24</div>
+        </div>
+      </div>
+      <div class="active-badge">ACTIVE</div>
+    </div>
+
+    <div class="header-row" style="margin-bottom:12px">
+      <div class="section-label" style="margin:0">Emergency</div>
+      <span style="font-size:12px;color:var(--burgundy);cursor:pointer">Edit</span>
+    </div>
+    <div class="card" style="padding: 4px 16px;">
+      <div class="emergency-item">
+        <div class="emergency-icon icon-pink">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7 2 2 0 012-2.18h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 6a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 12.92v4z"/></svg>
+        </div>
+        <div>
+          <div class="emergency-name">Air Doctor 24/7</div>
+          <div class="emergency-sub">Worldwide medical</div>
+        </div>
+        <div class="emergency-phone">+1 800 224 1100</div>
+      </div>
+      <div class="emergency-item">
+        <div class="emergency-icon icon-stone">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="emergency-name">AXA Claims</div>
+          <div class="emergency-sub">English line</div>
+        </div>
+        <div class="emergency-phone">+33 1 55 92 26 92</div>
+      </div>
+      <div class="emergency-item">
+        <div class="emergency-icon icon-cream">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        </div>
+        <div>
+          <div class="emergency-name">Ship reception</div>
+          <div class="emergency-sub">Dial from cabin</div>
+        </div>
+        <div class="emergency-phone">Ext. 0</div>
+      </div>
+      <div class="emergency-item" style="border:none">
+        <div class="emergency-icon icon-pink">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7 2 2 0 012-2.18h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 6a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 12.92v4z"/></svg>
+        </div>
+        <div>
+          <div class="emergency-name">Family — Anna</div>
+          <div class="emergency-sub">Spouse</div>
+        </div>
+        <div class="emergency-phone">+1 917 555 0144</div>
+      </div>
+    </div>
+
+    <div class="header-row" style="margin-bottom:12px;margin-top:4px">
+      <div class="section-label" style="margin:0">Documents</div>
+      <span style="font-size:12px;color:var(--burgundy);cursor:pointer">Add</span>
+    </div>
+    <div class="card" style="padding: 4px 16px;">
+      <div class="doc-item">
+        <svg class="doc-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="doc-name">Passport · M. Halden</span>
+        <span class="doc-badge">Verified</span>
+      </div>
+      <div class="doc-item">
+        <svg class="doc-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="doc-name">Boarding pass · Day 1</span>
+        <span class="doc-badge">PDF</span>
+      </div>
+      <div class="doc-item" style="border:none">
+        <svg class="doc-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="doc-name">Cabin 221 receipt</span>
+        <span class="doc-badge">PDF</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOURNAL SCREEN -->
+  <div class="screen" id="screen-journal">
+    <div class="screen-title" style="margin-bottom:20px">Journal</div>
+    <div class="journal-card">
+      <div class="journal-hero">
+        <svg width="100%" height="140" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="140" fill="#e0cdd2"/>
+          <circle cx="200" cy="50" r="20" fill="#e8b090" opacity="0.7"/>
+          <ellipse cx="80" cy="100" rx="80" ry="16" fill="#8a7a85" opacity="0.7"/>
+          <ellipse cx="320" cy="105" rx="70" ry="14" fill="#8a7a85" opacity="0.6"/>
+          <path d="M0 112 Q100 108 200 112 Q300 116 400 112 L400 140 L0 140Z" fill="#9a8898" opacity="0.6"/>
+          <path d="M0 120 Q100 117 200 120 Q300 123 400 120 L400 140 L0 140Z" fill="#8a7a88" opacity="0.7"/>
+          <polygon points="215,108 215,85 232,108" fill="rgba(139,58,82,0.75)"/>
+          <line x1="215" y1="108" x2="232" y2="108" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="journal-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="journal-date">Today · Sep 17</div>
+            <div class="journal-place">Santorini</div>
+          </div>
+          <svg class="pin-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="journal-text">Donkey path up to Fira at sunrise — air smelt like dry rosemary. Coffee at a café called Avocado.</div>
+        <div class="journal-tags">
+          <span class="tag">#santorini</span>
+          <span class="tag">#sunrise</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="journal-card">
+      <div class="journal-hero">
+        <svg width="100%" height="140" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="140" fill="#d8ccd2"/>
+          <circle cx="180" cy="45" r="18" fill="#dba870" opacity="0.5"/>
+          <ellipse cx="60" cy="102" rx="75" ry="14" fill="#7a6c78" opacity="0.7"/>
+          <ellipse cx="340" cy="106" rx="65" ry="13" fill="#7a6c78" opacity="0.6"/>
+          <path d="M0 110 Q100 106 200 110 Q300 114 400 110 L400 140 L0 140Z" fill="#8a7a88" opacity="0.6"/>
+          <path d="M0 120 Q100 117 200 120 Q300 123 400 120 L400 140 L0 140Z" fill="#7a6a78" opacity="0.7"/>
+          <polygon points="200,110 200,87 218,110" fill="rgba(139,58,82,0.7)"/>
+          <line x1="200" y1="110" x2="218" y2="110" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="journal-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="journal-date">Yesterday · Sep 16</div>
+            <div class="journal-place">Naples</div>
+          </div>
+          <svg class="pin-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="journal-text">Margherita at L'Antica. Walked the Spaccanapoli. Met a couple from Lyon who recommend a vineyard in Kotor.</div>
+        <div class="journal-tags">
+          <span class="tag">#naples</span>
+          <span class="tag">#food</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="confirm-btn" onclick="showNewEntry()">+ New entry</button>
+  </div>
+
+  <!-- IMPORT SCREEN -->
+  <div class="screen" id="screen-import">
+    <div class="section-label">Quick Entry</div>
+    <div class="screen-title" style="margin-bottom:20px">Import</div>
+
+    <div class="import-tabs">
+      <button class="import-tab active" onclick="switchImportTab('text',this)">Paste Text</button>
+      <button class="import-tab" onclick="switchImportTab('manual',this)">Manual</button>
+      <button class="import-tab" onclick="switchImportTab('template',this)">Template</button>
+    </div>
+
+    <!-- TEXT PASTE TAB -->
+    <div id="import-text-tab">
+      <div class="section-label">Paste your cruise itinerary</div>
+      <textarea class="import-textarea" id="import-input" placeholder="Paste any itinerary text here — email confirmation, PDF text, booking summary, etc.
+
+Example:
+Day 1 – Sep 14 – Barcelona, Spain (Depart 18:00)
+Day 2 – Sep 15 – At Sea
+Day 3 – Sep 16 – Naples, Italy (Arr 08:00, Dep 19:00)
+Day 4 – Sep 17 – Santorini, Greece (Arr 07:00, Dep 18:00)"></textarea>
+      <div class="parse-hint">Supports most cruise booking formats. The parser recognises dates, port names, arrival and departure times.</div>
+      <button class="parse-btn" onclick="parseItinerary()">Parse Itinerary</button>
+      <div id="parse-result"></div>
+    </div>
+
+    <!-- MANUAL TAB -->
+    <div id="import-manual-tab" style="display:none">
+      <div class="section-label">Add a single stop</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <input type="text" id="m-place" placeholder="Port / Place" style="width:100%;padding:12px 14px;border:1px solid var(--stone);border-radius:var(--radius-sm);background:var(--card-bg);font-family:var(--font-sans);font-size:14px;color:var(--text-primary);outline:none">
+        <input type="text" id="m-country" placeholder="Country" style="width:100%;padding:12px 14px;border:1px solid var(--stone);border-radius:var(--radius-sm);background:var(--card-bg);font-family:var(--font-sans);font-size:14px;color:var(--text-primary);outline:none">
+        <input type="date" id="m-date" style="width:100%;padding:12px 14px;border:1px solid var(--stone);border-radius:var(--radius-sm);background:var(--card-bg);font-family:var(--font-sans);font-size:14px;color:var(--text-primary);outline:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <input type="time" id="m-arr" placeholder="Arrival" style="width:100%;padding:12px 14px;border:1px solid var(--stone);border-radius:var(--radius-sm);background:var(--card-bg);font-family:var(--font-sans);font-size:14px;color:var(--text-primary);outline:none">
+          <input type="time" id="m-dep" placeholder="Departure" style="width:100%;padding:12px 14px;border:1px solid var(--stone);border-radius:var(--radius-sm);background:var(--card-bg);font-family:var(--font-sans);font-size:14px;color:var(--text-primary);outline:none">
+        </div>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary)">
+          <input type="checkbox" id="m-sea" onchange="toggleSea(this)"> At sea / transit day
+        </label>
+      </div>
+      <button class="parse-btn" onclick="addManualStop()">Add Stop</button>
+      <div id="manual-result"></div>
+    </div>
+
+    <!-- TEMPLATE TAB -->
+    <div id="import-template-tab" style="display:none">
+      <div class="section-label">Sample formats</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card" onclick="useTemplate('msc')" style="cursor:pointer">
+          <div style="font-weight:500;font-size:14px;margin-bottom:4px">MSC / Costa style</div>
+          <div style="font-size:12px;color:var(--text-muted)">Day 1 – Port – Date – Arr/Dep</div>
+        </div>
+        <div class="card" onclick="useTemplate('royal')" style="cursor:pointer">
+          <div style="font-weight:500;font-size:14px;margin-bottom:4px">Royal Caribbean / NCL</div>
+          <div style="font-size:12px;color:var(--text-muted)">Port · Country · Date (HH:MM–HH:MM)</div>
+        </div>
+        <div class="card" onclick="useTemplate('generic')" style="cursor:pointer">
+          <div style="font-weight:500;font-size:14px;margin-bottom:4px">Generic / Email booking</div>
+          <div style="font-size:12px;color:var(--text-muted)">Free-form date + city paste</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav>
+    <button class="active" onclick="showScreen('today',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      Today
+    </button>
+    <button onclick="showScreen('voyage',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      Voyage
+    </button>
+    <button onclick="showScreen('clocks',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Clocks
+    </button>
+    <button onclick="showScreen('vault',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Vault
+    </button>
+    <button onclick="showScreen('journal',this)">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      Journal
+    </button>
+    <button onclick="showScreen('import',this)">
+      <svg viewBox="0 0 24 24"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>
+      Import
+    </button>
+  </nav>
+</div>
+
+<script>
+const itinerary = [
+  { day:1, date:'Sep 14', place:'Barcelona', country:'Spain', arr:null, dep:'18:00', sea:false },
+  { day:2, date:'Sep 15', place:'At sea', country:'Balearic', arr:null, dep:null, sea:true },
+  { day:3, date:'Sep 16', place:'Naples', country:'Italy', arr:'08:00', dep:'19:00', sea:false },
+  { day:4, date:'Sep 17', place:'Santorini', country:'Greece', arr:'07:00', dep:'18:00', sea:false, today:true },
+  { day:5, date:'Sep 18', place:'Mykonos', country:'Greece', arr:'07:30', dep:'17:30', sea:false },
+  { day:6, date:'Sep 19', place:'Istanbul', country:'Türkiye', arr:'09:00', dep:'22:00', sea:false },
+  { day:7, date:'Sep 20', place:'At sea', country:'Aegean', arr:null, dep:null, sea:true },
+  { day:8, date:'Sep 21', place:'Kotor', country:'Montenegro', arr:'08:00', dep:'17:00', sea:false },
+];
+
+function renderItinerary(data) {
+  const list = document.getElementById('itinerary-list');
+  list.innerHTML = '';
+  data.forEach((item, i) => {
+    const isToday = item.today;
+    const div = document.createElement('div');
+    div.className = 'itin-item';
+    const bodyClass = isToday ? 'itin-body itin-card-highlight' : 'itin-body';
+    let timesHtml = '';
+    if (item.arr) timesHtml += `<div class="itin-time">↓ Arr <span>${item.arr}</span></div>`;
+    if (item.dep) timesHtml += `<div class="itin-time">↑ Dep <span>${item.dep}</span></div>`;
+    if (isToday) timesHtml += `<span class="today-badge">TODAY</span>`;
+    div.innerHTML = `
+      <div class="itin-num ${isToday?'today':''}">${item.day}</div>
+      <div class="${bodyClass}">
+        <div class="itin-row">
+          <div class="itin-place ${item.sea?'at-sea':''}">${item.place}</div>
+          <div class="itin-date">${item.date}</div>
+        </div>
+        <div class="itin-country">${item.country}</div>
+        <div class="itin-times">${timesHtml}</div>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+renderItinerary(itinerary);
+
+function showScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function updateClocks() {
+  const now = new Date();
+  const shipOffset = 2, portOffset = 3, homeOffset = -5;
+  const fmt = (h,m) => String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  const t = (off) => {
+    const u = now.getTime() + now.getTimezoneOffset()*60000 + off*3600000;
+    const d = new Date(u); return fmt(d.getHours(),d.getMinutes());
+  };
+  document.getElementById('ship-time').textContent = t(shipOffset);
+  document.getElementById('port-time').textContent = t(portOffset);
+  document.getElementById('home-time-today').textContent = t(homeOffset);
+  document.getElementById('ship-big-time').textContent = t(shipOffset);
+  document.getElementById('port-big-time').textContent = t(portOffset);
+  document.getElementById('home-big-time').textContent = t(homeOffset);
+  drawAnalogClock(shipOffset);
+}
+
+function drawAnalogClock(off) {
+  const c = document.getElementById('analog-clock');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const w=100, h=100, cx=50, cy=50, r=44;
+  const now = new Date();
+  const u = now.getTime() + now.getTimezoneOffset()*60000 + off*3600000;
+  const d = new Date(u);
+  const hrs = d.getHours()%12 + d.getMinutes()/60;
+  const min = d.getMinutes() + d.getSeconds()/60;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#d0c8c0'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); ctx.stroke();
+  for(let i=0;i<12;i++){
+    const a=i*30*Math.PI/180;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.sin(a)*(r-8),cy-Math.cos(a)*(r-8));
+    ctx.lineTo(cx+Math.sin(a)*(r-4),cy-Math.cos(a)*(r-4));
+    ctx.strokeStyle='#c0b8b0'; ctx.lineWidth=1; ctx.stroke();
+  }
+  const drawHand = (angle, len, w, color) => {
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.sin(angle)*len, cy-Math.cos(angle)*len);
+    ctx.strokeStyle=color; ctx.lineWidth=w; ctx.lineCap='round'; ctx.stroke();
+  };
+  drawHand(hrs*30*Math.PI/180, 26, 2.5, '#4a3a36');
+  drawHand(min*6*Math.PI/180, 36, 1.5, '#6a5a56');
+  ctx.beginPath(); ctx.arc(cx,cy,3,0,2*Math.PI); ctx.fillStyle='#8b3a52'; ctx.fill();
+}
+
+setInterval(updateClocks, 1000);
+updateClocks();
+
+// IMPORT FUNCTIONS
+function switchImportTab(name, btn) {
+  document.querySelectorAll('.import-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('import-text-tab').style.display = name==='text'?'block':'none';
+  document.getElementById('import-manual-tab').style.display = name==='manual'?'block':'none';
+  document.getElementById('import-template-tab').style.display = name==='template'?'block':'none';
+}
+
+function parseItinerary() {
+  const raw = document.getElementById('import-input').value.trim();
+  if (!raw) { alert('Please paste some itinerary text first.'); return; }
+  const lines = raw.split('\n').filter(l => l.trim());
+  const results = [];
+  const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  lines.forEach((line, i) => {
+    const l = line.toLowerCase();
+    const sea = l.includes('at sea') || l.includes('sea day') || l.includes('sailing');
+    const placeMatch = line.match(/(?:–|-|:|\d\.)\s*([A-Z][a-zA-Z\s,]+?)(?:\s*[,(–-]|$)/);
+    const dateMatch = line.match(/(?:Sep|Oct|Nov|Dec|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug)\s+\d{1,2}|\d{1,2}[\/\-]\d{1,2}/i);
+    const arrMatch = line.match(/Arr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i);
+    const depMatch = line.match(/Dep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i);
+    const timeRange = line.match(/\((\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})\)/);
+    if (placeMatch || sea) {
+      results.push({
+        day: i+1,
+        place: sea ? 'At sea' : (placeMatch ? placeMatch[1].trim() : 'Unknown'),
+        date: dateMatch ? dateMatch[0] : `Day ${i+1}`,
+        arr: arrMatch ? arrMatch[1] : (timeRange ? timeRange[1] : null),
+        dep: depMatch ? depMatch[1] : (timeRange ? timeRange[2] : null),
+        sea: sea,
+        country: ''
+      });
+    }
+  });
+
+  const res = document.getElementById('parse-result');
+  if (!results.length) {
+    res.innerHTML = `<div class="parsed-preview"><p style="font-size:13px;color:var(--text-muted);text-align:center;padding:12px 0">Couldn't parse stops. Try the Manual tab or a Template format.</p></div>`;
+    return;
+  }
+  let html = `<div class="parsed-preview"><div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:10px">${results.length} stops found</div>`;
+  results.forEach(r => {
+    html += `<div class="parsed-row"><span class="parsed-label">${r.day}. ${r.place}</span><span>${r.date}${r.arr?' · Arr '+r.arr:''}${r.dep?' · Dep '+r.dep:''}</span></div>`;
+  });
+  html += `</div><button class="confirm-btn" onclick="confirmImport(${JSON.stringify(results).replace(/</g,'&lt;')})">Add to Voyage ↗</button>`;
+  res.innerHTML = html;
+}
+
+function confirmImport(data) {
+  data.forEach(item => {
+    const exists = itinerary.find(x => x.place===item.place && x.date===item.date);
+    if (!exists) itinerary.push(item);
+  });
+  itinerary.sort((a,b) => a.day - b.day);
+  renderItinerary(itinerary);
+  document.getElementById('parse-result').innerHTML = `<div class="success-msg"><div class="check">✓</div><p>${data.length} stops added to your Voyage.</p></div>`;
+  document.getElementById('import-input').value = '';
+}
+
+function toggleSea(cb) {
+  document.getElementById('m-place').disabled = cb.checked;
+  document.getElementById('m-country').disabled = cb.checked;
+  if (cb.checked) { document.getElementById('m-place').value = 'At sea'; }
+  else { document.getElementById('m-place').value = ''; }
+}
+
+function addManualStop() {
+  const place = document.getElementById('m-place').value.trim();
+  const country = document.getElementById('m-country').value.trim();
+  const date = document.getElementById('m-date').value;
+  const arr = document.getElementById('m-arr').value;
+  const dep = document.getElementById('m-dep').value;
+  const sea = document.getElementById('m-sea').checked;
+  if (!place && !sea) { alert('Enter a place name.'); return; }
+  const dayNum = itinerary.length + 1;
+  const dateStr = date ? new Date(date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : `Day ${dayNum}`;
+  itinerary.push({ day: dayNum, place: sea?'At sea':place, country, date: dateStr, arr: arr||null, dep: dep||null, sea });
+  renderItinerary(itinerary);
+  document.getElementById('m-place').value=''; document.getElementById('m-country').value='';
+  document.getElementById('m-date').value=''; document.getElementById('m-arr').value=''; document.getElementById('m-dep').value='';
+  document.getElementById('m-sea').checked=false;
+  document.getElementById('manual-result').innerHTML = `<div class="success-msg" style="padding:16px 0"><div class="check">✓</div><p>Stop added!</p></div>`;
+  setTimeout(()=>document.getElementById('manual-result').innerHTML='', 2000);
+}
+
+function useTemplate(type) {
+  const templates = {
+    msc: `Day 1 - Sep 14 - Barcelona, Spain (Dep 18:00)\nDay 2 - Sep 15 - At sea (Balearic)\nDay 3 - Sep 16 - Naples, Italy (Arr 08:00, Dep 19:00)\nDay 4 - Sep 17 - Santorini, Greece (Arr 07:00, Dep 18:00)`,
+    royal: `Barcelona · Spain · Sep 14 (18:00–)\nAt Sea · Balearic · Sep 15\nNaples · Italy · Sep 16 (08:00–19:00)\nSantorini · Greece · Sep 17 (07:00–18:00)`,
+    generic: `14 September – Barcelona, Spain. Depart 18:00\n15 September – At sea\n16 September – Naples, Italy. Arrive 08:00, Depart 19:00\n17 September – Santorini, Greece. Arrive 07:00, Depart 18:00`
+  };
+  document.getElementById('import-input').value = templates[type] || '';
+  switchImportTab('text', document.querySelector('.import-tab'));
+  document.querySelectorAll('.import-tab')[0].classList.add('active');
+}
+
+function showNewEntry() {
+  alert('Journal entry editor coming soon.');
+}
+
+// PWA Install
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('install-banner').style.display = 'flex';
+});
+function installPWA() {
+  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.waitForOutcome().then(()=>{deferredPrompt=null;document.getElementById('install-banner').style.display='none';}); }
+}
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
