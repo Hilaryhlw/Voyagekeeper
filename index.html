@@ -4,157 +4,189 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>VoyageKeeper</title>
+<meta name="description" content="Your offline cruise companion">
 <meta name="theme-color" content="#f5f0eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="VoyageKeeper">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAABmJLR0QA/wD/AP+gvaeTAAAZLUlEQVR4nO2da6wkx1XH/6equnte9965d9f79jpex96187C9fiU2thwnECMFQh4SER8iIRBfIgQfEChC4gufAgQB4vElCD4EyXIAyRICAolMEuxssn7EsROS+Lnr9b69u3fvvfPo7qrDh+553efcefXcmfPTznZPz9yumuo6VadOnVNFGAPOv/TSzWD1PoI6ysRHyfFRJiwAqkjgMgMlAF7W+RS2RQ3AIoGuMXgRhHMAvcIOLxlSL+2+89hrROSyziRlkejbP/jBQcPmYwAeA+MjINyYRT6ELKFFEP8HOTxVpeg/b7777muZ5GJUCb174tXZMFf9DJg+D+ARAGpUaQtjTwTib5LTf7f37jv+bZQ9w9AF4OzzL99Oin4f4F8FkB92esKO5w0m/ptcHP79wr33Lg47saEJwNvPv/xBTfg9AL8GQA8rHWFiucrgL4WLM39580durg0rkYELwKXnfrw/UvGXAXxuGPcXpgzCG+Toi/uOv/9rRMSDv/2AYGZ17oWXfxOEPwEwN6j7CgIAgPFfzvBvHLrzzjODvO1ABODCyR8eiRSeIOC+QdxPENaFcAXgLxw8fucTg7tln5x54aXPKsZXWFp9YUQw6KtcX/6tGx98sNrvvXoWAH76aXN2ZtefA/zb/WZCELYLE510FP/K4ePHz/Zzn54E4NVXXw3yi5WvAvhsP4kLQp+cZeZP3XjfXd/v9QbbFoA3X3yx7Md4ioke6TVRQRggFWL3yYP3Hf9GL3+8LQF488UXy15MTwO4q5fEBGFIVAi9CUHXAvD2s8/mYQpfB+Hh7SYiCCOgygqfOnzPXV/fzh91JQD85JP6zHtuexLAp3vKmiCMhio5euzQh+480e0fdCUAb5/8wV+Bxdoj7ATovDbuQweOHz/V1be3+sKpky98lpi+1n/GBGFk/Nh6eKgbF2uz2YenTv7wCDn7lcHlSxBGwh06xD8y86e28h/asAfgJ5/Ub9/03u9C3BuEnQrRFw7ff/ffbvqVjT44deLF3wHxXww+V4IwMmoW+NCRB46/tNEX1hWAt557bj/F6icAZoeWNUEYDS9fMu6ee++9N1rvw/XHADG+DLBUfmES+MBuS78L4E/X+3BND/DmMy/eRcq9sN5ngrBDqThHdxx5aK1pdE1gOpH9Q0jlFyaLgiL3Z+t90FHR33z2uWNE9CPIig3CBOLYPXDkwfs6PEc7xwCMP2CwVH5hQqE/AvCJjiuNk1dPnJg1zpwDUBh1tgRhVDh299/y0P0nG++brb2x3mcglV+YcBSpL7a/b/YAbzx78mkwHh15jgRhtMSG9U2Hfy4JpVQA8OqJE4fAkAgvYRowkXKfb74BAGPVx5jF8iNMB8T868z8JSJiAwDMeJQx8EW3BGFcue2NZ75/D4DnFAAw+NFs8yMIo4VBvwgA5q1vfe9my3RT1hkShFFCwOMA/thYhfeJ8iNMIQ+c+s535g0THxP1X5hCdMzBcQNHR7POiSBkgQN/0DBwa9YZEYRMYLzfgN0u8X4WphM6pkA0k3U2BCELiHmXYYYIgDCVMKFswFzKOiOCkBFlw4CfdS4EISMCcYATphoDllkwYXoxUv2FacaIG4QwzcgYQJhqjATCCNOMqEDCVCMqkDDVGBYzqDDFSA8gTDUiAMJUIyqQMNVsukukMERcDAWXnEIBSh5FFkipjwhjl+CFV2CiRShbheK443NHBs4UEJs5hN48rJEwjVFgRAMaHgSHoH4JQe0daFuBcw7MDsyMmBnMSQ9ApAAKQVEVPl1FTp2GNQXUgoMIgz1gCVkdGgYyEzYUvHgRhZXXoeIVOGcRO7e2pCmp2AwGmFPHXAtrAWUjFOIV5GrvoFI8gsjMjfgXTAcyEzxomFGon0JQfQcujhCnrfx2cc7BuRAqjlCyr6CeP4RKcLgpNMJgEHfoQcIOMys/g6lfgrXRQNoWxwwX1eG70yBbxXLhNoDEej0oRAUaFOwwW/kZdO0SrIu3/v42sTaCV72AGXZYKh6TnmBAiAo0IIq1U1DVi7DODi0N6yxM/TIK6hQq+fcMLZ1pQlSgARDEV+CvnBlq5W9gbQy/egahmUPkzQ89vUlHVKA+IXbIr7w+FLVnI1wcoVR5Hdfm7oZs7NMfogL1Sa5+Hogqo02UAI5WENQuoBbsH23aE4aoQP3ADrn6GbgeTZ19Jc0OueppVP19MiDuA+kB+sCProGjanYZsDX48SJCU84uDzscGQP0gR9eRpbetMwML7qIUGaJe0ZUoD7Q8bWsswBTvwbOZ52LnYuoQD1CcCBbyzobIFcDnJPZ4R4RFahHyNXA7DL302TnoLkGS9IN9IKoQD2iOcy88gOJAYg4AkMEoBdEBeoR58ao4JyT6O4eERWoR2gs2v+EJGBGnmMvSERYj8RqfPYVsQhklfsekY6zRxx8OOisswGGgVNe1tnYsYgA9AopxCr7gWdEBTGB9oGsC9QHkVeGX1vKNg9+OdPZ6J2ONB19UNe7M219mRRq3kJm6U8CIgB94EwBNZWdH05NzYFNIbP0JwFRgfqCUPX3I6gugjBal2gmhZq/H8xiAu0H6QH6xHpzqOpdI0+3qnchFi/QvpGZ4D5haFSCgzDVCnxeGUmakSqi4h8ESEvj3yeyR9gAYFPEkncQc9GbMBwNNS1LPq77h+BMEVL7+0dUoAFhgwVc9w7D0vBmiGPysOgdhvUkAmxQiAo0MDRibzcWoTATnYHHgw2VjCiPJXMQsb8L4sI1OEQFGiRKI/IXcJUVSu5d5O27oD7L14FQVQuomBvgvLlE75dnNjCkBxg4GuzPY9n6qFEJRXcFAS9h295qRKhhBlW9C5EuAV4JyXooQ8n01CIBMcOAFNjMIFQBYluAtjUE7jp8XoHnaiBav9SZCZHKI6QC6moWVuXBXgFM4uw2LGSHmGGifDjlw+kY1pVQsSGILTRCKI6g0ubcgeDgw5IHKA1WPpzKybZJI8CII/kIIA2ni4AugmDhnAXYAc3ZY5X4FCkNbnexlmczdEQFGjEMDajs4wiEBJkHyJAnnvpnPPHUP2edjalGVKAMeffqleREnkFmiAo0BsgzyA6ZB8iYch0iARkic+oZs7cKLF+6jNINo3epFgDFSERAXqN/AQAx8No3n0FYrWWen2l8iQo0BoTLK3j96Wdx9OOPgpQY5kaJlPaYsHT2At557uWsszF1iDdohiRl31pi8fwr/4fCDfOYv/nG7DI1ZYgKlCWryp6Z8dZ3vo98eRa5ssT7jgJRgTLkvbfeuuaajSK89o3/hQ2HG1opJMiyKBkRFHL4hcc/jqdPvrbms9r1Jbz57e/hyGMPgmQHyKHSt7+tdQ5xHCGOHayzsDY9xg6xs7A2Tq5ZC+sS70dmbp4DgNvgulaqWQFUm3Wk/bpWClpraK1gjIYmA20UtEquaaVhjIIxHvSYWFi08bDn8AFcvHJpw+9cO30GF175KfZ94NgIczZ9bCoADCAKI4Rx1DpGMcIoSl8xrLNDy1y7MMD2n45WGr5n4HsePOPB8w0C48HzPfjpcdjtLRFh33v2w3hbtz1nn/8hCvNlzB7aN+RcTS9NFchai1o9RD2so1qro1KtolqvN1vnScDaGFUbo1pbf3M7IkLgeyjk88gFAXJ+gEIhB6MHF5iy9/AB+PlcV99lZrzxre/i9l/+efil4sDyILQwr59+G7V6HVEkgy5mRq0eolYPO657nodcEKBUyKOQz6OYz3eoZN2ycGAPCnOlbf2NDUO8/s1ncPQTH4XSEkcwaMzS8nLWeRh7oihCFEVolBWRQiGfQ6lYxFyphFwQbDlYnZmfRXn3fE/pV69ew+lnnsdND9/f098PE+cYztlk3OcYzrmOMV3DxMLOYb05JwI1Z78J6BjzKaWgFaXjOT0Ug4AEnW4GJQ+YHYOZ4ZjB7OAYWKlWcfHKVTjnoLRGPlWXVu8dZp3DXHkWd91yCCvVZK2ghuHNOgfHDmEUN5Jbk36DCz97DUsaKBw+AICg0wqSDPwJWhsoBRhtmoYBpRW8HnqNxBhhEUUWsY0RRXFyjOOmMcNaC2cd3AgnkhQISqdGj/Q3esbAMwbGGBht4HkaWnUvLFMVD8DMiUWKk5bKOpdU7PTcuqSCW+eSXSC3UThXkWyUobWCZzxorQAQiqUC7nv/0fT+neMp5iSNbsdZSz9+Fe9GEbiwvZ1plCIYreF5Hnxj4HkGvjbQRkMRgcFgB7CLO8pl3HBguNgijjc3iBARPJMYOwI/gB94yPkBPG+tkWOiegDrHGLr4Gxigo2thY0t4kblG8EzTUy+dWitUCyW8ODDDyAIBrRcomP4b55B/ejNgOn+0TnHCF1ivbvukvJxnAr5eoVCgFEaxmh4WsMYA0/rtMXVY2NO3ghmbloqlyuV5nWlFHzPRy7wUcjnUcjldp4rBDMjsjFiaxFFrnk+qgreLewY9z1wF2ZKA97AIozgvXUG0S2Hk12yt8CmOrm1DsxdWvQYiG3SgKxnLyMQdCocvmfgaQPf0/CNB1LjO3HnnEOtXkOtXsO169cBojHvARgI4zh9RYji5KGMU0XfiHvvvwv79u+BY4aiwe4rrJYqMGcvIT64Z93PnWPE6QTkMAqLwYjjGHEco1qvt31C8LRC4PsIPA+B78H3zPjOZjOPlwAkBWtRCyPUwxBhHO/IePHb33cbbj16S/O9cww94JbRXLoCLuZgy7Nt6bhkoJrZ3A0jtBZhtYqldMCvQPADD4UgQM73x04gxiIkMopjVGp1VOvRUGeWR8GBg/tx9/EPDD0dZoY5fR6cC+ByAcIogrV2DJ5mJw6dcyueVijkcijm8wj87NvfzKxADEa1HmGlUkUYxxnlYrDMlWfx0CMPrGnhBt7iEcCFPOxCGc73UA/DDFv97RFZh8WVChZXKgg8g3KpiHxu63mUYZGJCFrncPX6MuoTNPucz+fw2Ecfhu+tXch2UA+X8wFseQZuoQz2k3QS58OdUflXU49iXLi6iJzvY095LjUdj5aRC4B1jMvXrieD2QlBa41HHn0QxWKnxYeImpW/156WPQNbnoVdmF3X/j+O9vrtUgtDnL18BftvWBi5iXXkZtBqrTZRlR9IHAm//T/fxQ17dmHPnt3YtWsBu29Y6MlfCABACnauBDc/BztbbJk713lWSilMwkapsbNYqdYwWxztvscj7wHMhDp01ao1nD1zHpfOX04qpSLMzJQwP1/Grt3z2HXDLszObuIIR4Ar5GHny7ALs0CXwkNE8D0fYRTueCHwzOjrxsgFIOf7mCsWcX2lsq5z1E6CQEnQjdZrXKbZMa4vLuH64hJOvfU2AMDzDOYXyphfKGPXwjwuXjmHN+LrWNhzGPl9e+Hltufi0EAphcAPEMVRavvfWRAB5VIJeT8YeVeWiRWomM/B8zQWlyqI7M6xABGo5aWoVaqvUuooFsEzm+/kEkUxLl64jIsXLgMATjz3LdS4hsvXzmLlnZ8CAIrFGZRKsygVZlAqzqBYnFlz3yiOQEQdQtfoCZx2ySTYmM2Mb4TvGSzMlhD4fiYNojly442o1+uo1euo1sPEpLaejk6JGzARQaXedkQEKIKi1J2VsHXX7RyYgRyAUmkWURRhpVZP0o2TCDM3Bs5Yrcqe/L6GWrPejK4iwrdP/DfyuRJ279qDhfndmCnNbRlI43k+PM/HPXd+GAAQ2xiVyjKWVpawsrKEi5fOYbmyhDiOkAtyUFojDEPEcYSPPPw4CoUCKM1b8nzQdC1mBhw7sGO4NhcITsu/4QTIqeNf4i4RN92Zh1n+REAuCDBTyCPne5lOjNHX/+Ff2DHgGu6+IES24UBmE3dgJC1M4rw4vIJh5vSFdCq/FVOcxB3HiMMIURqaGdsIrq8un6BSQU4EO6nspBTUNh/KT197BW+dbgW4EwiFQglzs2UUCiXkcgUUcnkEfg7aGCil4JhBCvB1AFIEZosojlCpVlCtVbC8tIh3r1zG4vWrHRVypjSblBMBn/ylz6FUnNk6g+3ProtH2Ch/Z5M479hGsJFFFIWI43jb5a+IkAs85HM5FIIAKmOfId/zkc/lYK6FG6ggKuniVw9LmkEOjcraOE+PQFq+PQhLu9lQKx/stQRiI5Lp/xBRHCOOYsRRIig2Tl17bbIlkXMuvX/aixFt4Uu2vbwfOnATTp1+rRUAAsZKZQkrlaVt3acbHn/805gvLyCOY5huvULb/ZGaZqO2J7Tq5xptugoFdemiCI3yj6IQNrZwLoYiBaMIvtYwWnW29EPu4JNeUUEpDeNpeJ4PYwy08UDpfINzPS6LQgDQVlk3ov3eHecdX1r36jopcqvrbvYUnA4AcwiCLTLNrWgll3b7zK1jcv8k+GUzSDV+N6XqR+v4+ls/wbnz72yRkf7Yv+8QynPzYGZorQenqrTZUtdtuDZIhojg+T78IEiiu2iTib80oKgRYNRoRMGczG43zjfNZ1r+3DqndFyWqKnJuKyVj86GzgJA2zMe6jxAu768YaH00RMyWj0EtwkFIxGSznQISuue42qVUvADH0q3Crvt1mAG7j7+AM79+7/2/oO64PZjHxzezZsdxNqH0hj/UKMnSY+Nugigo/J2NnLpOyKANNIhY2cqbfVjvevN/6l1nnzUhZ/tJnXcrKkoO47NWp02oeA2gQHS1qd7NS2JJrOIoyjxsV9H99275yByuTxqtWpfv2gjcrkcbjp8y0AHqI1KDKJmTG77NZW2opvfY/XJaODValwPDK0HUEolIXe6YTZsnTdaj2TIvf4RANi2WyjSGFTnYGPbZSVof5ibfa9NGFYf0QpdtGHcLHRiav1teqZJ49ZbbsfLP3qhlyLbkltvuQNa62aL1tE2NlrDtt9Jzdaz1WK3t9xd1dg+6kczfZV0E41nlrWFr52hrQ6dK+ZARIkVwVlEUdQMxdtKzwZaA+KmyqEVjJ9YT6qVKuJowPMHqyrI9kl+0333fhjl8jzOnX8H5y+cxfLy9b6yVSrNYt/eA9i/7yBufe8xBH5jTqC/5rbNXNETHepgOsAlEJg5tRi2KnvjGoCOY7tVqt0kG9bDka1HRV/9638aH3GcQMKwjitXLuPa4hUsryyjUl1BrVpJLFXpJKDWyaoGuXwBhXwRpWIJ5bkFLCzshu9vNbrPBi8VxOa8QReN2ma0j63iKB6ZAKzZJtWxa1pDuLFqQmpBaTd9tseXNm+RDkCBxBWAKTknpmasKDVmbIBV3bVqrQtD6SRU2yi/YX1pTLrtFHzPx769B7Bv74Guvr+6/MNabSzLP1q1eFi/uNjCYfROkmZxcTFVS1xTvx0KAxNoas54qtSmTyodrDXMkkqlCy4RNGmAOhfXHQUudUWwbJPKCG528WCXmHKb6w1J+Q+absvfxPFOC0pJB6x2+y3GenoogcBtVqTWAHGdlFcNjKnNstS41n5ckz7QMiOCW2ZHTo0C1BiMjzM7t/zXY+oWxkpPhp6WJoJRDK0AlbhMtT3Y9dLvtKE7l8zXWAdErmPuZscyyvLvljVjAKE/iICiB2jV/WzqmnsA0JS8PJU4DloGVsKxqjsTwc4aUe4QeIMuvK97YtxVo51J9utSTBjMwEo9UXk8hZYKpLq33CeuzJOnAo0jIgBDwjFQt0D7OLFjEEydNbpdPZa6Pjq6GgSvdjRr74/bR+Hpl1uj8TYrB9CyMTdoWAGSN2ibpm+9Jglu/28btVzKf3iY6spK2r0m6943IrYY6THjNWdIqbTVVM2Is2ROJzmSak3DN2zSILRs1Bk/xEbFdZzYpRu2/6ZjnnNS/kNkq/I3tQ32yxoXkp1FgL5mctIZzJb60a6CUGf0V/tDa30lebvKXz3xpG00xdSciU10eDcRJptJL//pGAMww/FkrUW0oxjj8p+qiTBBWI3MAwhTjQiAMNWIAAhTjQiAMNWIAAhTjQiAMNWIAAhTjRLPK2GaURDnQ2FaYbDa6ZtUCEKvMBiKiEQChKlFxgDC1EJEnG4nknFOBCELuOkNykw8BeE/gtAGA1AAQ8YBwrTRWIJMAeO1XLUgjJLmTPDmO3EJwqSRaD1q9QVBmHTaV2BVHZelFxCmjA5nOJJeQJgOmvVcdV6VXkCYbFbX7zXu0NILCBPO5gIgvYAwqaxXrzcKiBEJECaRrgVAZseEiWIjrWbjpREJzMnuTUPLlCCMho13H9wqJtiJq6iw49kk6mvrxXEZDBrGpj+CMCJoYwHYelUIku2phB3Npuu6d7ssigiAsBPZclOD7awLlO1WJYKwHbpc7WG7C2OJEAjjD4M30/vb6WVlOBECYXzZRuUHel8aUYRAGD8Ym1p81sP0PLwlOMjaosK40Gj5t1mfe6/Aja0DxT4kZE2PlR/otwVPuhwRAiEzmNN5qh7rYP8qTKsnEDEQRkda76jPOapB6vDMzCIGwvAZoPo90I2y02iyRCMTN1JhCDCYBxm1OCwrDktUmTBI0nVM3KBDdodmxkwz6kQQhH5oVfzhKNdDt+OLIAi9kNaXoVX8BmZ0tZKYASYCmEESaiashtN/SaO5zSndHhnoILgb0n6Ak9Mk0IYgS7NPKw3NoKXbj6biNzBZufpz2yEd2YOTQwqJVEwQ3FTnW5W93Waelf38/wFKeQuBUqtiJgAAAABJRU5ErkJggg==">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --cream: #f5f0eb;
-  --cream-dark: #ede7df;
-  --stone: #e8e2da;
-  --burgundy: #8b3a52;
-  --burgundy-pale: #f0e4e7;
-  --text-primary: #2a2420;
-  --text-secondary: #7a6f68;
-  --text-muted: #a89f98;
-  --card-bg: #fdfaf7;
-  --dark-card: #2a2420;
-  --serif: 'Cormorant Garamond', Georgia, serif;
-  --sans: 'DM Sans', system-ui, sans-serif;
-  --r: 16px;
-  --r-sm: 10px;
+:root{
+  --cream:#f5f0eb; --cream-dark:#ede7df; --stone:#e8e2da;
+  --burgundy:#8b3a52; --burgundy-pale:#f0e4e7;
+  --text-primary:#2a2420; --text-secondary:#7a6f68; --text-muted:#a89f98;
+  --card-bg:#fdfaf7; --dark-card:#2a2420;
+  --serif:"Cormorant Garamond",Georgia,serif; --sans:"DM Sans",system-ui,sans-serif;
+  --r:16px; --r-sm:10px;
 }
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { width:100%; height:100%; overflow:hidden; background:var(--cream); font-family:var(--sans); color:var(--text-primary); -webkit-font-smoothing:antialiased; }
-#app { display:flex; flex-direction:column; height:100%; max-width:430px; margin:0 auto; position:relative; overflow:hidden; }
-.screen { flex:1; overflow-y:auto; overflow-x:hidden; padding:20px 20px 90px; display:none; -webkit-overflow-scrolling:touch; }
-.screen.active { display:block; }
-.screen::-webkit-scrollbar { display:none; }
-#nav { position:absolute; bottom:0; left:0; right:0; background:var(--card-bg); border-top:1px solid var(--stone); display:flex; z-index:100; padding:6px 0 20px; }
-#nav button { flex:1; background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; padding:4px 1px; color:var(--text-muted); font-family:var(--sans); font-size:9px; transition:color .2s; }
-#nav button.active { color:var(--burgundy); }
-#nav button svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-.big-title { font-family:var(--serif); font-size:40px; font-weight:300; line-height:1.05; margin-bottom:20px; }
-.eyebrow { font-size:10px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
-.card { background:var(--card-bg); border-radius:var(--r); border:1px solid var(--stone); padding:16px; margin-bottom:12px; }
-.card-dark { background:var(--dark-card); border-radius:var(--r); padding:20px; margin-bottom:12px; color:#fff; position:relative; overflow:hidden; }
-.card-dark::after { content:''; position:absolute; right:-24px; top:-24px; width:130px; height:130px; border-radius:50%; border:28px solid rgba(255,255,255,0.05); pointer-events:none; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-family:var(--sans);color:var(--text-primary);-webkit-font-smoothing:antialiased;}
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 20px 90px;display:none;-webkit-overflow-scrolling:touch;}
+.screen.active{display:block;}
+.screen::-webkit-scrollbar{display:none;}
+#nav{position:absolute;bottom:0;left:0;right:0;background:var(--card-bg);border-top:1px solid var(--stone);display:flex;z-index:100;padding:6px 0 20px;}
+#nav button{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 1px;color:var(--text-muted);font-family:var(--sans);font-size:9px;transition:color .2s;}
+#nav button.active{color:var(--burgundy);}
+#nav button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.big-title{font-family:var(--serif);font-size:40px;font-weight:300;line-height:1.05;margin-bottom:20px;}
+.eyebrow{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+.card{background:var(--card-bg);border-radius:var(--r);border:1px solid var(--stone);padding:16px;margin-bottom:12px;}
+.card-dark{background:var(--dark-card);border-radius:var(--r);padding:20px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;}
+.card-dark::after{content:"";position:absolute;right:-24px;top:-24px;width:130px;height:130px;border-radius:50%;border:28px solid rgba(255,255,255,0.05);pointer-events:none;}
 /* TODAY */
-.hero { border-radius:var(--r); overflow:hidden; height:195px; position:relative; margin-bottom:18px; }
-.hero svg { position:absolute; inset:0; width:100%; height:100%; }
-.hero-info { position:absolute; bottom:0; left:0; right:0; padding:14px 16px; display:flex; align-items:flex-end; justify-content:space-between; }
-.hero-loc { font-size:10px; letter-spacing:.1em; color:rgba(255,255,255,.7); text-transform:uppercase; }
-.hero-port { font-family:var(--serif); font-size:20px; color:#fff; }
-.dep-badge { background:var(--card-bg); border-radius:20px; padding:5px 12px; font-size:12px; color:var(--text-secondary); white-space:nowrap; }
-.dep-badge strong { color:var(--text-primary); font-weight:500; }
-.clocks-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--stone); border-radius:var(--r); overflow:hidden; margin-bottom:18px; }
-.clock-cell { background:var(--card-bg); padding:12px 8px; text-align:center; }
-.clock-lbl { font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:4px; }
-.dot { width:5px; height:5px; border-radius:50%; display:inline-block; flex-shrink:0; }
-.d-ship { background:var(--burgundy); } .d-port { background:#8b7355; } .d-home { background:var(--text-muted); }
-.clock-digits { font-family:var(--serif); font-size:20px; color:var(--text-primary); }
-.clock-tz-sm { font-size:10px; color:var(--text-muted); margin-top:2px; }
-.move-card { background:var(--card-bg); border-radius:var(--r); border:1px solid var(--stone); padding:16px; margin-bottom:16px; }
-.move-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
-.move-time { font-family:var(--serif); font-size:34px; font-weight:300; line-height:1; }
-.move-sub { font-size:12px; color:var(--text-muted); margin-top:4px; }
-.prog-track { position:relative; height:3px; background:var(--stone); border-radius:2px; margin-bottom:6px; }
-.prog-fill { height:100%; background:var(--burgundy); border-radius:2px; }
-.prog-dot { position:absolute; top:50%; width:11px; height:11px; border-radius:50%; background:var(--burgundy); transform:translate(-50%,-50%); }
-.prog-lbls { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); }
+.hero{border-radius:var(--r);overflow:hidden;height:195px;position:relative;margin-bottom:18px;}
+.hero svg{position:absolute;inset:0;width:100%;height:100%;}
+.hero-info{position:absolute;bottom:0;left:0;right:0;padding:14px 16px;display:flex;align-items:flex-end;justify-content:space-between;}
+.hero-loc{font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.7);text-transform:uppercase;}
+.hero-port{font-family:var(--serif);font-size:20px;color:#fff;}
+.dep-badge{background:var(--card-bg);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text-secondary);white-space:nowrap;}
+.dep-badge strong{color:var(--text-primary);font-weight:500;}
+.clocks-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--stone);border-radius:var(--r);overflow:hidden;margin-bottom:18px;}
+.clock-cell{background:var(--card-bg);padding:12px 8px;text-align:center;}
+.clock-lbl{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:4px;}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.d-ship{background:var(--burgundy);}.d-port{background:#8b7355;}.d-home{background:var(--text-muted);}
+.clock-digits{font-family:var(--serif);font-size:20px;color:var(--text-primary);}
+.clock-tz-sm{font-size:10px;color:var(--text-muted);margin-top:2px;}
+.move-card{background:var(--card-bg);border-radius:var(--r);border:1px solid var(--stone);padding:16px;margin-bottom:16px;}
+.move-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.move-time{font-family:var(--serif);font-size:34px;font-weight:300;line-height:1;}
+.move-sub{font-size:12px;color:var(--text-muted);margin-top:4px;}
+.prog-track{position:relative;height:3px;background:var(--stone);border-radius:2px;margin-bottom:6px;}
+.prog-fill{height:100%;background:var(--burgundy);border-radius:2px;}
+.prog-dot{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:var(--burgundy);transform:translate(-50%,-50%);}
+.prog-lbls{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);}
 /* VOYAGE */
-.itin-item { display:flex; gap:14px; position:relative; }
-.itin-item:not(:last-child)::before { content:''; position:absolute; left:13px; top:27px; bottom:0; width:1px; background:var(--stone); }
-.itin-num { width:26px; height:26px; border-radius:50%; border:1px solid var(--stone); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text-muted); flex-shrink:0; background:var(--card-bg); margin-top:2px; }
-.itin-num.tn { background:var(--burgundy); border-color:var(--burgundy); color:#fff; font-weight:500; }
-.itin-body { flex:1; padding-bottom:14px; }
-.itin-hl { background:var(--card-bg); border:1px solid var(--stone); border-radius:var(--r-sm); padding:10px 12px; }
-.itin-place-row { display:flex; justify-content:space-between; }
-.itin-place { font-family:var(--serif); font-size:19px; }
-.itin-place.sea { font-style:italic; color:var(--text-secondary); }
-.itin-date-sm { font-size:12px; color:var(--text-muted); }
-.itin-country { font-size:12px; color:var(--text-secondary); margin:2px 0 6px; }
-.itin-times { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.itin-t { font-size:11px; color:var(--text-muted); }
-.itin-t span { color:var(--text-secondary); }
-.today-pill { background:var(--burgundy-pale); color:var(--burgundy); font-size:10px; font-weight:500; padding:3px 10px; border-radius:20px; }
-/* CLOCKS */
-.clk-big-wrap { display:flex; gap:18px; align-items:center; }
-.clk-lbl { font-size:9px; text-transform:uppercase; letter-spacing:.12em; color:var(--text-muted); margin-bottom:4px; display:flex; align-items:center; gap:5px; }
-.clk-big-time { font-family:var(--serif); font-size:46px; font-weight:300; line-height:1; color:var(--text-primary); }
-.clk-sub { font-size:12px; color:var(--text-secondary); margin-top:5px; line-height:1.5; }
-.tz-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--stone); }
-.tz-row:last-child { border-bottom:none; }
-.tz-name { font-size:13px; color:var(--text-secondary); }
-.tz-off { font-size:10px; color:var(--text-muted); }
-.tz-digits { font-family:var(--serif); font-size:22px; }
-.tom-card { background:var(--cream-dark); border-radius:var(--r-sm); padding:14px 16px; display:flex; align-items:center; gap:12px; margin-top:8px; }
-.tom-arr { color:var(--burgundy); font-size:18px; flex-shrink:0; }
-.tom-text { font-size:13px; color:var(--text-secondary); line-height:1.5; }
-.tom-text strong { color:var(--burgundy); font-weight:500; }
+.itin-item{display:flex;gap:14px;position:relative;}
+.itin-item:not(:last-child)::before{content:"";position:absolute;left:13px;top:27px;bottom:0;width:1px;background:var(--stone);}
+.itin-num{width:26px;height:26px;border-radius:50%;border:1px solid var(--stone);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted);flex-shrink:0;background:var(--card-bg);margin-top:2px;}
+.itin-num.tn{background:var(--burgundy);border-color:var(--burgundy);color:#fff;font-weight:500;}
+.itin-body{flex:1;padding-bottom:14px;}
+.itin-hl{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:10px 12px;}
+.itin-place-row{display:flex;justify-content:space-between;}
+.itin-place{font-family:var(--serif);font-size:19px;}
+.itin-place.sea{font-style:italic;color:var(--text-secondary);}
+.itin-date-sm{font-size:12px;color:var(--text-muted);}
+.itin-country{font-size:12px;color:var(--text-secondary);margin:2px 0 6px;}
+.itin-times{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.itin-t{font-size:11px;color:var(--text-muted);}
+.itin-t span{color:var(--text-secondary);}
+.today-pill{background:var(--burgundy-pale);color:var(--burgundy);font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;}
+/* ITIN EDIT */
+.itin-edit-card{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px;}
+.itin-edit-card.editing{border-color:var(--burgundy);}
+.itin-edit-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;}
+.itin-edit-place{font-family:var(--serif);font-size:18px;}
+.itin-edit-meta{font-size:11px;color:var(--text-muted);margin-bottom:10px;}
+.itin-edit-actions{display:flex;gap:8px;margin-top:8px;}
+.itin-ed-inp{width:100%;padding:8px 10px;border:1px solid var(--stone);border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;color:var(--text-primary);background:var(--cream-dark);outline:none;margin-bottom:8px;transition:border-color .2s;}
+.itin-ed-inp:focus{border-color:var(--burgundy);}
+.itin-time-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+/* CLOCKS SCREEN */
+.clk-big-wrap{display:flex;gap:18px;align-items:center;}
+.clk-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
+.clk-big-time{font-family:var(--serif);font-size:46px;font-weight:300;line-height:1;color:var(--text-primary);}
+.clk-sub{font-size:12px;color:var(--text-secondary);margin-top:5px;line-height:1.5;}
+.tz-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--stone);}
+.tz-row:last-child{border-bottom:none;}
+.tz-name{font-size:13px;color:var(--text-secondary);}
+.tz-off{font-size:10px;color:var(--text-muted);}
+.tz-digits{font-family:var(--serif);font-size:22px;}
+.tom-card{background:var(--cream-dark);border-radius:var(--r-sm);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-top:8px;}
+.tom-arr{color:var(--burgundy);font-size:18px;flex-shrink:0;}
+.tom-text{font-size:13px;color:var(--text-secondary);line-height:1.5;}
+.tom-text strong{color:var(--burgundy);font-weight:500;}
+/* clocks edit row */
+.tz-edit-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--stone);}
+.tz-edit-row:last-of-type{border-bottom:none;}
+.tz-edit-label{flex:1;}
+.tz-edit-label .tz-name{font-size:13px;color:var(--text-secondary);}
+.tz-edit-label .tz-off{font-size:10px;color:var(--text-muted);}
+.tz-offset-input{width:68px;padding:6px 8px;border:1px solid var(--stone);border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;color:var(--text-primary);background:var(--cream);text-align:center;outline:none;}
+.tz-offset-input:focus{border-color:var(--burgundy);}
+.edit-clocks-toggle{font-size:12px;color:var(--burgundy);cursor:pointer;background:none;border:none;font-family:var(--sans);padding:0;margin-left:auto;}
 /* VAULT */
-.vault-ins-lbl { font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:rgba(255,255,255,.45); margin-bottom:6px; }
-.vault-ins-name { font-family:var(--serif); font-size:26px; font-weight:300; font-style:italic; color:#fff; margin-bottom:18px; }
-.vault-ins-row { display:flex; justify-content:space-between; align-items:flex-end; }
-.vault-f-lbl { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.4); margin-bottom:2px; }
-.vault-f-val { font-size:14px; color:rgba(255,255,255,.85); letter-spacing:.05em; }
-.active-pill { position:absolute; top:18px; right:18px; background:var(--burgundy-pale); color:var(--burgundy); font-size:10px; font-weight:500; padding:3px 10px; border-radius:20px; }
-.sec-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; margin-top:20px; }
-.link-btn { font-size:12px; color:var(--burgundy); cursor:pointer; background:none; border:none; font-family:var(--sans); padding:0; }
-.em-item { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--stone); }
-.em-item:last-child { border-bottom:none; }
-.em-icon { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.ic-pink { background:#f5e0e5; } .ic-stone { background:var(--stone); } .ic-cream { background:var(--cream-dark); }
-.em-name { font-size:13px; font-weight:500; }
-.em-sub { font-size:11px; color:var(--text-muted); }
-.em-ph { font-size:12px; color:var(--text-secondary); margin-left:auto; white-space:nowrap; padding-left:8px; }
-.doc-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--stone); }
-.doc-item:last-child { border-bottom:none; }
-.doc-ic { color:var(--text-muted); flex-shrink:0; }
-.doc-nm { font-size:13px; flex:1; }
-.doc-badge { font-size:10px; color:var(--text-muted); background:var(--stone); padding:2px 8px; border-radius:10px; }
+.vault-ins-lbl{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;}
+.vault-ins-name{font-family:var(--serif);font-size:26px;font-weight:300;font-style:italic;color:#fff;margin-bottom:18px;}
+.vault-ins-row{display:flex;justify-content:space-between;align-items:flex-end;}
+.vault-f-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:2px;}
+.vault-f-val{font-size:14px;color:rgba(255,255,255,.85);letter-spacing:.05em;}
+.active-pill{position:absolute;top:18px;right:18px;background:var(--burgundy-pale);color:var(--burgundy);font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;}
+.sec-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;margin-top:20px;}
+.link-btn{font-size:12px;color:var(--burgundy);cursor:pointer;background:none;border:none;font-family:var(--sans);padding:0;}
+.em-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--stone);}
+.em-item:last-child{border-bottom:none;}
+.em-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ic-pink{background:#f5e0e5;}.ic-stone{background:var(--stone);}.ic-cream{background:var(--cream-dark);}
+.em-name{font-size:13px;font-weight:500;}
+.em-sub{font-size:11px;color:var(--text-muted);}
+.em-ph{font-size:12px;color:var(--text-secondary);margin-left:auto;white-space:nowrap;padding-left:8px;}
+.doc-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--stone);}
+.doc-item:last-child{border-bottom:none;}
+.doc-ic{color:var(--text-muted);flex-shrink:0;}
+.doc-nm{font-size:13px;flex:1;}
+.doc-badge{font-size:10px;color:var(--text-muted);background:var(--stone);padding:2px 8px;border-radius:10px;}
 /* JOURNAL */
-.j-card { background:var(--card-bg); border-radius:var(--r); border:1px solid var(--stone); overflow:hidden; margin-bottom:16px; }
-.j-hero { height:130px; position:relative; overflow:hidden; }
-.j-hero svg { position:absolute; inset:0; width:100%; height:100%; }
-.j-body { padding:14px 16px; }
-.j-date { font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted); margin-bottom:4px; }
-.j-place { font-family:var(--serif); font-size:22px; margin-bottom:7px; }
-.j-text { font-size:13px; color:var(--text-secondary); line-height:1.65; margin-bottom:10px; }
-.j-tags { display:flex; gap:6px; flex-wrap:wrap; }
-.tag { background:var(--cream-dark); color:var(--text-secondary); font-size:11px; padding:3px 10px; border-radius:20px; }
-.j-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.j-tabs{display:flex;background:var(--stone);border-radius:var(--r-sm);padding:3px;margin-bottom:16px;}
+.j-tab{flex:1;padding:8px;border:none;background:none;cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--text-secondary);border-radius:8px;transition:all .2s;}
+.j-tab.active{background:var(--card-bg);color:var(--text-primary);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.j-card{background:var(--card-bg);border-radius:var(--r);border:1px solid var(--stone);overflow:hidden;margin-bottom:16px;position:relative;}
+.j-card.editing{border-color:var(--burgundy);}
+.j-hero{height:130px;position:relative;overflow:hidden;}
+.j-hero svg{position:absolute;inset:0;width:100%;height:100%;}
+.j-body{padding:14px 16px;}
+.j-date{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px;}
+.j-place{font-family:var(--serif);font-size:22px;margin-bottom:7px;}
+.j-text{font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:10px;}
+.j-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{background:var(--cream-dark);color:var(--text-secondary);font-size:11px;padding:3px 10px;border-radius:20px;}
+.j-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.j-edit-btn{position:absolute;top:10px;right:10px;background:var(--card-bg);border:1px solid var(--stone);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--burgundy);cursor:pointer;font-family:var(--sans);}
+.j-discard-btn{background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;font-family:var(--sans);padding:0;}
+.j-edit-area{width:100%;border:1px solid var(--stone);border-radius:var(--r-sm);padding:10px;font-family:var(--sans);font-size:13px;color:var(--text-primary);outline:none;resize:vertical;min-height:80px;background:var(--cream-dark);transition:border-color .2s;margin-bottom:8px;}
+.j-edit-area:focus{border-color:var(--burgundy);}
+.j-edit-input{width:100%;border:1px solid var(--stone);border-radius:var(--r-sm);padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--text-primary);outline:none;background:var(--cream-dark);transition:border-color .2s;margin-bottom:8px;}
+.j-edit-input:focus{border-color:var(--burgundy);}
+.j-edit-actions{display:flex;gap:8px;margin-top:4px;}
 /* IMPORT */
-.imp-tabs { display:flex; background:var(--stone); border-radius:var(--r-sm); padding:3px; margin-bottom:18px; }
-.imp-tab { flex:1; padding:8px 2px; border:none; background:none; cursor:pointer; font-family:var(--sans); font-size:12px; color:var(--text-secondary); border-radius:8px; transition:all .2s; }
-.imp-tab.active { background:var(--card-bg); color:var(--text-primary); font-weight:500; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-.imp-ta { width:100%; min-height:160px; border:1px solid var(--stone); border-radius:var(--r-sm); background:var(--card-bg); padding:14px; font-family:var(--sans); font-size:13px; color:var(--text-primary); resize:vertical; outline:none; line-height:1.6; transition:border-color .2s; }
-.imp-ta:focus { border-color:var(--burgundy); }
-.imp-ta::placeholder { color:var(--text-muted); }
-.imp-hint { font-size:12px; color:var(--text-muted); line-height:1.6; margin-top:8px; }
-.btn-p { width:100%; padding:14px; border-radius:var(--r-sm); border:none; background:var(--burgundy); color:#fff; font-family:var(--sans); font-size:14px; font-weight:500; cursor:pointer; margin-top:12px; }
-.btn-p:active { opacity:.82; }
-.btn-d { width:100%; padding:14px; border-radius:var(--r-sm); border:none; background:var(--dark-card); color:#fff; font-family:var(--sans); font-size:14px; font-weight:500; cursor:pointer; margin-top:10px; }
-.btn-d:active { opacity:.82; }
-.parsed-box { background:var(--card-bg); border:1px solid var(--stone); border-radius:var(--r-sm); padding:14px; margin-top:14px; }
-.parsed-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--stone); font-size:13px; gap:8px; }
-.parsed-row:last-child { border-bottom:none; }
-.p-lbl { color:var(--text-muted); flex-shrink:0; }
-.p-val { color:var(--text-secondary); text-align:right; font-size:12px; }
-.ok-wrap { text-align:center; padding:18px 0; }
-.ok-check { font-size:26px; color:var(--burgundy); margin-bottom:8px; }
-.ok-txt { font-size:14px; color:var(--text-secondary); }
-.m-inp { width:100%; padding:12px 14px; border:1px solid var(--stone); border-radius:var(--r-sm); background:var(--card-bg); font-family:var(--sans); font-size:14px; color:var(--text-primary); outline:none; transition:border-color .2s; margin-bottom:10px; }
-.m-inp:focus { border-color:var(--burgundy); }
-.m-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-.tpl-card { cursor:pointer; }
-.tpl-card:active { opacity:.8; }
-.tpl-nm { font-weight:500; font-size:14px; margin-bottom:3px; }
-.tpl-desc { font-size:12px; color:var(--text-muted); }
+.imp-tabs{display:flex;background:var(--stone);border-radius:var(--r-sm);padding:3px;margin-bottom:18px;}
+.imp-tab{flex:1;padding:8px 2px;border:none;background:none;cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--text-secondary);border-radius:8px;transition:all .2s;}
+.imp-tab.active{background:var(--card-bg);color:var(--text-primary);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.imp-ta{width:100%;min-height:160px;border:1px solid var(--stone);border-radius:var(--r-sm);background:var(--card-bg);padding:14px;font-family:var(--sans);font-size:13px;color:var(--text-primary);resize:vertical;outline:none;line-height:1.6;transition:border-color .2s;}
+.imp-ta:focus{border-color:var(--burgundy);}
+.imp-ta::placeholder{color:var(--text-muted);}
+.imp-hint{font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:8px;}
+.btn-p{width:100%;padding:14px;border-radius:var(--r-sm);border:none;background:var(--burgundy);color:#fff;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;margin-top:12px;}
+.btn-p:active{opacity:.82;}
+.btn-d{width:100%;padding:14px;border-radius:var(--r-sm);border:none;background:var(--dark-card);color:#fff;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;margin-top:10px;}
+.btn-d:active{opacity:.82;}
+.btn-sm{padding:10px 20px;border-radius:var(--r-sm);border:none;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;}
+.btn-sm.primary{background:var(--burgundy);color:#fff;}
+.btn-sm.ghost{background:none;border:1px solid var(--stone);color:var(--text-secondary);}
+.parsed-box{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:14px;margin-top:14px;}
+.parsed-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--stone);font-size:13px;gap:8px;}
+.parsed-row:last-child{border-bottom:none;}
+.p-lbl{color:var(--text-muted);flex-shrink:0;}
+.p-val{color:var(--text-secondary);text-align:right;font-size:12px;}
+.ok-wrap{text-align:center;padding:18px 0;}
+.ok-check{font-size:26px;color:var(--burgundy);margin-bottom:8px;}
+.ok-txt{font-size:14px;color:var(--text-secondary);}
+.m-inp{width:100%;padding:12px 14px;border:1px solid var(--stone);border-radius:var(--r-sm);background:var(--card-bg);font-family:var(--sans);font-size:14px;color:var(--text-primary);outline:none;transition:border-color .2s;margin-bottom:10px;}
+.m-inp:focus{border-color:var(--burgundy);}
+.m-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.tpl-card{cursor:pointer;}
+.tpl-card:active{opacity:.8;}
+.tpl-nm{font-weight:500;font-size:14px;margin-bottom:3px;}
+.tpl-desc{font-size:12px;color:var(--text-muted);}
+/* MODAL */
+#modal-overlay{display:none;position:absolute;inset:0;background:rgba(42,36,32,.55);z-index:200;align-items:flex-end;justify-content:center;}
+#modal-sheet{background:var(--card-bg);border-radius:20px 20px 0 0;width:100%;padding:20px 20px 40px;max-height:88%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+#modal-title{font-family:var(--serif);font-size:24px;font-weight:300;}
+#modal-close{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:22px;line-height:1;padding:0 4px;}
 </style>
 </head>
 <body>
@@ -180,7 +212,7 @@ html, body { width:100%; height:100%; overflow:hidden; background:var(--cream); 
       <line x1="213" y1="152" x2="234" y2="152" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/>
     </svg>
     <div class="hero-info">
-      <div><div class="hero-loc">GREECE · GMT+3</div><div class="hero-port">Thira · Oia</div></div>
+      <div><div class="hero-loc">GREECE &middot; GMT+3</div><div class="hero-port">Thira &middot; Oia</div></div>
       <div class="dep-badge">Departs <strong>18:00</strong></div>
     </div>
   </div>
@@ -196,7 +228,7 @@ html, body { width:100%; height:100%; overflow:hidden; background:var(--cream); 
       <div>
         <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px;">All aboard</div>
         <div class="move-time">17:30</div>
-        <div class="move-sub">Ship time · in 2h 58m</div>
+        <div class="move-sub">Ship time &middot; in 2h 58m</div>
       </div>
       <svg style="color:var(--burgundy);" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="5" r="2"/><path d="M12 7v14"/><path d="M5 15a7 7 0 0014 0"/><path d="M3 12h4M17 12h4"/>
@@ -211,29 +243,92 @@ html, body { width:100%; height:100%; overflow:hidden; background:var(--cream); 
 <div class="screen" id="s-voyage">
   <div class="eyebrow">The Voyage</div>
   <div class="big-title">Itinerary</div>
-  <div id="itin-list"></div>
+
+  <div class="j-tabs" style="margin-bottom:18px;">
+    <button class="j-tab active" id="vtab-read">View</button>
+    <button class="j-tab" id="vtab-edit">Edit</button>
+    <button class="j-tab" id="vtab-add">+ Add Stop</button>
+  </div>
+
+  <!-- VIEW -->
+  <div id="vp-read"><div id="itin-list"></div></div>
+
+  <!-- EDIT -->
+  <div id="vp-edit" style="display:none;">
+    <div class="eyebrow">Tap a stop to edit or delete</div>
+    <div id="itin-edit-list"></div>
+  </div>
+
+  <!-- ADD -->
+  <div id="vp-add" style="display:none;">
+    <div class="eyebrow">New Stop</div>
+    <input id="va-place" class="m-inp" type="text" placeholder="Port / Place name">
+    <input id="va-country" class="m-inp" type="text" placeholder="Country">
+    <input id="va-date" class="m-inp" type="date">
+    <div class="m-grid2">
+      <input id="va-arr" class="m-inp" type="time" style="margin:0;">
+      <input id="va-dep" class="m-inp" type="time" style="margin:0;">
+    </div>
+    <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer;margin-top:6px;">
+      <input type="checkbox" id="va-sea"> At sea / transit day
+    </label>
+    <button id="btn-va-save" class="btn-p" style="margin-top:12px;">Add to Itinerary</button>
+    <div id="va-out"></div>
+  </div>
 </div>
 
 <!-- CLOCKS -->
 <div class="screen" id="s-clocks">
-  <div class="eyebrow">Three Skies</div>
-  <div class="big-title">Clocks</div>
-  <div class="card">
-    <div class="clk-big-wrap">
-      <canvas id="analog" width="92" height="92" style="flex-shrink:0;"></canvas>
-      <div>
-        <div class="clk-lbl"><span class="dot d-ship"></span>SHIP TIME</div>
-        <div class="clk-big-time" id="clk-ship">--:--</div>
-        <div class="clk-sub">Mediterranean<br><span style="color:var(--text-muted);font-size:11px;">GMT+2 · CEST</span></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+    <div><div class="eyebrow" style="margin-bottom:2px;">Three Skies</div><div class="big-title" style="margin-bottom:0;">Clocks</div></div>
+    <button id="btn-edit-clocks" class="edit-clocks-toggle" style="margin-top:6px;">Edit</button>
+  </div>
+
+  <!-- live view -->
+  <div id="clocks-live">
+    <div class="card">
+      <div class="clk-big-wrap">
+        <canvas id="analog" width="92" height="92" style="flex-shrink:0;"></canvas>
+        <div>
+          <div class="clk-lbl"><span class="dot d-ship"></span>SHIP TIME</div>
+          <div class="clk-big-time" id="clk-ship">--:--</div>
+          <div class="clk-sub" id="clk-ship-label">Mediterranean &middot; <span style="color:var(--text-muted);font-size:11px;">GMT+2</span></div>
+        </div>
       </div>
     </div>
+    <div class="eyebrow" style="margin-top:8px;">Other Timezones</div>
+    <div class="card" style="padding:4px 16px;">
+      <div class="tz-row"><div><div class="tz-name" id="lv-port-name">Port &middot; Santorini &middot; EEST</div><div class="tz-off" id="lv-port-off">GMT+3</div></div><div class="tz-digits" id="clk-port">--:--</div></div>
+      <div class="tz-row"><div><div class="tz-name" id="lv-home-name">Home &middot; New York &middot; EST</div><div class="tz-off" id="lv-home-off">GMT&minus;5</div></div><div class="tz-digits" id="clk-home">--:--</div></div>
+    </div>
+    <div class="tom-card"><span class="tom-arr">&#8594;</span><div class="tom-text">Set ship clock <strong>+1 hour</strong> at 02:00<br><span style="font-size:11px;color:var(--text-muted);">Arrival in Mykonos &middot; EEST</span></div></div>
   </div>
-  <div class="eyebrow" style="margin-top:8px;">Other Timezones</div>
-  <div class="card" style="padding:4px 16px;">
-    <div class="tz-row"><div><div class="tz-name">Port · Santorini · EEST</div><div class="tz-off">GMT+3</div></div><div class="tz-digits" id="clk-port">--:--</div></div>
-    <div class="tz-row"><div><div class="tz-name">Home · New York · EST</div><div class="tz-off">GMT−5</div></div><div class="tz-digits" id="clk-home">--:--</div></div>
+
+  <!-- edit view -->
+  <div id="clocks-edit" style="display:none;">
+    <div class="eyebrow">Timezone Offsets (UTC)</div>
+    <div class="card" style="padding:8px 16px;">
+      <div class="tz-edit-row">
+        <div class="tz-edit-label"><div class="tz-name">Ship</div><div class="tz-off">e.g. +2 for CEST</div></div>
+        <input id="ed-ship-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="2">
+        <input id="ed-ship-name" class="m-inp" type="text" placeholder="Label e.g. Mediterranean" style="width:auto;flex:1;margin:0 0 0 8px;padding:6px 10px;font-size:12px;">
+      </div>
+      <div class="tz-edit-row">
+        <div class="tz-edit-label"><div class="tz-name">Port</div><div class="tz-off">local port time</div></div>
+        <input id="ed-port-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="3">
+        <input id="ed-port-name" class="m-inp" type="text" placeholder="e.g. Santorini EEST" style="width:auto;flex:1;margin:0 0 0 8px;padding:6px 10px;font-size:12px;">
+      </div>
+      <div class="tz-edit-row">
+        <div class="tz-edit-label"><div class="tz-name">Home</div><div class="tz-off">your home timezone</div></div>
+        <input id="ed-home-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="-5">
+        <input id="ed-home-name" class="m-inp" type="text" placeholder="e.g. New York EST" style="width:auto;flex:1;margin:0 0 0 8px;padding:6px 10px;font-size:12px;">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button id="btn-clocks-save" class="btn-sm primary" style="flex:1;">Save</button>
+      <button id="btn-clocks-cancel" class="btn-sm ghost" style="flex:1;">Cancel</button>
+    </div>
   </div>
-  <div class="tom-card"><span class="tom-arr">→</span><div class="tom-text">Set ship clock <strong>+1 hour</strong> at 02:00<br><span style="font-size:11px;color:var(--text-muted);">Arrival in Mykonos · EEST</span></div></div>
 </div>
 
 <!-- VAULT -->
@@ -247,16 +342,16 @@ html, body { width:100%; height:100%; overflow:hidden; background:var(--cream); 
     <div class="vault-ins-lbl">Travel Insurance</div>
     <div class="vault-ins-name">AXA Schengen</div>
     <div class="vault-ins-row">
-      <div><div class="vault-f-lbl">Policy</div><div class="vault-f-val">AX · 7720 · 8841</div></div>
+      <div><div class="vault-f-lbl">Policy</div><div class="vault-f-val">AX &middot; 7720 &middot; 8841</div></div>
       <div style="text-align:right;"><div class="vault-f-lbl">Expires</div><div class="vault-f-val">09 / 24</div></div>
     </div>
     <div class="active-pill">ACTIVE</div>
   </div>
   <div class="sec-row">
     <div class="eyebrow" style="margin:0;">Emergency</div>
-    <button id="btn-vault-edit" class="link-btn">Edit</button>
+    <button id="btn-vault-edit" class="link-btn">Add Contact</button>
   </div>
-  <div class="card" style="padding:4px 16px;">
+  <div class="card" style="padding:4px 16px;" id="em-list">
     <div class="em-item">
       <div class="em-icon ic-pink"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>
       <div><div class="em-name">Air Doctor 24/7</div><div class="em-sub">Worldwide medical</div></div>
@@ -274,7 +369,7 @@ html, body { width:100%; height:100%; overflow:hidden; background:var(--cream); 
     </div>
     <div class="em-item" style="border:none;">
       <div class="em-icon ic-pink"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>
-      <div><div class="em-name">Family — Anna</div><div class="em-sub">Spouse</div></div>
+      <div><div class="em-name">Family &mdash; Anna</div><div class="em-sub">Spouse</div></div>
       <div class="em-ph">+1 917 555 0144</div>
     </div>
   </div>
@@ -282,72 +377,57 @@ html, body { width:100%; height:100%; overflow:hidden; background:var(--cream); 
     <div class="eyebrow" style="margin:0;">Documents</div>
     <button id="btn-vault-doc" class="link-btn">Add</button>
   </div>
-  <div class="card" style="padding:4px 16px;">
-    <div class="doc-item">
-      <svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span class="doc-nm">Passport · M. Halden</span><span class="doc-badge">Verified</span>
-    </div>
-    <div class="doc-item">
-      <svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span class="doc-nm">Boarding pass · Day 1</span><span class="doc-badge">PDF</span>
-    </div>
-    <div class="doc-item" style="border:none;">
-      <svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span class="doc-nm">Cabin 221 receipt</span><span class="doc-badge">PDF</span>
-    </div>
+  <div class="card" id="doc-list" style="padding:4px 16px;">
+    <div class="doc-item"><svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="doc-nm">Passport &middot; M. Halden</span><span class="doc-badge">Verified</span></div>
+    <div class="doc-item"><svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="doc-nm">Boarding pass &middot; Day 1</span><span class="doc-badge">PDF</span></div>
+    <div class="doc-item" style="border:none;"><svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="doc-nm">Cabin 221 receipt</span><span class="doc-badge">PDF</span></div>
   </div>
 </div>
 
 <!-- JOURNAL -->
 <div class="screen" id="s-journal">
   <div class="big-title">Journal</div>
-  <div class="j-card">
-    <div class="j-hero">
-      <svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-        <rect width="400" height="130" fill="#e0cdd2"/>
-        <circle cx="200" cy="46" r="18" fill="#e8b090" opacity=".7"/>
-        <ellipse cx="80" cy="95" rx="80" ry="14" fill="#8a7a85" opacity=".7"/>
-        <ellipse cx="330" cy="100" rx="70" ry="12" fill="#8a7a85" opacity=".6"/>
-        <path d="M0 105 Q100 100 200 105 Q300 110 400 105 L400 130 L0 130Z" fill="#9a8898" opacity=".65"/>
-        <path d="M0 115 Q100 111 200 115 Q300 119 400 115 L400 130 L0 130Z" fill="#8a7a88" opacity=".7"/>
-        <line x1="213" y1="84" x2="213" y2="107" stroke="#3a2e30" stroke-width="2" stroke-linecap="round"/>
-        <polygon points="213,106 213,84 230,106" fill="rgba(139,58,82,.75)"/>
-        <line x1="213" y1="106" x2="230" y2="106" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
-      </svg>
-    </div>
-    <div class="j-body">
-      <div class="j-top">
-        <div><div class="j-date">Today · Sep 17</div><div class="j-place">Santorini</div></div>
-        <svg style="color:var(--text-muted);flex-shrink:0;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  <!-- journal tabs -->
+  <div class="j-tabs">
+    <button class="j-tab active" id="jtab-read">Read</button>
+    <button class="j-tab" id="jtab-edit">Edit</button>
+    <button class="j-tab" id="jtab-new">+ New</button>
+  </div>
+
+  <!-- READ panel -->
+  <div id="jp-read">
+    <div class="j-card" data-jid="0">
+      <div class="j-hero"><svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="130" fill="#e0cdd2"/><circle cx="200" cy="46" r="18" fill="#e8b090" opacity=".7"/><ellipse cx="80" cy="95" rx="80" ry="14" fill="#8a7a85" opacity=".7"/><ellipse cx="330" cy="100" rx="70" ry="12" fill="#8a7a85" opacity=".6"/><path d="M0 105 Q100 100 200 105 Q300 110 400 105 L400 130 L0 130Z" fill="#9a8898" opacity=".65"/><path d="M0 115 Q100 111 200 115 Q300 119 400 115 L400 130 L0 130Z" fill="#8a7a88" opacity=".7"/><line x1="213" y1="84" x2="213" y2="107" stroke="#3a2e30" stroke-width="2" stroke-linecap="round"/><polygon points="213,106 213,84 230,106" fill="rgba(139,58,82,.75)"/><line x1="213" y1="106" x2="230" y2="106" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/></svg></div>
+      <div class="j-body">
+        <div class="j-top"><div><div class="j-date" data-field="date">Today &middot; Sep 17</div><div class="j-place" data-field="place">Santorini</div></div></div>
+        <div class="j-text" data-field="text">Donkey path up to Fira at sunrise &mdash; air smelt like dry rosemary. Coffee at a caf&eacute; called Avocado.</div>
+        <div class="j-tags" data-field="tags"><span class="tag">#santorini</span><span class="tag">#sunrise</span></div>
       </div>
-      <div class="j-text">Donkey path up to Fira at sunrise — air smelt like dry rosemary. Coffee at a café called Avocado.</div>
-      <div class="j-tags"><span class="tag">#santorini</span><span class="tag">#sunrise</span></div>
+    </div>
+    <div class="j-card" data-jid="1">
+      <div class="j-hero"><svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="130" fill="#d8ccd2"/><circle cx="180" cy="42" r="16" fill="#dba870" opacity=".5"/><ellipse cx="60" cy="96" rx="72" ry="13" fill="#7a6c78" opacity=".7"/><ellipse cx="340" cy="100" rx="65" ry="12" fill="#7a6c78" opacity=".6"/><path d="M0 104 Q100 99 200 104 Q300 109 400 104 L400 130 L0 130Z" fill="#8a7a88" opacity=".65"/><path d="M0 116 Q100 112 200 116 Q300 120 400 116 L400 130 L0 130Z" fill="#7a6a78" opacity=".7"/><line x1="200" y1="83" x2="200" y2="106" stroke="#3a2e30" stroke-width="2" stroke-linecap="round"/><polygon points="200,105 200,83 218,105" fill="rgba(139,58,82,.7)"/><line x1="200" y1="105" x2="218" y2="105" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/></svg></div>
+      <div class="j-body">
+        <div class="j-top"><div><div class="j-date" data-field="date">Yesterday &middot; Sep 16</div><div class="j-place" data-field="place">Naples</div></div></div>
+        <div class="j-text" data-field="text">Margherita at L&rsquo;Antica. Walked the Spaccanapoli. Met a couple from Lyon who recommend a vineyard in Kotor.</div>
+        <div class="j-tags" data-field="tags"><span class="tag">#naples</span><span class="tag">#food</span></div>
+      </div>
     </div>
   </div>
-  <div class="j-card">
-    <div class="j-hero">
-      <svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-        <rect width="400" height="130" fill="#d8ccd2"/>
-        <circle cx="180" cy="42" r="16" fill="#dba870" opacity=".5"/>
-        <ellipse cx="60" cy="96" rx="72" ry="13" fill="#7a6c78" opacity=".7"/>
-        <ellipse cx="340" cy="100" rx="65" ry="12" fill="#7a6c78" opacity=".6"/>
-        <path d="M0 104 Q100 99 200 104 Q300 109 400 104 L400 130 L0 130Z" fill="#8a7a88" opacity=".65"/>
-        <path d="M0 116 Q100 112 200 116 Q300 120 400 116 L400 130 L0 130Z" fill="#7a6a78" opacity=".7"/>
-        <line x1="200" y1="83" x2="200" y2="106" stroke="#3a2e30" stroke-width="2" stroke-linecap="round"/>
-        <polygon points="200,105 200,83 218,105" fill="rgba(139,58,82,.7)"/>
-        <line x1="200" y1="105" x2="218" y2="105" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
-      </svg>
-    </div>
-    <div class="j-body">
-      <div class="j-top">
-        <div><div class="j-date">Yesterday · Sep 16</div><div class="j-place">Naples</div></div>
-        <svg style="color:var(--text-muted);flex-shrink:0;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      </div>
-      <div class="j-text">Margherita at L'Antica. Walked the Spaccanapoli. Met a couple from Lyon who recommend a vineyard in Kotor.</div>
-      <div class="j-tags"><span class="tag">#naples</span><span class="tag">#food</span></div>
-    </div>
+
+  <!-- EDIT panel -->
+  <div id="jp-edit" style="display:none;">
+    <div class="eyebrow">Select an entry to edit</div>
+    <div id="edit-entries-list"></div>
   </div>
-  <button id="btn-new-entry" class="btn-d">+ New entry</button>
+
+  <!-- NEW panel -->
+  <div id="jp-new" style="display:none;">
+    <div class="eyebrow">New Journal Entry</div>
+    <input id="new-place" class="m-inp" type="text" placeholder="Place (e.g. Mykonos)">
+    <textarea id="new-text" class="imp-ta" style="min-height:100px;" placeholder="Write about your day&#8230;"></textarea>
+    <input id="new-tags" class="m-inp" type="text" placeholder="Tags, comma-separated (e.g. sunrise, food)">
+    <button id="btn-save-entry" class="btn-p">Save Entry</button>
+  </div>
 </div>
 
 <!-- IMPORT -->
@@ -359,21 +439,19 @@ html, body { width:100%; height:100%; overflow:hidden; background:var(--cream); 
     <button class="imp-tab" id="itab-manual">Manual</button>
     <button class="imp-tab" id="itab-tpl">Templates</button>
   </div>
-  <!-- text panel -->
   <div id="panel-text">
     <div class="eyebrow">Paste your cruise itinerary</div>
-    <textarea id="imp-input" class="imp-ta" placeholder="Paste any itinerary text here — email confirmation, PDF text, booking summary, etc.
+    <textarea id="imp-input" class="imp-ta" placeholder="Paste any itinerary text here &#8212; email confirmation, PDF text, booking summary, etc.
 
 Example:
-Day 1 – Sep 14 – Barcelona, Spain (Dep 18:00)
-Day 2 – Sep 15 – At sea
-Day 3 – Sep 16 – Naples, Italy (Arr 08:00, Dep 19:00)
-Day 4 – Sep 17 – Santorini, Greece (Arr 07:00, Dep 18:00)"></textarea>
+Day 1 &#8211; Sep 14 &#8211; Barcelona, Spain (Dep 18:00)
+Day 2 &#8211; Sep 15 &#8211; At sea
+Day 3 &#8211; Sep 16 &#8211; Naples, Italy (Arr 08:00, Dep 19:00)
+Day 4 &#8211; Sep 17 &#8211; Santorini, Greece (Arr 07:00, Dep 18:00)"></textarea>
     <div class="imp-hint">Supports most cruise booking formats. Parser reads dates, ports, arrival and departure times.</div>
     <button id="btn-parse" class="btn-p">Parse Itinerary</button>
     <div id="parse-out"></div>
   </div>
-  <!-- manual panel -->
   <div id="panel-manual" style="display:none;">
     <div class="eyebrow">Add a single stop</div>
     <input id="m-place" class="m-inp" type="text" placeholder="Port / Place name">
@@ -383,18 +461,23 @@ Day 4 – Sep 17 – Santorini, Greece (Arr 07:00, Dep 18:00)"></textarea>
       <input id="m-arr" class="m-inp" type="time" placeholder="Arrival" style="margin:0;">
       <input id="m-dep" class="m-inp" type="time" placeholder="Departure" style="margin:0;">
     </div>
-    <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer;">
-      <input type="checkbox" id="m-sea"> At sea / transit day
-    </label>
+    <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer;"><input type="checkbox" id="m-sea"> At sea / transit day</label>
     <button id="btn-manual" class="btn-p">Add Stop</button>
     <div id="manual-out"></div>
   </div>
-  <!-- template panel -->
   <div id="panel-tpl" style="display:none;">
     <div class="eyebrow">Choose a sample format</div>
-    <div class="card tpl-card" id="tpl-msc"><div class="tpl-nm">MSC / Costa style</div><div class="tpl-desc">Day 1 – Port – Date – Arr/Dep</div></div>
-    <div class="card tpl-card" id="tpl-royal"><div class="tpl-nm">Royal Caribbean / NCL</div><div class="tpl-desc">Port · Country · Date (HH:MM – HH:MM)</div></div>
+    <div class="card tpl-card" id="tpl-msc"><div class="tpl-nm">MSC / Costa style</div><div class="tpl-desc">Day 1 &#8211; Port &#8211; Date &#8211; Arr/Dep</div></div>
+    <div class="card tpl-card" id="tpl-royal"><div class="tpl-nm">Royal Caribbean / NCL</div><div class="tpl-desc">Port &middot; Country &middot; Date (HH:MM &#8211; HH:MM)</div></div>
     <div class="card tpl-card" id="tpl-generic"><div class="tpl-nm">Generic / Email booking</div><div class="tpl-desc">Free-form date + city text</div></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal-sheet">
+    <div class="modal-hdr"><div id="modal-title"></div><button id="modal-close">&#x2715;</button></div>
+    <div id="modal-body"></div>
   </div>
 </div>
 
@@ -407,24 +490,159 @@ Day 4 – Sep 17 – Santorini, Greece (Arr 07:00, Dep 18:00)"></textarea>
   <button data-s="journal"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Journal</button>
   <button data-s="import"><svg viewBox="0 0 24 24"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>Import</button>
 </nav>
-</div>
+</div><!-- #app -->
 
 <script>
 (function(){
+'use strict';
+
+// ── HELPERS ──
+function g(id){return document.getElementById(id);}
+function fmt2(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function tzTime(off){var n=new Date(),u=n.getTime()+n.getTimezoneOffset()*60000;return new Date(u+off*3600000);}
+
+// ── TIMEZONE SETTINGS (editable) ──
+var tz={ship:2,port:3,home:-5,shipName:'Mediterranean',portName:'Santorini EEST',homeName:'New York EST'};
+function saveTZ(){try{localStorage.setItem('vk_tz',JSON.stringify(tz));}catch(e){}}
+function loadTZ(){try{var d=localStorage.getItem('vk_tz');if(d){var p=JSON.parse(d);tz.ship=p.ship||2;tz.port=p.port||3;tz.home=p.home||-5;tz.shipName=p.shipName||'Mediterranean';tz.portName=p.portName||'Santorini EEST';tz.homeName=p.homeName||'New York EST';}}catch(e){}}
+loadTZ();
+
+// ── NAV ──
+document.querySelectorAll('#nav button').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var id=btn.getAttribute('data-s');
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    document.querySelectorAll('#nav button').forEach(function(b){b.classList.remove('active');});
+    var sc=g('s-'+id);if(sc)sc.classList.add('active');
+    btn.classList.add('active');
+  });
+});
+
+// ── ITINERARY ──
 var stops=[
   {day:1,date:'Sep 14',place:'Barcelona',country:'Spain',arr:null,dep:'18:00',sea:false},
   {day:2,date:'Sep 15',place:'At sea',country:'Balearic',arr:null,dep:null,sea:true},
   {day:3,date:'Sep 16',place:'Naples',country:'Italy',arr:'08:00',dep:'19:00',sea:false},
   {day:4,date:'Sep 17',place:'Santorini',country:'Greece',arr:'07:00',dep:'18:00',sea:false,today:true},
   {day:5,date:'Sep 18',place:'Mykonos',country:'Greece',arr:'07:30',dep:'17:30',sea:false},
-  {day:6,date:'Sep 19',place:'Istanbul',country:'Türkiye',arr:'09:00',dep:'22:00',sea:false},
+  {day:6,date:'Sep 19',place:'Istanbul',country:'T\u00fcrkiye',arr:'09:00',dep:'22:00',sea:false},
   {day:7,date:'Sep 20',place:'At sea',country:'Aegean',arr:null,dep:null,sea:true},
   {day:8,date:'Sep 21',place:'Kotor',country:'Montenegro',arr:'08:00',dep:'17:00',sea:false}
 ];
+// ── VOYAGE TABS ──
+function switchVTab(name){
+  ['read','edit','add'].forEach(function(n){
+    g('vtab-'+n).classList.toggle('active',n===name);
+    g('vp-'+n).style.display=n===name?'block':'none';
+  });
+  if(name==='edit')renderItinEdit();
+}
+g('vtab-read').addEventListener('click',function(){switchVTab('read');});
+g('vtab-edit').addEventListener('click',function(){switchVTab('edit');});
+g('vtab-add').addEventListener('click',function(){switchVTab('add');});
+
+// ADD STOP
+g('btn-va-save').addEventListener('click',function(){
+  var sea=g('va-sea').checked;
+  var place=(g('va-place').value||'').trim();
+  var country=(g('va-country').value||'').trim();
+  var date=g('va-date').value,arr=g('va-arr').value,dep=g('va-dep').value;
+  if(!place&&!sea)return;
+  var ds=date?(new Date(date+'T12:00:00')).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Day '+(stops.length+1);
+  stops.push({day:stops.length+1,place:sea?'At sea':place,country:country,date:ds,arr:arr||null,dep:dep||null,sea:sea});
+  renderItin();
+  ['va-place','va-country','va-date','va-arr','va-dep'].forEach(function(id){var e=g(id);if(e)e.value='';});
+  g('va-sea').checked=false;
+  var out=g('va-out');
+  out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Stop added!</div></div>';
+  setTimeout(function(){out.innerHTML='';switchVTab('read');},1800);
+});
+
+function renderItinEdit(){
+  var el=g('itin-edit-list');if(!el)return;
+  if(!stops.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;">No stops yet. Use Add Stop to begin.</div>';return;}
+  var h='';
+  stops.forEach(function(s,idx){
+    h+='<div class="itin-edit-card" id="iec-'+idx+'">';
+    h+='<div class="itin-edit-header">';
+    h+='<div><div class="itin-edit-place'+(s.sea?' sea':'')+'">'+(s.sea?'<em>'+s.place+'</em>':s.place)+'</div>';
+    h+='<div class="itin-edit-meta">Day '+s.day+' &middot; '+s.date+(s.country?' &middot; '+s.country:'')+(s.arr?' &middot; Arr '+s.arr:'')+(s.dep?' &middot; Dep '+s.dep:'')+'</div></div>';
+    h+='<div style="display:flex;gap:6px;">';
+    h+='<button class="btn-sm ghost iec-edit-btn" data-idx="'+idx+'" style="font-size:11px;padding:5px 10px;">Edit</button>';
+    h+='<button class="btn-sm ghost iec-del-btn" data-idx="'+idx+'" style="font-size:11px;padding:5px 10px;color:var(--burgundy);border-color:var(--burgundy);">Delete</button>';
+    h+='</div></div>';
+    h+='<div id="iec-form-'+idx+'" style="display:none;">';
+    h+='<input class="itin-ed-inp" id="ief-place-'+idx+'" type="text" value="'+s.place+'" placeholder="Place">';
+    h+='<input class="itin-ed-inp" id="ief-country-'+idx+'" type="text" value="'+s.country+'" placeholder="Country">';
+    h+='<input class="itin-ed-inp" id="ief-date-'+idx+'" type="text" value="'+s.date+'" placeholder="Date (e.g. Sep 17)">';
+    h+='<div class="itin-time-grid">';
+    h+='<input class="itin-ed-inp" id="ief-arr-'+idx+'" type="time" value="'+(s.arr||'')+'" style="margin:0;">';
+    h+='<input class="itin-ed-inp" id="ief-dep-'+idx+'" type="time" value="'+(s.dep||'')+'" style="margin:0;">';
+    h+='</div>';
+    h+='<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);cursor:pointer;margin-bottom:10px;">';
+    h+='<input type="checkbox" id="ief-sea-'+idx+'"'+(s.sea?' checked':'')+'>At sea</label>';
+    h+='<div class="itin-edit-actions">';
+    h+='<button class="btn-sm primary iec-save-btn" data-idx="'+idx+'" style="flex:1;">Save</button>';
+    h+='<button class="btn-sm ghost iec-cancel-btn" data-idx="'+idx+'" style="flex:1;">Cancel</button>';
+    h+='</div></div>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+
+  // wire edit toggle
+  el.querySelectorAll('.iec-edit-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=btn.getAttribute('data-idx');
+      var form=g('iec-form-'+idx);
+      var card=g('iec-'+idx);
+      var isOpen=form.style.display!=='none';
+      // close all
+      el.querySelectorAll('[id^=iec-form-]').forEach(function(f){f.style.display='none';});
+      el.querySelectorAll('.itin-edit-card').forEach(function(c){c.classList.remove('editing');});
+      if(!isOpen){form.style.display='block';card.classList.add('editing');}
+    });
+  });
+
+  // wire cancel
+  el.querySelectorAll('.iec-cancel-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=btn.getAttribute('data-idx');
+      g('iec-form-'+idx).style.display='none';
+      g('iec-'+idx).classList.remove('editing');
+    });
+  });
+
+  // wire save
+  el.querySelectorAll('.iec-save-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=parseInt(btn.getAttribute('data-idx'));
+      var s=stops[idx];if(!s)return;
+      s.place=(g('ief-place-'+idx).value||'').trim()||s.place;
+      s.country=(g('ief-country-'+idx).value||'').trim();
+      s.date=(g('ief-date-'+idx).value||'').trim()||s.date;
+      s.arr=g('ief-arr-'+idx).value||null;
+      s.dep=g('ief-dep-'+idx).value||null;
+      s.sea=g('ief-sea-'+idx).checked;
+      if(s.sea)s.place='At sea';
+      renderItin();
+      renderItinEdit();
+    });
+  });
+
+  // wire delete
+  el.querySelectorAll('.iec-del-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=parseInt(btn.getAttribute('data-idx'));
+      if(!confirm('Remove "'+stops[idx].place+'" from itinerary?'))return;
+      stops.splice(idx,1);
+      stops.forEach(function(s,i){s.day=i+1;});
+      renderItin();renderItinEdit();
+    });
+  });
+}
 
 function renderItin(){
-  var el=document.getElementById('itin-list');
-  if(!el)return;
+  var el=g('itin-list');if(!el)return;
   var h='';
   stops.forEach(function(s){
     var td=!!s.today,t='';
@@ -443,30 +661,27 @@ function renderItin(){
 }
 renderItin();
 
-/* NAV */
-document.querySelectorAll('#nav button').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    var id=btn.getAttribute('data-s');
-    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
-    document.querySelectorAll('#nav button').forEach(function(b){b.classList.remove('active');});
-    var sc=document.getElementById('s-'+id);
-    if(sc)sc.classList.add('active');
-    btn.classList.add('active');
-  });
-});
-
-/* CLOCKS */
-function fmt2(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
-function tzTime(off){var n=new Date(),u=n.getTime()+n.getTimezoneOffset()*60000;return new Date(u+off*3600000);}
+// ── CLOCKS ──
+function applyTZLabels(){
+  var sign=function(n){return n>=0?'GMT+'+n:'GMT'+n;};
+  var se=g('clk-ship-label');if(se)se.innerHTML=tz.shipName+' &middot; <span style="color:var(--text-muted);font-size:11px;">'+sign(tz.ship)+'</span>';
+  var pn=g('lv-port-name');if(pn)pn.textContent='Port \u00b7 '+tz.portName;
+  var po=g('lv-port-off');if(po)po.textContent=sign(tz.port);
+  var hn=g('lv-home-name');if(hn)hn.textContent='Home \u00b7 '+tz.homeName;
+  var ho=g('lv-home-off');if(ho)ho.textContent=sign(tz.home);
+  // update today screen tz labels
+  var tship=g('t-ship');if(tship){var c=tship.nextElementSibling;if(c)c.textContent=tz.shipName.split(' ').pop();}
+}
+applyTZLabels();
 function tick(){
-  var ship=tzTime(2),port=tzTime(3),home=tzTime(-5);
-  function set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  var ship=tzTime(tz.ship),port=tzTime(tz.port),home=tzTime(tz.home);
+  function set(id,v){var e=g(id);if(e)e.textContent=v;}
   set('t-ship',fmt2(ship));set('t-port',fmt2(port));set('t-home',fmt2(home));
   set('clk-ship',fmt2(ship));set('clk-port',fmt2(port));set('clk-home',fmt2(home));
   drawClock(ship);
 }
 function drawClock(d){
-  var c=document.getElementById('analog');if(!c)return;
+  var c=g('analog');if(!c)return;
   var ctx=c.getContext('2d'),cx=46,cy=46,r=40;
   ctx.clearRect(0,0,92,92);
   ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.strokeStyle='#d8d0c8';ctx.lineWidth=1;ctx.stroke();
@@ -479,37 +694,220 @@ function drawClock(d){
 }
 tick();setInterval(tick,1000);
 
-/* VAULT BUTTONS */
-function g(id){return document.getElementById(id);}
-g('btn-vault-add')&&g('btn-vault-add').addEventListener('click',function(){alert('Add insurance / document — coming soon!');});
-g('btn-vault-edit')&&g('btn-vault-edit').addEventListener('click',function(){alert('Edit emergency contacts — coming soon!');});
-g('btn-vault-doc')&&g('btn-vault-doc').addEventListener('click',function(){alert('Add document — coming soon!');});
-g('btn-new-entry')&&g('btn-new-entry').addEventListener('click',function(){alert('Journal entry editor — coming soon!');});
+// ── CLOCKS EDIT ──
+var editingClocks=false;
+g('btn-edit-clocks').addEventListener('click',function(){
+  editingClocks=!editingClocks;
+  g('clocks-live').style.display=editingClocks?'none':'block';
+  g('clocks-edit').style.display=editingClocks?'block':'none';
+  g('btn-edit-clocks').textContent=editingClocks?'Cancel':'Edit';
+  if(editingClocks){
+    g('ed-ship-offset').value=tz.ship;g('ed-ship-name').value=tz.shipName;
+    g('ed-port-offset').value=tz.port;g('ed-port-name').value=tz.portName;
+    g('ed-home-offset').value=tz.home;g('ed-home-name').value=tz.homeName;
+  }
+});
+g('btn-clocks-save').addEventListener('click',function(){
+  tz.ship=parseFloat(g('ed-ship-offset').value)||2;
+  tz.port=parseFloat(g('ed-port-offset').value)||3;
+  tz.home=parseFloat(g('ed-home-offset').value)||-5;
+  tz.shipName=(g('ed-ship-name').value||'Mediterranean').trim();
+  tz.portName=(g('ed-port-name').value||'Santorini EEST').trim();
+  tz.homeName=(g('ed-home-name').value||'New York EST').trim();
+  saveTZ();applyTZLabels();
+  editingClocks=false;
+  g('clocks-live').style.display='block';
+  g('clocks-edit').style.display='none';
+  g('btn-edit-clocks').textContent='Edit';
+});
+g('btn-clocks-cancel').addEventListener('click',function(){
+  editingClocks=false;
+  g('clocks-live').style.display='block';
+  g('clocks-edit').style.display='none';
+  g('btn-edit-clocks').textContent='Edit';
+});
 
-/* IMPORT TABS */
-function showPanel(name){
-  ['text','manual','tpl'].forEach(function(n){
-    var p=g('panel-'+(n==='tpl'?'tpl':n));
-    if(p)p.style.display=n===name?'block':'none';
-    var t=g('itab-'+(n==='tpl'?'tpl':n));
-    if(t)t.classList.toggle('active',n===name);
+// ── MODAL ──
+var overlay=g('modal-overlay'),mTitle=g('modal-title'),mBody=g('modal-body');
+function openModal(title,bodyHtml,cb){mTitle.textContent=title;mBody.innerHTML=bodyHtml;overlay.style.display='flex';g('modal-sheet').scrollTop=0;if(cb)cb();}
+function closeModal(){overlay.style.display='none';mBody.innerHTML='';}
+g('modal-close').addEventListener('click',closeModal);
+overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
+
+// ── VAULT ──
+g('btn-vault-add').addEventListener('click',function(){
+  openModal('Add to Vault',
+    '<div style="display:flex;gap:8px;margin-bottom:16px;">'
+    +'<button id="vt-ins" style="flex:1;padding:9px;border:1px solid var(--burgundy);border-radius:var(--r-sm);background:var(--burgundy);color:#fff;font-family:var(--sans);font-size:13px;cursor:pointer;">Insurance</button>'
+    +'<button id="vt-doc" style="flex:1;padding:9px;border:1px solid var(--stone);border-radius:var(--r-sm);background:none;color:var(--text-secondary);font-family:var(--sans);font-size:13px;cursor:pointer;">Document</button>'
+    +'</div>'
+    +'<div id="ins-form"><input id="vi-provider" class="m-inp" type="text" placeholder="Provider name"><input id="vi-policy" class="m-inp" type="text" placeholder="Policy number"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;"><input id="vi-from" class="m-inp" type="date" style="margin:0;"><input id="vi-to" class="m-inp" type="date" style="margin:0;"></div><button id="vi-save" class="btn-p">Save Insurance</button></div>'
+    +'<div id="doc-form" style="display:none;"><input id="vd-name" class="m-inp" type="text" placeholder="Document name"><select id="vd-type" class="m-inp" style="appearance:auto;-webkit-appearance:auto;"><option>PDF</option><option>Verified</option><option>Scan</option></select><button id="vd-save" class="btn-p">Save Document</button></div>'
+  ,function(){
+    function sw(t){g('ins-form').style.display=t==='ins'?'block':'none';g('doc-form').style.display=t==='doc'?'block':'none';g('vt-ins').style.cssText='flex:1;padding:9px;border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;cursor:pointer;border:1px solid '+(t==='ins'?'var(--burgundy);background:var(--burgundy);color:#fff':'var(--stone);background:none;color:var(--text-secondary)')+';';g('vt-doc').style.cssText='flex:1;padding:9px;border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;cursor:pointer;border:1px solid '+(t==='doc'?'var(--burgundy);background:var(--burgundy);color:#fff':'var(--stone);background:none;color:var(--text-secondary)')+';';}
+    g('vt-ins').addEventListener('click',function(){sw('ins');});
+    g('vt-doc').addEventListener('click',function(){sw('doc');});
+    g('vi-save').addEventListener('click',function(){if(!(g('vi-provider').value||"").trim()){g('vi-provider').focus();return;}mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Insurance saved.</div></div>';setTimeout(closeModal,1800);});
+    g('vd-save').addEventListener('click',function(){var nm=(g('vd-name').value||"").trim();if(!nm){g('vd-name').focus();return;}addDocRow(nm,g('vd-type').value);mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';setTimeout(closeModal,1800);});
+  });
+});
+g('btn-vault-edit').addEventListener('click',function(){
+  openModal('Add Emergency Contact',
+    '<input id="ec-name" class="m-inp" type="text" placeholder="Name"><input id="ec-sub" class="m-inp" type="text" placeholder="Label (e.g. Spouse)"><input id="ec-phone" class="m-inp" type="tel" placeholder="Phone number"><button id="ec-save" class="btn-p">Save Contact</button>'
+  ,function(){
+    g('ec-save').addEventListener('click',function(){
+      var nm=(g('ec-name').value||"").trim(),sub=(g('ec-sub').value||"").trim(),ph=(g('ec-phone').value||"").trim();
+      if(!nm||!ph)return;
+      var list=g('em-list');
+      list.querySelectorAll('.em-item').forEach(function(i){i.style.borderBottom='1px solid var(--stone)';});
+      var row=document.createElement('div');row.className='em-item';row.style.borderBottom='none';
+      row.innerHTML='<div class="em-icon ic-cream"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>'
+        +'<div><div class="em-name">'+nm+'</div><div class="em-sub">'+sub+'</div></div><div class="em-ph">'+ph+'</div>';
+      list.appendChild(row);
+      mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';
+      setTimeout(closeModal,1800);
+    });
+  });
+});
+function addDocRow(nm,badge){
+  var list=g('doc-list');if(!list)return;
+  list.querySelectorAll('.doc-item').forEach(function(i){i.style.borderBottom='1px solid var(--stone)';});
+  var row=document.createElement('div');row.className='doc-item';row.style.borderBottom='none';
+  row.innerHTML='<svg class="doc-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="doc-nm">'+nm+'</span><span class="doc-badge">'+badge+'</span>';
+  list.appendChild(row);
+}
+g('btn-vault-doc').addEventListener('click',function(){
+  openModal('Add Document',
+    '<input id="vd2-name" class="m-inp" type="text" placeholder="Document name"><select id="vd2-type" class="m-inp" style="appearance:auto;-webkit-appearance:auto;"><option>PDF</option><option>Verified</option><option>Scan</option></select><button id="vd2-save" class="btn-p">Save Document</button>'
+  ,function(){
+    g('vd2-save').addEventListener('click',function(){var nm=(g('vd2-name').value||"").trim();if(!nm){g('vd2-name').focus();return;}addDocRow(nm,g('vd2-type').value);mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';setTimeout(closeModal,1800);});
+  });
+});
+
+// ── JOURNAL ──
+// internal journal store
+var jEntries=[
+  {id:0,date:'Today \u00b7 Sep 17',place:'Santorini',text:'Donkey path up to Fira at sunrise \u2014 air smelt like dry rosemary. Coffee at a caf\u00e9 called Avocado.',tags:['santorini','sunrise']},
+  {id:1,date:'Yesterday \u00b7 Sep 16',place:'Naples',text:'Margherita at L\u2019Antica. Walked the Spaccanapoli. Met a couple from Lyon who recommend a vineyard in Kotor.',tags:['naples','food']}
+];
+var nextJid=2;
+function jHeroSVG(){return '<svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="130" fill="#e0cdd2"/><circle cx="200" cy="46" r="18" fill="#e8b090" opacity=".7"/><ellipse cx="80" cy="95" rx="80" ry="14" fill="#8a7a85" opacity=".7"/><ellipse cx="330" cy="100" rx="70" ry="12" fill="#8a7a85" opacity=".6"/><path d="M0 105 Q100 100 200 105 Q300 110 400 105 L400 130 L0 130Z" fill="#9a8898" opacity=".65"/><line x1="213" y1="84" x2="213" y2="107" stroke="#3a2e30" stroke-width="2" stroke-linecap="round"/><polygon points="213,106 213,84 230,106" fill="rgba(139,58,82,.75)"/></svg>';}
+
+function switchJTab(name){
+  ['read','edit','new'].forEach(function(n){
+    g('jtab-'+n).classList.toggle('active',n===name);
+    g('jp-'+n).style.display=n===name?'block':'none';
+  });
+  if(name==='edit')renderEditList();
+}
+g('jtab-read').addEventListener('click',function(){switchJTab('read');});
+g('jtab-edit').addEventListener('click',function(){switchJTab('edit');});
+g('jtab-new').addEventListener('click',function(){switchJTab('new');});
+
+function renderEditList(){
+  var list=g('edit-entries-list');if(!list)return;
+  if(!jEntries.length){list.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;">No entries yet.</div>';return;}
+  var h='';
+  jEntries.forEach(function(e){
+    h+='<div class="card" style="margin-bottom:12px;" data-eid="'+e.id+'">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">';
+    h+='<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);">'+e.date+'</div><div style="font-family:var(--serif);font-size:20px;">'+e.place+'</div></div>';
+    h+='<div style="display:flex;gap:8px;">';
+    h+='<button class="btn-sm ghost edit-entry-btn" data-eid="'+e.id+'">Edit</button>';
+    h+='<button class="btn-sm ghost discard-entry-btn" data-eid="'+e.id+'" style="color:var(--burgundy);border-color:var(--burgundy);">Discard</button>';
+    h+='</div></div>';
+    h+='<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">'+e.text.substring(0,80)+(e.text.length>80?'\u2026':'')+'</div>';
+    h+='</div>';
+  });
+  list.innerHTML=h;
+
+  // Edit buttons
+  list.querySelectorAll('.edit-entry-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var eid=parseInt(btn.getAttribute('data-eid'));
+      var entry=jEntries.find(function(e){return e.id===eid;});
+      if(!entry)return;
+      openModal('Edit Entry',
+        '<input id="ee-place" class="m-inp" type="text" value="'+entry.place+'" placeholder="Place">'
+        +'<textarea id="ee-text" class="imp-ta" style="min-height:100px;">'+entry.text+'</textarea>'
+        +'<input id="ee-tags" class="m-inp" type="text" value="'+entry.tags.join(', ')+'" placeholder="Tags">'
+        +'<button id="ee-save" class="btn-p">Save Changes</button>'
+      ,function(){
+        g('ee-save').addEventListener('click',function(){
+          var pl=(g('ee-place').value||"").trim(),tx=(g('ee-text').value||"").trim();
+          if(!pl||!tx)return;
+          entry.place=pl;entry.text=tx;
+          entry.tags=(g('ee-tags').value||"").split(',').map(function(t){return t.trim();}).filter(Boolean);
+          rebuildReadPanel();renderEditList();
+          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Entry updated.</div></div>';
+          setTimeout(closeModal,1500);
+        });
+      });
+    });
+  });
+
+  // Discard buttons
+  list.querySelectorAll('.discard-entry-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var eid=parseInt(btn.getAttribute('data-eid'));
+      if(!confirm('Discard this journal entry? This cannot be undone.'))return;
+      jEntries=jEntries.filter(function(e){return e.id!==eid;});
+      rebuildReadPanel();renderEditList();
+    });
   });
 }
-g('itab-text')&&g('itab-text').addEventListener('click',function(){showPanel('text');});
-g('itab-manual')&&g('itab-manual').addEventListener('click',function(){showPanel('manual');});
-g('itab-tpl')&&g('itab-tpl').addEventListener('click',function(){showPanel('tpl');});
 
-/* PARSE */
-g('btn-parse')&&g('btn-parse').addEventListener('click',function(){
-  var raw=(g('imp-input')||{}).value||'';
-  raw=raw.trim();
-  if(!raw){alert('Paste some itinerary text first.');return;}
+function rebuildReadPanel(){
+  var panel=g('jp-read');if(!panel)return;
+  panel.innerHTML='';
+  jEntries.forEach(function(e){
+    var card=document.createElement('div');card.className='j-card';card.setAttribute('data-jid',e.id);
+    var tagsHtml=e.tags.map(function(t){return '<span class="tag">#'+t+'</span>';}).join('');
+    card.innerHTML='<div class="j-hero">'+jHeroSVG()+'</div>'
+      +'<div class="j-body">'
+      +'<div class="j-top"><div><div class="j-date">'+e.date+'</div><div class="j-place">'+e.place+'</div></div></div>'
+      +'<div class="j-text">'+e.text+'</div>'
+      +(tagsHtml?'<div class="j-tags">'+tagsHtml+'</div>':'')+'</div>';
+    panel.appendChild(card);
+  });
+}
+
+// New entry save
+g('btn-save-entry').addEventListener('click',function(){
+  var place=(g('new-place').value||"").trim();
+  var text=(g('new-text').value||"").trim();
+  var tags=(g('new-tags').value||"").split(',').map(function(t){return t.trim();}).filter(Boolean);
+  if(!place||!text)return;
+  var today=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  var entry={id:nextJid++,date:'Today \u00b7 '+today,place:place,text:text,tags:tags};
+  jEntries.unshift(entry);
+  rebuildReadPanel();
+  g('new-place').value='';g('new-text').value='';g('new-tags').value='';
+  // show success, switch to read
+  switchJTab('read');
+});
+
+// ── IMPORT TABS ──
+function showPanel(name){
+  ['text','manual','tpl'].forEach(function(n){
+    g('panel-'+n).style.display=n===name?'block':'none';
+    g('itab-'+n).classList.toggle('active',n===name);
+  });
+}
+g('itab-text').addEventListener('click',function(){showPanel('text');});
+g('itab-manual').addEventListener('click',function(){showPanel('manual');});
+g('itab-tpl').addEventListener('click',function(){showPanel('tpl');});
+
+// ── PARSE ──
+g('btn-parse').addEventListener('click',function(){
+  var raw=(g('imp-input').value||"").trim();
+  if(!raw)return;
   var lines=raw.split('\n').filter(function(l){return l.trim();});
   var results=[];
   lines.forEach(function(line,i){
     var lo=line.toLowerCase();
     var isSea=lo.indexOf('at sea')!==-1||lo.indexOf('sea day')!==-1;
-    var pm=line.match(/(?:[\u2013\-]|\d\.\s*)([A-Z][a-zA-Z\u00C0-\u017E\s,]+?)(?:\s*[,(–\-]|$)/);
+    var pm=line.match(/(?:[\u2013\-]|\d\.\s*)([A-Z][a-zA-Z\u00C0-\u017E\s,]+?)(?:\s*[,([\u2013\-]|$)]/);
     var dm=line.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}/i);
     var am=line.match(/Arr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i);
     var dem=line.match(/Dep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i);
@@ -519,9 +917,9 @@ g('btn-parse')&&g('btn-parse').addEventListener('click',function(){
     }
   });
   var out=g('parse-out');
-  if(!results.length){out.innerHTML='<div class="parsed-box" style="text-align:center;padding:14px;"><span style="font-size:13px;color:var(--text-muted);">Could not parse stops. Try Manual tab or a Template.</span></div>';return;}
+  if(!results.length){out.innerHTML='<div class="parsed-box" style="text-align:center;padding:14px;"><span style="font-size:13px;color:var(--text-muted);">Could not parse. Try Manual or a Template.</span></div>';return;}
   var h='<div class="parsed-box"><div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">'+results.length+' stops found</div>';
-  results.forEach(function(r){h+='<div class="parsed-row"><span class="p-lbl">'+r.day+'. '+r.place+'</span><span class="p-val">'+r.date+(r.arr?' · Arr '+r.arr:'')+(r.dep?' · Dep '+r.dep:'')+'</span></div>';});
+  results.forEach(function(r){h+='<div class="parsed-row"><span class="p-lbl">'+r.day+'. '+r.place+'</span><span class="p-val">'+r.date+(r.arr?' \u00b7 Arr '+r.arr:'')+(r.dep?' \u00b7 Dep '+r.dep:'')+'</span></div>';});
   h+='</div>';
   var enc=encodeURIComponent(JSON.stringify(results));
   h+='<button class="btn-d" id="btn-confirm" data-pl="'+enc+'">Add to Voyage &#8599;</button>';
@@ -530,47 +928,41 @@ g('btn-parse')&&g('btn-parse').addEventListener('click',function(){
     var data=JSON.parse(decodeURIComponent(this.getAttribute('data-pl')));
     data.forEach(function(item){if(!stops.some(function(x){return x.place===item.place&&x.date===item.date;}))stops.push(item);});
     renderItin();
-    out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+data.length+' stops added to Voyage.</div></div>';
+    out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+data.length+' stops added.</div></div>';
     g('imp-input').value='';
   });
 });
 
-/* MANUAL */
-g('btn-manual')&&g('btn-manual').addEventListener('click',function(){
+// ── MANUAL ──
+g('btn-manual').addEventListener('click',function(){
   var sea=g('m-sea').checked;
-  var place=(g('m-place').value||'').trim();
-  var country=(g('m-country').value||'').trim();
-  var date=g('m-date').value;
-  var arr=g('m-arr').value;
-  var dep=g('m-dep').value;
-  if(!place&&!sea){alert('Enter a place name.');return;}
-  var ds='';
-  if(date){var dd=new Date(date+'T12:00:00');ds=dd.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
-  else{ds='Day '+(stops.length+1);}
+  var place=(g('m-place').value||"").trim();
+  var country=(g('m-country').value||"").trim();
+  var date=g('m-date').value,arr=g('m-arr').value,dep=g('m-dep').value;
+  if(!place&&!sea)return;
+  var ds=date?(new Date(date+'T12:00:00')).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Day '+(stops.length+1);
   stops.push({day:stops.length+1,place:sea?'At sea':place,country:country,date:ds,arr:arr||null,dep:dep||null,sea:sea});
   renderItin();
   ['m-place','m-country','m-date','m-arr','m-dep'].forEach(function(id){var e=g(id);if(e)e.value='';});
   g('m-sea').checked=false;
   var out=g('manual-out');
   out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Stop added!</div></div>';
-  setTimeout(function(){out.innerHTML='';},2500);
+  setTimeout(function(){out.innerHTML='';},2000);
 });
 
-/* TEMPLATES */
+// ── TEMPLATES ──
 var tpls={
   'tpl-msc':'Day 1 \u2013 Sep 14 \u2013 Barcelona, Spain (Dep 18:00)\nDay 2 \u2013 Sep 15 \u2013 At sea (Balearic)\nDay 3 \u2013 Sep 16 \u2013 Naples, Italy (Arr 08:00, Dep 19:00)\nDay 4 \u2013 Sep 17 \u2013 Santorini, Greece (Arr 07:00, Dep 18:00)',
   'tpl-royal':'Barcelona \u00b7 Spain \u00b7 Sep 14 (18:00\u2013)\nAt Sea \u00b7 Balearic \u00b7 Sep 15\nNaples \u00b7 Italy \u00b7 Sep 16 (08:00\u201319:00)\nSantorini \u00b7 Greece \u00b7 Sep 17 (07:00\u201318:00)',
   'tpl-generic':'14 September \u2013 Barcelona, Spain. Depart 18:00\n15 September \u2013 At sea\n16 September \u2013 Naples, Italy. Arrive 08:00, Depart 19:00\n17 September \u2013 Santorini, Greece. Arrive 07:00, Depart 18:00'
 };
 ['tpl-msc','tpl-royal','tpl-generic'].forEach(function(id){
-  var el=g(id);
-  if(el)el.addEventListener('click',function(){
-    var ta=g('imp-input');if(ta)ta.value=tpls[id];
-    showPanel('text');
-  });
+  var el=g(id);if(el)el.addEventListener('click',function(){var ta=g('imp-input');if(ta)ta.value=tpls[id];showPanel('text');});
 });
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+// ── SERVICE WORKER (offline) ──
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+
 })();
 </script>
 </body>
