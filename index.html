@@ -231,8 +231,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 
 <!-- TODAY -->
 <div class="screen active" id="s-today">
-  <div class="eyebrow">Today in</div>
-  <div style="font-family:var(--serif);font-size:40px;font-weight:300;font-style:italic;color:var(--burgundy);line-height:1.05;margin-bottom:18px;">Santorini</div>
+  <!-- Date + day counter -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+    <div>
+      <div class="eyebrow" style="margin-bottom:2px;" id="today-date-label">Today</div>
+      <div class="eyebrow" style="margin-bottom:2px;color:var(--burgundy);" id="today-full-date"></div>
+    </div>
+    <div id="today-cruise-day" style="text-align:right;font-size:11px;color:var(--text-muted);line-height:1.5;"></div>
+  </div>
+  <div style="font-family:var(--serif);font-size:40px;font-weight:300;font-style:italic;color:var(--burgundy);line-height:1.05;margin-bottom:18px;" id="today-place-title">—</div>
+
   <div class="hero">
     <svg viewBox="0 0 400 195" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
       <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8d0d4"/><stop offset="55%" stop-color="#c4a8b4"/><stop offset="100%" stop-color="#9e8898"/></linearGradient></defs>
@@ -249,30 +257,52 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
       <line x1="213" y1="152" x2="234" y2="152" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/>
     </svg>
     <div class="hero-info">
-      <div><div class="hero-loc">GREECE &middot; GMT+3</div><div class="hero-port">Thira &middot; Oia</div></div>
-      <div class="dep-badge">Departs <strong>18:00</strong></div>
+      <div>
+        <div class="hero-loc" id="today-hero-country"></div>
+        <div class="hero-port" id="today-hero-port"></div>
+      </div>
+      <div class="dep-badge" id="today-dep-badge" style="display:none;">Departs <strong id="today-dep-time"></strong></div>
     </div>
   </div>
+
   <div class="eyebrow">Clocks</div>
   <div class="clocks-grid">
-    <div class="clock-cell"><div class="clock-lbl"><span class="dot d-ship"></span>SHIP</div><div class="clock-digits" id="t-ship">--:--</div><div class="clock-tz-sm">CEST</div></div>
-    <div class="clock-cell"><div class="clock-lbl"><span class="dot d-port"></span>PORT</div><div class="clock-digits" id="t-port">--:--</div><div class="clock-tz-sm">EEST</div></div>
-    <div class="clock-cell"><div class="clock-lbl"><span class="dot d-home"></span>HOME</div><div class="clock-digits" id="t-home">--:--</div><div class="clock-tz-sm">EST</div></div>
+    <div class="clock-cell">
+      <div class="clock-lbl"><span class="dot d-ship"></span>SHIP</div>
+      <div class="clock-digits" id="t-ship">--:--</div>
+      <div class="clock-tz-sm" id="t-ship-lbl">--</div>
+    </div>
+    <div class="clock-cell">
+      <div class="clock-lbl"><span class="dot d-port"></span>PORT</div>
+      <div class="clock-digits" id="t-port">--:--</div>
+      <div class="clock-tz-sm" id="t-port-lbl">--</div>
+    </div>
+    <div class="clock-cell">
+      <div class="clock-lbl"><span class="dot d-home"></span>HOME</div>
+      <div class="clock-digits" id="t-home">--:--</div>
+      <div class="clock-tz-sm" id="t-home-lbl">--</div>
+    </div>
   </div>
+
   <div class="eyebrow">Next Movement</div>
-  <div class="move-card">
+  <div class="move-card" id="today-move-card">
     <div class="move-row">
       <div>
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px;">All aboard</div>
-        <div class="move-time">17:30</div>
-        <div class="move-sub">Ship time &middot; in 2h 58m</div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px;" id="today-move-label">—</div>
+        <div class="move-time" id="today-move-time">—</div>
+        <div class="move-sub" id="today-move-sub"></div>
       </div>
       <svg style="color:var(--burgundy);" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="5" r="2"/><path d="M12 7v14"/><path d="M5 15a7 7 0 0014 0"/><path d="M3 12h4M17 12h4"/>
       </svg>
     </div>
-    <div class="prog-track"><div class="prog-fill" style="width:65%"></div><div class="prog-dot" style="left:65%"></div></div>
-    <div class="prog-lbls"><span>Arrived 07:00</span><span>Depart 18:00</span></div>
+    <div class="prog-track" id="today-prog-track" style="display:none;">
+      <div class="prog-fill" id="today-prog-fill"></div>
+      <div class="prog-dot" id="today-prog-dot"></div>
+    </div>
+    <div class="prog-lbls" id="today-prog-lbls" style="display:none;">
+      <span id="today-prog-arr"></span><span id="today-prog-dep"></span>
+    </div>
   </div>
 </div>
 
@@ -321,7 +351,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
     <button id="btn-edit-clocks" class="edit-clocks-toggle" style="margin-top:6px;">Edit</button>
   </div>
 
-  <!-- live view -->
+  <!-- LIVE view -->
   <div id="clocks-live">
     <div class="card">
       <div class="clk-big-wrap">
@@ -329,38 +359,72 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
         <div>
           <div class="clk-lbl"><span class="dot d-ship"></span>SHIP TIME</div>
           <div class="clk-big-time" id="clk-ship">--:--</div>
-          <div class="clk-sub" id="clk-ship-label">Mediterranean &middot; <span style="color:var(--text-muted);font-size:11px;">GMT+2</span></div>
+          <div class="clk-sub" id="clk-ship-label">--</div>
         </div>
       </div>
     </div>
     <div class="eyebrow" style="margin-top:8px;">Other Timezones</div>
     <div class="card" style="padding:4px 16px;">
-      <div class="tz-row"><div><div class="tz-name" id="lv-port-name">Port &middot; Santorini &middot; EEST</div><div class="tz-off" id="lv-port-off">GMT+3</div></div><div class="tz-digits" id="clk-port">--:--</div></div>
-      <div class="tz-row"><div><div class="tz-name" id="lv-home-name">Home &middot; New York &middot; EST</div><div class="tz-off" id="lv-home-off">GMT&minus;5</div></div><div class="tz-digits" id="clk-home">--:--</div></div>
+      <div class="tz-row">
+        <div><div class="tz-name" id="lv-port-name">Port</div><div class="tz-off" id="lv-port-off">--</div></div>
+        <div class="tz-digits" id="clk-port">--:--</div>
+      </div>
+      <div class="tz-row">
+        <div><div class="tz-name" id="lv-home-name">Home</div><div class="tz-off" id="lv-home-off">--</div></div>
+        <div class="tz-digits" id="clk-home">--:--</div>
+      </div>
     </div>
-    <div class="tom-card"><span class="tom-arr">&#8594;</span><div class="tom-text">Set ship clock <strong>+1 hour</strong> at 02:00<br><span style="font-size:11px;color:var(--text-muted);">Arrival in Mykonos &middot; EEST</span></div></div>
   </div>
 
-  <!-- edit view -->
+  <!-- EDIT view -->
   <div id="clocks-edit" style="display:none;">
-    <div class="eyebrow">Timezone Offsets (UTC)</div>
-    <div class="card" style="padding:8px 16px;">
-      <div class="tz-edit-row">
-        <div class="tz-edit-label"><div class="tz-name">Ship</div><div class="tz-off">e.g. +2 for CEST</div></div>
-        <input id="ed-ship-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="2">
-        <input id="ed-ship-name" class="m-inp" type="text" placeholder="Label e.g. Mediterranean" style="width:auto;flex:1;margin:0 0 0 8px;padding:6px 10px;font-size:12px;">
+    <div class="eyebrow">Set Timezones</div>
+
+    <!-- SHIP -->
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <span class="dot d-ship"></span>
+        <span style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);">Ship Time</span>
       </div>
-      <div class="tz-edit-row">
-        <div class="tz-edit-label"><div class="tz-name">Port</div><div class="tz-off">local port time</div></div>
-        <input id="ed-port-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="3">
-        <input id="ed-port-name" class="m-inp" type="text" placeholder="e.g. Santorini EEST" style="width:auto;flex:1;margin:0 0 0 8px;padding:6px 10px;font-size:12px;">
-      </div>
-      <div class="tz-edit-row">
-        <div class="tz-edit-label"><div class="tz-name">Home</div><div class="tz-off">your home timezone</div></div>
-        <input id="ed-home-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="-5">
-        <input id="ed-home-name" class="m-inp" type="text" placeholder="e.g. New York EST" style="width:auto;flex:1;margin:0 0 0 8px;padding:6px 10px;font-size:12px;">
+      <input id="ed-ship-name" class="m-inp" type="text" placeholder="Label (e.g. Mediterranean)" style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <label style="font-size:12px;color:var(--text-muted);width:80px;flex-shrink:0;">UTC Offset</label>
+        <input id="ed-ship-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="2" style="width:70px;">
+        <span style="font-size:11px;color:var(--text-muted);">or pick:</span>
+        <select id="ed-ship-tz" class="m-inp" style="flex:1;margin:0;padding:8px 10px;font-size:12px;appearance:auto;-webkit-appearance:auto;"></select>
       </div>
     </div>
+
+    <!-- PORT -->
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <span class="dot d-port"></span>
+        <span style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);">Port Time</span>
+      </div>
+      <input id="ed-port-name" class="m-inp" type="text" placeholder="Label (e.g. Santorini EEST)" style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <label style="font-size:12px;color:var(--text-muted);width:80px;flex-shrink:0;">UTC Offset</label>
+        <input id="ed-port-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="3" style="width:70px;">
+        <span style="font-size:11px;color:var(--text-muted);">or pick:</span>
+        <select id="ed-port-tz" class="m-inp" style="flex:1;margin:0;padding:8px 10px;font-size:12px;appearance:auto;-webkit-appearance:auto;"></select>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <span class="dot d-home"></span>
+        <span style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);">Home Time</span>
+      </div>
+      <input id="ed-home-name" class="m-inp" type="text" placeholder="Label (e.g. London BST)" style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <label style="font-size:12px;color:var(--text-muted);width:80px;flex-shrink:0;">UTC Offset</label>
+        <input id="ed-home-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="-5" style="width:70px;">
+        <span style="font-size:11px;color:var(--text-muted);">or pick:</span>
+        <select id="ed-home-tz" class="m-inp" style="flex:1;margin:0;padding:8px 10px;font-size:12px;appearance:auto;-webkit-appearance:auto;"></select>
+      </div>
+    </div>
+
     <div style="display:flex;gap:10px;">
       <button id="btn-clocks-save" class="btn-sm primary" style="flex:1;">Save</button>
       <button id="btn-clocks-cancel" class="btn-sm ghost" style="flex:1;">Cancel</button>
@@ -691,24 +755,67 @@ function renderItin(){
 }
 renderItin();
 
-// ── CLOCKS ──
+// ── TIMEZONE LIST for picker ──
+var TZ_LIST=[
+  {l:'UTC',o:0},{l:'London (GMT/BST)',o:0},{l:'Lisbon (WET/WEST)',o:0},
+  {l:'Paris / Rome / Madrid (CET)',o:1},{l:'Amsterdam / Brussels (CET)',o:1},
+  {l:'Athens / Helsinki (EET)',o:2},{l:'Istanbul (TRT)',o:3},
+  {l:'Moscow (MSK)',o:3},{l:'Dubai (GST)',o:4},{l:'Karachi (PKT)',o:5},
+  {l:'Mumbai / Delhi (IST)',o:5.5},{l:'Dhaka (BST)',o:6},
+  {l:'Bangkok / Jakarta (ICT)',o:7},{l:'Singapore / HK (SGT)',o:8},
+  {l:'Tokyo (JST)',o:9},{l:'Sydney (AEST)',o:10},{l:'Auckland (NZST)',o:12},
+  {l:'Azores (AZOT)',o:-1},{l:'Cape Verde (CVT)',o:-1},
+  {l:'New York (EST/EDT)',o:-5},{l:'Chicago (CST/CDT)',o:-6},
+  {l:'Denver (MST/MDT)',o:-7},{l:'Los Angeles (PST/PDT)',o:-8},
+  {l:'Anchorage (AKST)',o:-9},{l:'Honolulu (HST)',o:-10},
+  {l:'Buenos Aires (ART)',o:-3},{l:'São Paulo (BRT)',o:-3},
+  {l:'Casablanca (WET)',o:0},{l:'Cairo (EET)',o:2},
+  {l:'Nairobi (EAT)',o:3},{l:'Lagos (WAT)',o:1}
+];
+function buildTZSelect(selId, currentOffset) {
+  var sel = g(selId); if(!sel) return;
+  sel.innerHTML = '<option value="">— pick city —</option>';
+  TZ_LIST.forEach(function(z){
+    var opt = document.createElement('option');
+    opt.value = z.o;
+    opt.textContent = z.l + ' (UTC' + (z.o>=0?'+':'')+z.o+')';
+    if(z.o === currentOffset) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', function(){
+    var v = parseFloat(sel.value);
+    if(isNaN(v)) return;
+    // find which clock this select belongs to and update offset input
+    var prefix = selId.replace('ed-','').replace('-tz','');
+    var inp = g('ed-'+prefix+'-offset');
+    if(inp) inp.value = v;
+  });
+}
+
+// ── APPLY TZ LABELS to live display ──
 function applyTZLabels(){
   var sign=function(n){return n>=0?'GMT+'+n:'GMT'+n;};
-  var se=g('clk-ship-label');if(se)se.innerHTML=tz.shipName+' &middot; <span style="color:var(--text-muted);font-size:11px;">'+sign(tz.ship)+'</span>';
+  var se=g('clk-ship-label');
+  if(se)se.innerHTML=tz.shipName+' <span style="color:var(--text-muted);font-size:11px;">&middot; '+sign(tz.ship)+'</span>';
   var pn=g('lv-port-name');if(pn)pn.textContent='Port \u00b7 '+tz.portName;
   var po=g('lv-port-off');if(po)po.textContent=sign(tz.port);
   var hn=g('lv-home-name');if(hn)hn.textContent='Home \u00b7 '+tz.homeName;
   var ho=g('lv-home-off');if(ho)ho.textContent=sign(tz.home);
-  // update today screen tz labels
-  var tship=g('t-ship');if(tship){var c=tship.nextElementSibling;if(c)c.textContent=tz.shipName.split(' ').pop();}
+  // Today screen clock labels
+  var sl=g('t-ship-lbl');if(sl)sl.textContent=tz.shipName.split(' ')[0]||'Ship';
+  var pl=g('t-port-lbl');if(pl)pl.textContent=tz.portName.split(' ')[0]||'Port';
+  var hl=g('t-home-lbl');if(hl)hl.textContent=tz.homeName.split(' ')[0]||'Home';
 }
 applyTZLabels();
+
+// ── TICK — update all clocks every second ──
 function tick(){
   var ship=tzTime(tz.ship),port=tzTime(tz.port),home=tzTime(tz.home);
   function set(id,v){var e=g(id);if(e)e.textContent=v;}
   set('t-ship',fmt2(ship));set('t-port',fmt2(port));set('t-home',fmt2(home));
   set('clk-ship',fmt2(ship));set('clk-port',fmt2(port));set('clk-home',fmt2(home));
   drawClock(ship);
+  updateTodayPage();
 }
 function drawClock(d){
   var c=g('analog');if(!c)return;
@@ -722,7 +829,149 @@ function drawClock(d){
   hand(mn*6*Math.PI/180,33,1.5,'#6a5a56');
   ctx.beginPath();ctx.arc(cx,cy,3,0,2*Math.PI);ctx.fillStyle='#8b3a52';ctx.fill();
 }
-tick();setInterval(tick,1000);
+
+// ── UPDATE TODAY PAGE from stops[] + real clock ──
+function updateTodayPage(){
+  var now = new Date();
+  // Real date display
+  var dateStr = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var el = g('today-full-date'); if(el) el.textContent = dateStr;
+
+  // Match today's date against stops
+  var todayStop = null, nextStop = null;
+  var todayStr = now.toLocaleDateString('en-US',{month:'short',day:'numeric'}); // e.g. "May 18"
+  var todayNorm = normDate(todayStr);
+
+  for(var i=0;i<stops.length;i++){
+    var sn = normDate(stops[i].date);
+    if(sn === todayNorm){ todayStop = stops[i]; nextStop = stops[i+1]||null; break; }
+  }
+
+  // Cruise day number
+  var dayEl = g('today-cruise-day');
+  if(dayEl){
+    if(todayStop){
+      dayEl.textContent = 'Cruise Day ' + todayStop.day;
+    } else {
+      // Check if today is between first and last stop
+      var first = stops[0], last = stops[stops.length-1];
+      if(first && last){
+        var fd=parseStopDate(first.date), ld=parseStopDate(last.date);
+        if(fd && ld && now >= fd && now <= ld){
+          dayEl.textContent = 'In progress';
+        } else if(fd && now < fd){
+          var diff = Math.ceil((fd - now)/(1000*60*60*24));
+          dayEl.textContent = diff + ' day'+(diff!==1?'s':'')+' to cruise';
+        } else {
+          dayEl.textContent = '';
+        }
+      } else { dayEl.textContent = ''; }
+    }
+  }
+
+  // Place title
+  var pt = g('today-place-title');
+  if(pt){
+    if(todayStop){ pt.textContent = todayStop.place; }
+    else { pt.textContent = 'No port today'; }
+  }
+
+  // Hero info
+  var hc=g('today-hero-country'), hp=g('today-hero-port'), db=g('today-dep-badge'), dt=g('today-dep-time');
+  if(todayStop && !todayStop.sea){
+    if(hc) hc.textContent = (todayStop.country||'').toUpperCase() + (tz.port!==0?' \u00b7 GMT'+(tz.port>0?'+':'')+tz.port:'');
+    if(hp) hp.textContent = todayStop.place;
+    if(db) db.style.display = todayStop.dep ? 'block' : 'none';
+    if(dt && todayStop.dep) dt.textContent = todayStop.dep;
+  } else if(todayStop && todayStop.sea){
+    if(hc) hc.textContent = 'AT SEA';
+    if(hp) hp.textContent = '';
+    if(db) db.style.display = 'none';
+  } else {
+    if(hc) hc.textContent = '';
+    if(hp) hp.textContent = stops.length ? 'Add your itinerary in Import' : '';
+    if(db) db.style.display = 'none';
+  }
+
+  // Next movement
+  var ml=g('today-move-label'), mt=g('today-move-time'), ms=g('today-move-sub');
+  var pf=g('today-prog-track'), pfi=g('today-prog-fill'), pd=g('today-prog-dot');
+  var pa=g('today-prog-arr'), pd2=g('today-prog-dep'), plbls=g('today-prog-lbls');
+  if(todayStop){
+    var shipNow = tzTime(tz.ship);
+    var shipMins = shipNow.getHours()*60 + shipNow.getMinutes();
+
+    if(todayStop.dep && !todayStop.sea){
+      var depParts = todayStop.dep.split(':');
+      var depMins = parseInt(depParts[0])*60 + parseInt(depParts[1]);
+      var arrMins = 0;
+      if(todayStop.arr){ var ap=todayStop.arr.split(':'); arrMins=parseInt(ap[0])*60+parseInt(ap[1]); }
+      var diffMin = depMins - shipMins;
+
+      if(ml) ml.textContent = 'All Aboard';
+      if(mt) mt.textContent = todayStop.dep;
+      if(ms){
+        if(diffMin > 0){
+          var h2=Math.floor(diffMin/60), m2=diffMin%60;
+          ms.textContent = 'Ship time \u00b7 in '+(h2?h2+'h ':'')+m2+'m';
+        } else if(diffMin > -60) {
+          ms.textContent = 'Departing soon';
+        } else {
+          ms.textContent = 'Departed';
+        }
+      }
+      // progress bar
+      if(pf) pf.style.display='block';
+      if(plbls) plbls.style.display='flex';
+      if(arrMins < depMins){
+        var pct = Math.max(0,Math.min(100, (shipMins-arrMins)/(depMins-arrMins)*100));
+        if(pfi) pfi.style.width=pct+'%';
+        if(pd) pd.style.left=pct+'%';
+      }
+      if(pa) pa.textContent = todayStop.arr ? 'Arrived '+todayStop.arr : '';
+      if(pd2) pd2.textContent = 'Depart '+todayStop.dep;
+    } else if(nextStop){
+      if(ml) ml.textContent = 'Next Port';
+      if(mt) mt.textContent = nextStop.place;
+      if(ms) ms.textContent = nextStop.date + (nextStop.arr ? ' \u00b7 Arr '+nextStop.arr : '');
+      if(pf) pf.style.display='none';
+      if(plbls) plbls.style.display='none';
+    } else {
+      if(ml) ml.textContent = 'Voyage';
+      if(mt) mt.textContent = 'Complete';
+      if(ms) ms.textContent = '';
+      if(pf) pf.style.display='none';
+      if(plbls) plbls.style.display='none';
+    }
+  } else {
+    if(ml) ml.textContent = stops.length ? 'No port today' : 'Import itinerary';
+    if(mt) mt.textContent = '';
+    if(ms) ms.textContent = '';
+    if(pf) pf.style.display='none';
+    if(plbls) plbls.style.display='none';
+  }
+}
+
+// Parse stop date string "Jun 10" or "Sep 17" into a Date (current year, or next if past)
+function parseStopDate(ds){
+  if(!ds) return null;
+  try{
+    var d = new Date(ds + ' ' + new Date().getFullYear());
+    if(isNaN(d)) return null;
+    return d;
+  } catch(e){ return null; }
+}
+
+// Normalize date string for comparison: "Jun 10" == "Jun 10", handles padding
+function normDate(s){
+  if(!s) return '';
+  return s.replace(/\s+/g,' ').trim().toLowerCase()
+    .replace(/(\w+)\s+0?(\d+)/,'$1 $2');
+}
+
+tick();
+setInterval(tick, 1000);
+updateTodayPage();
 
 // ── CLOCKS EDIT ──
 var editingClocks=false;
@@ -732,19 +981,22 @@ g('btn-edit-clocks').addEventListener('click',function(){
   g('clocks-edit').style.display=editingClocks?'block':'none';
   g('btn-edit-clocks').textContent=editingClocks?'Cancel':'Edit';
   if(editingClocks){
-    g('ed-ship-offset').value=tz.ship;g('ed-ship-name').value=tz.shipName;
-    g('ed-port-offset').value=tz.port;g('ed-port-name').value=tz.portName;
-    g('ed-home-offset').value=tz.home;g('ed-home-name').value=tz.homeName;
+    g('ed-ship-offset').value=tz.ship; g('ed-ship-name').value=tz.shipName;
+    g('ed-port-offset').value=tz.port; g('ed-port-name').value=tz.portName;
+    g('ed-home-offset').value=tz.home; g('ed-home-name').value=tz.homeName;
+    buildTZSelect('ed-ship-tz', tz.ship);
+    buildTZSelect('ed-port-tz', tz.port);
+    buildTZSelect('ed-home-tz', tz.home);
   }
 });
 g('btn-clocks-save').addEventListener('click',function(){
-  tz.ship=parseFloat(g('ed-ship-offset').value)||2;
-  tz.port=parseFloat(g('ed-port-offset').value)||3;
-  tz.home=parseFloat(g('ed-home-offset').value)||-5;
-  tz.shipName=(g('ed-ship-name').value||'Mediterranean').trim();
-  tz.portName=(g('ed-port-name').value||'Santorini EEST').trim();
-  tz.homeName=(g('ed-home-name').value||'New York EST').trim();
-  saveTZ();applyTZLabels();
+  tz.ship=parseFloat(g('ed-ship-offset').value)||0;
+  tz.port=parseFloat(g('ed-port-offset').value)||0;
+  tz.home=parseFloat(g('ed-home-offset').value)||0;
+  tz.shipName=(g('ed-ship-name').value||'Ship').trim();
+  tz.portName=(g('ed-port-name').value||'Port').trim();
+  tz.homeName=(g('ed-home-name').value||'Home').trim();
+  saveTZ(); applyTZLabels();
   editingClocks=false;
   g('clocks-live').style.display='block';
   g('clocks-edit').style.display='none';
