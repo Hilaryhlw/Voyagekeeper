@@ -256,6 +256,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 @keyframes alarm-pulse{from{transform:scale(1);}to{transform:scale(1.15);}}
 #alarm-overlay{display:none;}
 #alarm-overlay.firing{display:flex!important;}
+
+/* TRANSFER / EXPORT */
+.xp-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--stone);cursor:pointer;}
+.xp-row:last-child{border-bottom:none;}
+.xp-row input[type=checkbox]{width:22px;height:22px;accent-color:var(--burgundy);cursor:pointer;flex-shrink:0;}
+.xp-label{display:flex;align-items:center;gap:12px;flex:1;}
+.xp-icon{font-size:22px;flex-shrink:0;}
+.xp-name{font-size:15px;font-weight:700;color:var(--text-primary);}
+.xp-desc{font-size:13px;color:var(--text-muted);margin-top:1px;}
 </style>
 </head>
 <body>
@@ -697,50 +706,106 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
   </div>
 </div>
 
-<!-- IMPORT -->
+<!-- TRANSFER (Import + Export) -->
 <div class="screen" id="s-import">
-  <div class="eyebrow">Quick Entry</div>
-  <div class="big-title">Import</div>
-  <div class="imp-tabs">
-    <button class="imp-tab active" id="itab-text">Paste Text</button>
-    <button class="imp-tab" id="itab-manual">Manual</button>
-    <button class="imp-tab" id="itab-tpl">Templates</button>
+  <div class="eyebrow">Data Transfer</div>
+  <div class="big-title">Transfer</div>
+
+  <!-- Top tabs -->
+  <div class="j-tabs" style="margin-bottom:20px;">
+    <button class="j-tab active" id="ttab-import">&#8595; Import</button>
+    <button class="j-tab" id="ttab-export">&#8593; Export</button>
   </div>
-  <div id="panel-text">
-    <div class="eyebrow">Paste your cruise itinerary</div>
-    <textarea id="imp-input" class="imp-ta" placeholder="Paste any cruise itinerary here. Supported formats:
+
+  <!-- ═══ IMPORT PANEL ═══ -->
+  <div id="transfer-panel-import">
+    <div class="imp-tabs" style="margin-bottom:16px;">
+      <button class="imp-tab active" id="itab-text">Paste Text</button>
+      <button class="imp-tab" id="itab-manual">Manual</button>
+      <button class="imp-tab" id="itab-tpl">Templates</button>
+      <button class="imp-tab" id="itab-restore">Restore</button>
+    </div>
+
+    <div id="panel-text">
+      <div class="eyebrow">Paste your cruise itinerary</div>
+      <textarea id="imp-input" class="imp-ta" placeholder="Paste any cruise itinerary here. Supported formats:
 
 &#x2022; 10-Jun Southampton, England 11-Jun At Sea 12-Jun Lisbon, Portugal
 &#x2022; Day 1 &#8211; Sep 14 &#8211; Barcelona, Spain (Dep 18:00)
 &#x2022; Sep 14 Naples, Italy Arr 08:00 Dep 19:00
-&#x2022; 14 September &#8211; Lisbon, Portugal. Depart 18:00
 
 Multiple voyages and accented characters supported."></textarea>
-    <div class="imp-hint">Supports most cruise booking formats. Parser reads dates, ports, arrival and departure times.</div>
-    <button id="btn-parse" class="btn-p">Parse Itinerary</button>
-    <div id="parse-out"></div>
-  </div>
-  <div id="panel-manual" style="display:none;">
-    <div class="eyebrow">Add a single stop</div>
-    <input id="m-place" class="m-inp" type="text" placeholder="Port / Place name">
-    <input id="m-country" class="m-inp" type="text" placeholder="Country">
-    <input id="m-date" class="m-inp" type="date">
-    <div class="m-grid2">
-      <input id="m-arr" class="m-inp" type="time" placeholder="Arrival" style="margin:0;">
-      <input id="m-dep" class="m-inp" type="time" placeholder="Departure" style="margin:0;">
+      <div class="imp-hint">Parser reads dates, ports, arrival and departure times.</div>
+      <button id="btn-parse" class="btn-p">Parse Itinerary</button>
+      <div id="parse-out"></div>
     </div>
-    <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer;"><input type="checkbox" id="m-sea"> At sea / transit day</label>
-    <button id="btn-manual" class="btn-p">Add Stop</button>
-    <div id="manual-out"></div>
+
+    <div id="panel-manual" style="display:none;">
+      <div class="eyebrow">Add a single stop</div>
+      <input id="m-place" class="m-inp" type="text" placeholder="Port / Place name">
+      <input id="m-country" class="m-inp" type="text" placeholder="Country">
+      <input id="m-date" class="m-inp" type="date">
+      <div class="m-grid2">
+        <input id="m-arr" class="m-inp" type="time" placeholder="Arrival" style="margin:0;">
+        <input id="m-dep" class="m-inp" type="time" placeholder="Departure" style="margin:0;">
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer;"><input type="checkbox" id="m-sea"> At sea / transit day</label>
+      <button id="btn-manual" class="btn-p">Add Stop</button>
+      <div id="manual-out"></div>
+    </div>
+
+    <div id="panel-tpl" style="display:none;">
+      <div class="eyebrow">Sample formats</div>
+      <div class="card tpl-card" id="tpl-msc"><div class="tpl-nm">MSC / Costa style</div><div class="tpl-desc">Day 1 &#8211; Port &#8211; Date &#8211; Arr/Dep</div></div>
+      <div class="card tpl-card" id="tpl-royal"><div class="tpl-nm">Royal Caribbean / NCL</div><div class="tpl-desc">Port &middot; Country &middot; Date (HH:MM &#8211; HH:MM)</div></div>
+      <div class="card tpl-card" id="tpl-generic"><div class="tpl-nm">Generic / Email booking</div><div class="tpl-desc">Free-form date + city text</div></div>
+    </div>
+
+    <div id="panel-restore" style="display:none;">
+      <div class="card" style="background:var(--cream-dark);border:none;margin-bottom:14px;">
+        <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Restore from backup</div>
+        <div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">Paste the backup code from another device or from an email/file. Restores your itinerary, vault, journal and settings.</div>
+      </div>
+      <textarea id="restore-input" class="imp-ta" style="min-height:130px;font-family:monospace;font-size:13px;letter-spacing:.01em;" placeholder="Paste VoyageKeeper backup code here&#8230; (starts with VK1:)"></textarea>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button id="btn-restore-merge" class="btn-p" style="flex:1;">Merge (keep existing)</button>
+        <button id="btn-restore-replace" style="flex:1;padding:16px;border-radius:var(--r-sm);border:2px solid var(--burgundy);background:none;color:var(--burgundy);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer;">Replace all</button>
+      </div>
+      <div id="restore-out" style="margin-top:12px;"></div>
+    </div>
   </div>
-  <div id="panel-tpl" style="display:none;">
-    <div class="eyebrow">Choose a sample format</div>
-    <div class="card tpl-card" id="tpl-msc"><div class="tpl-nm">MSC / Costa style</div><div class="tpl-desc">Day 1 &#8211; Port &#8211; Date &#8211; Arr/Dep</div></div>
-    <div class="card tpl-card" id="tpl-royal"><div class="tpl-nm">Royal Caribbean / NCL</div><div class="tpl-desc">Port &middot; Country &middot; Date (HH:MM &#8211; HH:MM)</div></div>
-    <div class="card tpl-card" id="tpl-generic"><div class="tpl-nm">Generic / Email booking</div><div class="tpl-desc">Free-form date + city text</div></div>
+
+  <!-- ═══ EXPORT PANEL ═══ -->
+  <div id="transfer-panel-export" style="display:none;">
+    <div class="eyebrow">Choose what to export</div>
+    <div class="card" style="padding:12px 16px;margin-bottom:16px;">
+      <label class="xp-row"><input type="checkbox" id="xp-stops" checked><div class="xp-label"><span class="xp-icon">&#128506;</span><div><div class="xp-name">Itinerary</div><div class="xp-desc" id="xp-stops-count"></div></div></div></label>
+      <label class="xp-row"><input type="checkbox" id="xp-vault" checked><div class="xp-label"><span class="xp-icon">&#128274;</span><div><div class="xp-name">Vault</div><div class="xp-desc" id="xp-vault-count"></div></div></div></label>
+      <label class="xp-row"><input type="checkbox" id="xp-journal" checked><div class="xp-label"><span class="xp-icon">&#128214;</span><div><div class="xp-name">Journal</div><div class="xp-desc" id="xp-journal-count"></div></div></div></label>
+      <label class="xp-row"><input type="checkbox" id="xp-clocks" checked><div class="xp-label"><span class="xp-icon">&#128336;</span><div><div class="xp-name">Clock Settings</div><div class="xp-desc">Timezones &amp; travel mode</div></div></div></label>
+    </div>
+
+    <button id="btn-do-export" class="btn-p">Generate Backup Code</button>
+
+    <!-- Result -->
+    <div id="export-result" style="display:none;margin-top:18px;">
+      <div class="eyebrow" style="margin-bottom:8px;">Backup code</div>
+      <div style="position:relative;">
+        <textarea id="export-code" class="imp-ta" style="font-family:monospace;font-size:11px;min-height:110px;background:var(--dark-card);color:#d4c8b8;border-color:var(--dark-card);letter-spacing:.01em;" readonly></textarea>
+        <button id="btn-copy-code" style="position:absolute;top:10px;right:10px;background:var(--burgundy);border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;">Copy</button>
+      </div>
+      <div id="export-info" style="font-size:13px;color:var(--text-muted);margin:10px 0;text-align:center;"></div>
+
+      <!-- Share options -->
+      <div class="eyebrow" style="margin-bottom:10px;">Send to other device</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="btn-share" class="btn-p" style="flex:1;margin:0;">&#128279; Share&#8230;</button>
+        <button id="btn-email" class="btn-p" style="flex:1;margin:0;background:#1a4a8a;">&#9993; Email</button>
+        <button id="btn-dlfile" class="btn-p" style="flex:1;margin:0;background:var(--dark-card);">&#8659; File</button>
+      </div>
+    </div>
   </div>
 </div>
-
 <!-- MODAL -->
 <div id="modal-overlay">
   <div id="modal-sheet">
@@ -756,7 +821,7 @@ Multiple voyages and accented characters supported."></textarea>
   <button data-s="clocks"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Clocks</button>
   <button data-s="vault"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Vault</button>
   <button data-s="journal"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Journal</button>
-  <button data-s="import"><svg viewBox="0 0 24 24"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>Import</button>
+  <button data-s="import"><svg viewBox="0 0 24 24"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>Transfer</button>
 </nav>
 </div><!-- #app -->
 
@@ -877,16 +942,25 @@ document.querySelectorAll('#nav button').forEach(function(btn){
 });
 
 // ── ITINERARY ──
-var stops=[
-  {day:1,date:'Sep 14',place:'Barcelona',country:'Spain',arr:null,dep:'18:00',sea:false},
-  {day:2,date:'Sep 15',place:'At sea',country:'Balearic',arr:null,dep:null,sea:true},
-  {day:3,date:'Sep 16',place:'Naples',country:'Italy',arr:'08:00',dep:'19:00',sea:false},
-  {day:4,date:'Sep 17',place:'Santorini',country:'Greece',arr:'07:00',dep:'18:00',sea:false,today:true},
-  {day:5,date:'Sep 18',place:'Mykonos',country:'Greece',arr:'07:30',dep:'17:30',sea:false},
-  {day:6,date:'Sep 19',place:'Istanbul',country:'T\u00fcrkiye',arr:'09:00',dep:'22:00',sea:false},
-  {day:7,date:'Sep 20',place:'At sea',country:'Aegean',arr:null,dep:null,sea:true},
-  {day:8,date:'Sep 21',place:'Kotor',country:'Montenegro',arr:'08:00',dep:'17:00',sea:false}
-];
+// ══════════════════════════════════════════════════
+// PERSISTENT DATA — all saved to localStorage
+// ══════════════════════════════════════════════════
+var DB_KEY_STOPS    = 'vk_stops_v2';
+var DB_KEY_VAULT    = 'vk_vault_v2';
+var DB_KEY_JOURNAL  = 'vk_journal_v2';
+
+// ── STOPS (itinerary) ──
+var SAMPLE_STOPS = []; // start empty — user imports their own
+var stops = [];
+function saveStops(){ try{ localStorage.setItem(DB_KEY_STOPS, JSON.stringify(stops)); }catch(e){} }
+function loadStops(){
+  try{
+    var d = localStorage.getItem(DB_KEY_STOPS);
+    if(d){ stops = JSON.parse(d); return; }
+  }catch(e){}
+  stops = SAMPLE_STOPS.slice(); // fresh install: empty
+}
+loadStops();
 // ── VOYAGE TABS ──
 function switchVTab(name){
   ['read','edit','add'].forEach(function(n){
@@ -908,6 +982,7 @@ g('btn-va-save').addEventListener('click',function(){
   if(!place&&!sea)return;
   var ds=date?(new Date(date+'T12:00:00')).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Day '+(stops.length+1);
   stops.push({day:stops.length+1,place:sea?'At sea':place,country:country,date:ds,arr:arr||null,dep:dep||null,sea:sea});
+  saveStops();
   renderItin();
   ['va-place','va-country','va-date','va-arr','va-dep'].forEach(function(id){var e=g(id);if(e)e.value='';});
   g('va-sea').checked=false;
@@ -982,6 +1057,7 @@ function renderItinEdit(){
       s.dep=g('ief-dep-'+idx).value||null;
       s.sea=g('ief-sea-'+idx).checked;
       if(s.sea)s.place='At sea';
+      saveStops();
       renderItin();
       renderItinEdit();
     });
@@ -994,6 +1070,7 @@ function renderItinEdit(){
       if(!confirm('Remove "'+stops[idx].place+'" from itinerary?'))return;
       stops.splice(idx,1);
       stops.forEach(function(s,i){s.day=i+1;});
+      saveStops();
       renderItin();renderItinEdit();
     });
   });
@@ -1729,22 +1806,24 @@ function closeModal(){overlay.style.display='none';mBody.innerHTML='';}
 g('modal-close').addEventListener('click',closeModal);
 overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
 
-// ── VAULT DATA ──
-var vaultIns=[
-  {id:0,provider:'AXA Schengen',policy:'AX · 7720 · 8841',from:'2024-01-01',to:'2024-09-30',active:true}
-];
-var vaultEm=[
-  {id:0,name:'Air Doctor 24/7',sub:'Worldwide medical',phone:'+1 800 224 1100'},
-  {id:1,name:'AXA Claims',sub:'English line',phone:'+33 1 55 92 26 92'},
-  {id:2,name:'Ship reception',sub:'Dial from cabin',phone:'Ext. 0'},
-  {id:3,name:'Family — Anna',sub:'Spouse',phone:'+1 917 555 0144'}
-];
-var vaultDocs=[
-  {id:0,name:'Passport · M. Halden',type:'Verified'},
-  {id:1,name:'Boarding pass · Day 1',type:'PDF'},
-  {id:2,name:'Cabin 221 receipt',type:'PDF'}
-];
-var nextVid=10;
+// ── VAULT DATA (persistent) ──
+var vaultIns=[], vaultEm=[], vaultNotes=[], nextVid=100;
+function saveVault(){
+  try{ localStorage.setItem(DB_KEY_VAULT, JSON.stringify({ins:vaultIns,em:vaultEm,notes:vaultNotes,nextVid:nextVid})); }catch(e){}
+}
+function loadVault(){
+  try{
+    var d=localStorage.getItem(DB_KEY_VAULT);
+    if(d){
+      var p=JSON.parse(d);
+      vaultIns=p.ins||[]; vaultEm=p.em||[]; vaultNotes=p.notes||[];
+      nextVid=p.nextVid||100; return;
+    }
+  }catch(e){}
+  // fresh install defaults
+  vaultIns=[]; vaultEm=[]; vaultNotes=[]; nextVid=100;
+}
+loadVault();
 
 // Vault tab switching
 function switchVaultTab(name){
@@ -1799,6 +1878,7 @@ function renderVaultIns(){
           ins.from=g('vi2-from').value||ins.from;
           ins.to=g('vi2-to').value||ins.to;
           ins.active=g('vi2-active').checked;
+          saveVault();
           renderVaultIns();
           mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Insurance updated.</div></div>';
           setTimeout(closeModal,1500);
@@ -1811,6 +1891,7 @@ function renderVaultIns(){
       var id=parseInt(btn.getAttribute('data-id'));
       if(!confirm('Delete this insurance record?'))return;
       vaultIns=vaultIns.filter(function(x){return x.id!==id;});
+      saveVault();
       renderVaultIns();
     });
   });
@@ -1832,6 +1913,7 @@ g('btn-add-ins').addEventListener('click',function(){
       var prov=(g('vi-provider').value||'').trim();
       if(!prov){g('vi-provider').focus();return;}
       vaultIns.push({id:nextVid++,provider:prov,policy:(g('vi-policy').value||'').trim(),from:g('vi-from').value||'',to:g('vi-to').value||'',active:g('vi-active').checked});
+      saveVault();
       renderVaultIns();
       mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Insurance saved.</div></div>';
       setTimeout(closeModal,1500);
@@ -1870,6 +1952,7 @@ function renderVaultEm(){
           em.name=(g('ec2-name').value||em.name).trim();
           em.sub=(g('ec2-sub').value||'').trim();
           em.phone=(g('ec2-phone').value||em.phone).trim();
+          saveVault();
           renderVaultEm();
           mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Contact updated.</div></div>';
           setTimeout(closeModal,1500);
@@ -1882,6 +1965,7 @@ function renderVaultEm(){
       var id=parseInt(btn.getAttribute('data-id'));
       if(!confirm('Delete this contact?'))return;
       vaultEm=vaultEm.filter(function(x){return x.id!==id;});
+      saveVault();
       renderVaultEm();
     });
   });
@@ -1899,6 +1983,7 @@ g('btn-add-em').addEventListener('click',function(){
       var nm=(g('ec-name').value||'').trim(),ph=(g('ec-phone').value||'').trim();
       if(!nm||!ph)return;
       vaultEm.push({id:nextVid++,name:nm,sub:(g('ec-sub').value||'').trim(),phone:ph});
+      saveVault();
       renderVaultEm();
       mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';
       setTimeout(closeModal,1500);
@@ -1968,6 +2053,7 @@ function renderVaultNotes(){
       var newBody=el.querySelector('.vn-body-inp[data-id="'+id+'"]').value.trim();
       if(!newTitle)return;
       note.title=newTitle; note.body=newBody;
+      saveVault();
       renderVaultNotes();
     });
   });
@@ -1976,6 +2062,7 @@ function renderVaultNotes(){
       var id=parseInt(btn.getAttribute('data-id'));
       if(!confirm('Delete this note?'))return;
       vaultNotes=vaultNotes.filter(function(x){return x.id!==id;});
+      saveVault();
       renderVaultNotes();
     });
   });
@@ -1987,6 +2074,7 @@ g('btn-add-note').addEventListener('click',function(){
   var body=(g('vn-body').value||'').trim();
   if(!title){g('vn-title').focus();return;}
   vaultNotes.push({id:nextVid++, title:title, body:body});
+  saveVault();
   g('vn-title').value='';
   g('vn-body').value='';
   renderVaultNotes();
@@ -2004,13 +2092,19 @@ renderVaultIns();
 renderVaultEm();
 renderVaultNotes();
 
-// ── JOURNAL ──
-// internal journal store
-var jEntries=[
-  {id:0,date:'Today \u00b7 Sep 17',place:'Santorini',text:'Donkey path up to Fira at sunrise \u2014 air smelt like dry rosemary. Coffee at a caf\u00e9 called Avocado.',tags:['santorini','sunrise']},
-  {id:1,date:'Yesterday \u00b7 Sep 16',place:'Naples',text:'Margherita at L\u2019Antica. Walked the Spaccanapoli. Met a couple from Lyon who recommend a vineyard in Kotor.',tags:['naples','food']}
-];
-var nextJid=2;
+// ── JOURNAL (persistent) ──
+var jEntries=[], nextJid=1;
+function saveJournal(){
+  try{ localStorage.setItem(DB_KEY_JOURNAL, JSON.stringify({entries:jEntries,nextJid:nextJid})); }catch(e){}
+}
+function loadJournal(){
+  try{
+    var d=localStorage.getItem(DB_KEY_JOURNAL);
+    if(d){ var p=JSON.parse(d); jEntries=p.entries||[]; nextJid=p.nextJid||1; return; }
+  }catch(e){}
+  jEntries=[]; nextJid=1;
+}
+loadJournal();
 function jHeroSVG(){return '<svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="130" fill="#e0cdd2"/><circle cx="200" cy="46" r="18" fill="#e8b090" opacity=".7"/><ellipse cx="80" cy="95" rx="80" ry="14" fill="#8a7a85" opacity=".7"/><ellipse cx="330" cy="100" rx="70" ry="12" fill="#8a7a85" opacity=".6"/><path d="M0 105 Q100 100 200 105 Q300 110 400 105 L400 130 L0 130Z" fill="#9a8898" opacity=".65"/><line x1="213" y1="84" x2="213" y2="107" stroke="#3a2e30" stroke-width="2" stroke-linecap="round"/><polygon points="213,106 213,84 230,106" fill="rgba(139,58,82,.75)"/></svg>';}
 
 function switchJTab(name){
@@ -2058,6 +2152,7 @@ function renderEditList(){
           if(!pl||!tx)return;
           entry.place=pl;entry.text=tx;
           entry.tags=(g('ee-tags').value||"").split(',').map(function(t){return t.trim();}).filter(Boolean);
+          saveJournal();
           rebuildReadPanel();renderEditList();
           mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Entry updated.</div></div>';
           setTimeout(closeModal,1500);
@@ -2072,6 +2167,7 @@ function renderEditList(){
       var eid=parseInt(btn.getAttribute('data-eid'));
       if(!confirm('Discard this journal entry? This cannot be undone.'))return;
       jEntries=jEntries.filter(function(e){return e.id!==eid;});
+      saveJournal();
       rebuildReadPanel();renderEditList();
     });
   });
@@ -2101,22 +2197,204 @@ g('btn-save-entry').addEventListener('click',function(){
   var today=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
   var entry={id:nextJid++,date:'Today \u00b7 '+today,place:place,text:text,tags:tags};
   jEntries.unshift(entry);
+  saveJournal();
   rebuildReadPanel();
   g('new-place').value='';g('new-text').value='';g('new-tags').value='';
   // show success, switch to read
   switchJTab('read');
 });
 
-// ── IMPORT TABS ──
+// ══════════════════════════════════════════════════════
+// ── TRANSFER SYSTEM (Import + Export) ──
+// ══════════════════════════════════════════════════════
+
+// Top-level tab switch
+function switchTransferTab(name){
+  ['import','export'].forEach(function(n){
+    g('ttab-'+n).classList.toggle('active',n===name);
+    var p=g('transfer-panel-'+n);if(p)p.style.display=n===name?'block':'none';
+  });
+  if(name==='export') updateExportCounts();
+}
+g('ttab-import')&&g('ttab-import').addEventListener('click',function(){switchTransferTab('import');});
+g('ttab-export')&&g('ttab-export').addEventListener('click',function(){switchTransferTab('export');});
+
+// Import sub-tabs
 function showPanel(name){
-  ['text','manual','tpl'].forEach(function(n){
-    g('panel-'+n).style.display=n===name?'block':'none';
-    g('itab-'+n).classList.toggle('active',n===name);
+  ['text','manual','tpl','restore'].forEach(function(n){
+    var p=g('panel-'+n);if(p)p.style.display=n===name?'block':'none';
+    var t=g('itab-'+n);if(t)t.classList.toggle('active',n===name);
   });
 }
-g('itab-text').addEventListener('click',function(){showPanel('text');});
-g('itab-manual').addEventListener('click',function(){showPanel('manual');});
-g('itab-tpl').addEventListener('click',function(){showPanel('tpl');});
+g('itab-text')&&g('itab-text').addEventListener('click',function(){showPanel('text');});
+g('itab-manual')&&g('itab-manual').addEventListener('click',function(){showPanel('manual');});
+g('itab-tpl')&&g('itab-tpl').addEventListener('click',function(){showPanel('tpl');});
+g('itab-restore')&&g('itab-restore').addEventListener('click',function(){showPanel('restore');});
+
+// ── EXPORT COUNT DISPLAY ──
+function updateExportCounts(){
+  var s=g('xp-stops-count');  if(s)s.textContent=stops.length+' stop'+(stops.length!==1?'s':'');
+  var v=g('xp-vault-count');
+  if(v){var vc=(vaultIns.length+vaultEm.length+vaultNotes.length);v.textContent=vc+' item'+(vc!==1?'s':'');}
+  var j=g('xp-journal-count');if(j)j.textContent=jEntries.length+' entr'+(jEntries.length!==1?'ies':'y');
+}
+
+// ── BUILD EXPORT PAYLOAD ──
+function buildPayload(){
+  var p={v:'2',ts:Date.now(),app:'VoyageKeeper'};
+  if(g('xp-stops')&&g('xp-stops').checked)   p.stops    = JSON.parse(JSON.stringify(stops));
+  if(g('xp-vault')&&g('xp-vault').checked){
+    p.vaultIns   = JSON.parse(JSON.stringify(vaultIns));
+    p.vaultEm    = JSON.parse(JSON.stringify(vaultEm));
+    p.vaultNotes = JSON.parse(JSON.stringify(vaultNotes));
+  }
+  if(g('xp-journal')&&g('xp-journal').checked)p.jEntries = JSON.parse(JSON.stringify(jEntries));
+  if(g('xp-clocks')&&g('xp-clocks').checked) p.tz        = JSON.parse(JSON.stringify(tz));
+  return p;
+}
+
+function encodePayload(p){
+  try{ return 'VK2:'+btoa(unescape(encodeURIComponent(JSON.stringify(p)))); }
+  catch(e){ return 'VK2:'+btoa(JSON.stringify(p)); }
+}
+function decodePayload(code){
+  code=code.trim();
+  if(!code.startsWith('VK2:')&&!code.startsWith('VK1:')) throw new Error('Not a VoyageKeeper backup');
+  var b=code.slice(4);
+  try{ return JSON.parse(decodeURIComponent(escape(atob(b)))); }
+  catch(e){ return JSON.parse(atob(b)); }
+}
+
+// ── GENERATE EXPORT ──
+g('btn-do-export')&&g('btn-do-export').addEventListener('click',function(){
+  var p=buildPayload();
+  var code=encodePayload(p);
+  var codeEl=g('export-code'); if(codeEl)codeEl.value=code;
+  var res=g('export-result');  if(res)res.style.display='block';
+  var info=g('export-info');
+  if(info){
+    var parts=[];
+    if(p.stops)parts.push(p.stops.length+' stops');
+    if(p.vaultIns)parts.push((p.vaultIns.length+p.vaultEm.length+p.vaultNotes.length)+' vault items');
+    if(p.jEntries)parts.push(p.jEntries.length+' journal entries');
+    if(p.tz)parts.push('clock settings');
+    info.textContent='Includes: '+parts.join(', ')+' — '+(Math.round(code.length/102.4)/10)+' KB';
+  }
+});
+
+// ── COPY CODE ──
+g('btn-copy-code')&&g('btn-copy-code').addEventListener('click',function(){
+  var el=g('export-code');if(!el)return;
+  el.select();
+  var btn=g('btn-copy-code');
+  var copied=function(){if(btn){btn.textContent='Copied ✓';setTimeout(function(){btn.textContent='Copy';},2500);}};
+  try{ if(document.execCommand('copy')){copied();return;} }catch(e){}
+  navigator.clipboard&&navigator.clipboard.writeText(el.value).then(copied).catch(function(){});
+});
+
+// ── SHARE (native) ──
+g('btn-share')&&g('btn-share').addEventListener('click',function(){
+  var code=g('export-code')&&g('export-code').value; if(!code)return;
+  if(navigator.share){
+    navigator.share({title:'VoyageKeeper Backup',text:'Paste this in VoyageKeeper → Transfer → Import → Restore:
+
+'+code}).catch(function(){});
+  } else {
+    navigator.clipboard&&navigator.clipboard.writeText(code).then(function(){
+      alert('Copied! Paste into VoyageKeeper on your other device → Transfer → Import → Restore tab.');
+    });
+  }
+});
+
+// ── EMAIL ──
+g('btn-email')&&g('btn-email').addEventListener('click',function(){
+  var code=g('export-code')&&g('export-code').value; if(!code)return;
+  var subj=encodeURIComponent('VoyageKeeper Backup — '+new Date().toLocaleDateString());
+  var body=encodeURIComponent('VoyageKeeper Backup
+
+To restore:
+1. Open VoyageKeeper
+2. Transfer tab → Import → Restore
+3. Paste the code below
+
+---
+'+code+'
+---');
+  window.location.href='mailto:?subject='+subj+'&body='+body;
+});
+
+// ── DOWNLOAD FILE ──
+g('btn-dlfile')&&g('btn-dlfile').addEventListener('click',function(){
+  var code=g('export-code')&&g('export-code').value; if(!code)return;
+  var date=new Date().toISOString().slice(0,10);
+  try{
+    var blob=new Blob([code],{type:'text/plain'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download='VoyageKeeper-backup-'+date+'.txt';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }catch(e){ alert('Download not supported. Use Copy or Share instead.'); }
+});
+
+// ── RESTORE ──
+function doRestore(replace){
+  var raw=(g('restore-input')&&g('restore-input').value)||'';
+  var out=g('restore-out');
+  if(!raw.trim()){
+    if(out)out.innerHTML='<div style="color:var(--burgundy);font-size:14px;font-weight:700;padding:8px 0;">Please paste a backup code first.</div>';
+    return;
+  }
+  try{
+    var p=decodePayload(raw.trim());
+    var ts=p.ts?new Date(p.ts).toLocaleString():'unknown date';
+    if(replace&&!confirm('Replace ALL current data with backup from '+ts+'?'))return;
+
+    var changed=[];
+    if(p.stops){
+      if(replace)stops.length=0;
+      p.stops.forEach(function(s){
+        if(!stops.some(function(x){return x.place===s.place&&x.date===s.date;}))stops.push(s);
+      });
+      stops.forEach(function(s,i){s.day=i+1;});
+      saveStops(); renderItin(); if(typeof renderItinEdit==='function')renderItinEdit();
+      changed.push(p.stops.length+' stops');
+    }
+    if(p.vaultIns){
+      if(replace)vaultIns.length=0;
+      p.vaultIns.forEach(function(x){if(!vaultIns.some(function(e){return e.id===x.id;}))vaultIns.push(x);});
+      changed.push(p.vaultIns.length+' insurance');
+    }
+    if(p.vaultEm){
+      if(replace)vaultEm.length=0;
+      p.vaultEm.forEach(function(x){if(!vaultEm.some(function(e){return e.id===x.id;}))vaultEm.push(x);});
+      changed.push(p.vaultEm.length+' contacts');
+    }
+    if(p.vaultNotes){
+      if(replace)vaultNotes.length=0;
+      p.vaultNotes.forEach(function(x){if(!vaultNotes.some(function(e){return e.id===x.id;}))vaultNotes.push(x);});
+      changed.push(p.vaultNotes.length+' notes');
+    }
+    if(p.vaultIns||p.vaultEm||p.vaultNotes){ saveVault(); renderVaultIns(); renderVaultEm(); renderVaultNotes(); }
+    if(p.jEntries){
+      if(replace)jEntries.length=0;
+      p.jEntries.forEach(function(x){if(!jEntries.some(function(e){return e.id===x.id;}))jEntries.push(x);});
+      saveJournal(); if(typeof rebuildReadPanel==='function')rebuildReadPanel();
+      changed.push(p.jEntries.length+' journal entries');
+    }
+    if(p.tz){
+      Object.keys(p.tz).forEach(function(k){tz[k]=p.tz[k];});
+      saveTZ(); applyTZLabels();
+      changed.push('clock settings');
+    }
+    if(out)out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt"><strong>Restored:</strong> '+changed.join(', ')+'<br><span style="font-size:12px;color:var(--text-muted);">From: '+ts+'</span></div></div>';
+    if(g('restore-input'))g('restore-input').value='';
+  }catch(err){
+    if(out)out.innerHTML='<div style="color:var(--burgundy);font-size:14px;font-weight:700;padding:8px 0;">&#9888; Invalid backup code. Make sure you copied the entire code starting with VK2:</div>';
+  }
+}
+g('btn-restore-merge')&&g('btn-restore-merge').addEventListener('click',function(){doRestore(false);});
+g('btn-restore-replace')&&g('btn-restore-replace').addEventListener('click',function(){doRestore(true);});
 
 // ── SMART PARSER ──
 // Handles formats like: "10-Jun Southampton, England 11-Jun At Sea 12-Jun Lisbon, Portugal"
@@ -2270,6 +2548,7 @@ g('btn-parse').addEventListener('click',function(){
       }
     });
     stops.forEach(function(s,i){s.day=i+1;});
+    saveStops();
     renderItin();
     if(typeof renderItinEdit==='function')renderItinEdit();
     out.innerHTML='<div class="ok-wrap">'
