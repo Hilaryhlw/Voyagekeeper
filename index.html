@@ -24,47 +24,48 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --cream:#f5f0eb; --cream-dark:#ede7df; --stone:#e8e2da;
-  --burgundy:#8b3a52; --burgundy-pale:#f0e4e7;
-  --text-primary:#2a2420; --text-secondary:#7a6f68; --text-muted:#a89f98;
-  --card-bg:#fdfaf7; --dark-card:#2a2420;
+  --cream:#f2ece4; --cream-dark:#e8e0d6; --stone:#ccc4b8;
+  --burgundy:#6e2040; --burgundy-pale:#f0e0e6;
+  --text-primary:#140e0c; --text-secondary:#3a3230; --text-muted:#6a605a;
+  --card-bg:#faf6f1; --dark-card:#140e0c;
   --serif:"Cormorant Garamond",Georgia,serif; --sans:"DM Sans",system-ui,sans-serif;
-  --r:16px; --r-sm:10px;
+  --r:18px; --r-sm:12px;
+  --fs-xs:13px; --fs-sm:15px; --fs-base:17px; --fs-md:19px; --fs-lg:23px; --fs-xl:30px;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-family:var(--sans);color:var(--text-primary);-webkit-font-smoothing:antialiased;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-family:var(--sans);font-size:16px;font-weight:400;color:var(--text-primary);-webkit-font-smoothing:antialiased;-webkit-text-stroke:0.01em transparent;}
 #app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 20px 90px;display:none;-webkit-overflow-scrolling:touch;}
 .screen.active{display:block;}
 .screen::-webkit-scrollbar{display:none;}
 #nav{position:absolute;bottom:0;left:0;right:0;background:var(--card-bg);border-top:1px solid var(--stone);display:flex;z-index:100;padding:6px 0 20px;}
-#nav button{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 1px;color:var(--text-muted);font-family:var(--sans);font-size:9px;transition:color .2s;}
+#nav button{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 1px;color:var(--text-secondary);font-family:var(--sans);font-size:11px;font-weight:700;transition:color .2s;}
 #nav button.active{color:var(--burgundy);}
-#nav button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
-.big-title{font-family:var(--serif);font-size:40px;font-weight:300;line-height:1.05;margin-bottom:20px;}
-.eyebrow{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
-.card{background:var(--card-bg);border-radius:var(--r);border:1px solid var(--stone);padding:16px;margin-bottom:12px;}
+#nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+.big-title{font-family:var(--serif);font-size:46px;font-weight:300;line-height:1.05;margin-bottom:20px;}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:8px;}
+.card{background:var(--card-bg);border-radius:var(--r);border:1px solid var(--stone);padding:18px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
 .card-dark{background:var(--dark-card);border-radius:var(--r);padding:20px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;}
 .card-dark::after{content:"";position:absolute;right:-24px;top:-24px;width:130px;height:130px;border-radius:50%;border:28px solid rgba(255,255,255,0.05);pointer-events:none;}
 /* TODAY */
 .hero{border-radius:var(--r);overflow:hidden;height:195px;position:relative;margin-bottom:18px;}
 .hero svg{position:absolute;inset:0;width:100%;height:100%;}
 .hero-info{position:absolute;bottom:0;left:0;right:0;padding:14px 16px;display:flex;align-items:flex-end;justify-content:space-between;}
-.hero-loc{font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.7);text-transform:uppercase;}
-.hero-port{font-family:var(--serif);font-size:20px;color:#fff;}
-.dep-badge{background:var(--card-bg);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text-secondary);white-space:nowrap;}
+.hero-loc{font-size:12px;letter-spacing:.1em;color:rgba(255,255,255,.85);text-transform:uppercase;font-weight:600;}
+.hero-port{font-family:var(--serif);font-size:24px;color:#fff;font-weight:400;}
+.dep-badge{background:var(--card-bg);border-radius:20px;padding:7px 16px;font-size:14px;color:var(--text-secondary);white-space:nowrap;font-weight:500;}
 .dep-badge strong{color:var(--text-primary);font-weight:500;}
 .clocks-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--stone);border-radius:var(--r);overflow:hidden;margin-bottom:18px;}
-.clock-cell{background:var(--card-bg);padding:12px 8px;text-align:center;}
-.clock-lbl{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:4px;}
+.clock-cell{background:var(--card-bg);padding:16px 8px;text-align:center;}
+.clock-lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:4px;font-weight:500;}
 .dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0;}
 .d-ship{background:var(--burgundy);}.d-port{background:#8b7355;}.d-home{background:var(--text-muted);}
-.clock-digits{font-family:var(--serif);font-size:20px;color:var(--text-primary);}
-.clock-tz-sm{font-size:10px;color:var(--text-muted);margin-top:2px;}
+.clock-digits{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--text-primary);}
+.clock-tz-sm{font-size:12px;color:var(--text-secondary);margin-top:3px;font-weight:500;}
 .move-card{background:var(--card-bg);border-radius:var(--r);border:1px solid var(--stone);padding:16px;margin-bottom:16px;}
 .move-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-.move-time{font-family:var(--serif);font-size:34px;font-weight:300;line-height:1;}
-.move-sub{font-size:12px;color:var(--text-muted);margin-top:4px;}
+.move-time{font-family:var(--serif);font-size:42px;font-weight:300;line-height:1;}
+.move-sub{font-size:14px;color:var(--text-primary);margin-top:6px;font-weight:600;}
 .prog-track{position:relative;height:3px;background:var(--stone);border-radius:2px;margin-bottom:6px;}
 .prog-fill{height:100%;background:var(--burgundy);border-radius:2px;}
 .prog-dot{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:var(--burgundy);transform:translate(-50%,-50%);}
@@ -77,12 +78,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .itin-body{flex:1;padding-bottom:14px;}
 .itin-hl{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:10px 12px;}
 .itin-place-row{display:flex;justify-content:space-between;}
-.itin-place{font-family:var(--serif);font-size:19px;}
+.itin-place{font-family:var(--serif);font-size:23px;font-weight:500;}
 .itin-place.sea{font-style:italic;color:var(--text-secondary);}
-.itin-date-sm{font-size:12px;color:var(--text-muted);}
-.itin-country{font-size:12px;color:var(--text-secondary);margin:2px 0 6px;}
+.itin-date-sm{font-size:13px;color:var(--text-muted);font-weight:500;}
+.itin-country{font-size:14px;color:var(--text-secondary);margin:3px 0 7px;font-weight:600;}
 .itin-times{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.itin-t{font-size:11px;color:var(--text-muted);}
+.itin-t{font-size:13px;color:var(--text-muted);}
 .itin-t span{color:var(--text-secondary);}
 .today-pill{background:var(--burgundy-pale);color:var(--burgundy);font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;}
 /* ITIN EDIT */
@@ -97,14 +98,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .itin-time-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
 /* CLOCKS SCREEN */
 .clk-big-wrap{display:flex;gap:18px;align-items:center;}
-.clk-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
-.clk-big-time{font-family:var(--serif);font-size:46px;font-weight:300;line-height:1;color:var(--text-primary);}
-.clk-sub{font-size:12px;color:var(--text-secondary);margin-top:5px;line-height:1.5;}
-.tz-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--stone);}
+.clk-lbl{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:6px;display:flex;align-items:center;gap:5px;font-weight:600;}
+.clk-big-time{font-family:var(--serif);font-size:58px;font-weight:300;line-height:1;color:var(--text-primary);}
+.clk-sub{font-size:15px;color:var(--text-secondary);margin-top:6px;line-height:1.5;font-weight:500;}
+.tz-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--stone);}
 .tz-row:last-child{border-bottom:none;}
-.tz-name{font-size:13px;color:var(--text-secondary);}
-.tz-off{font-size:10px;color:var(--text-muted);}
-.tz-digits{font-family:var(--serif);font-size:22px;}
+.tz-name{font-size:16px;color:var(--text-primary);font-weight:700;}
+.tz-off{font-size:13px;color:var(--text-secondary);}
+.tz-digits{font-family:var(--serif);font-size:30px;font-weight:400;color:var(--text-primary);}
 .tom-card{background:var(--cream-dark);border-radius:var(--r-sm);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-top:8px;}
 .tom-arr{color:var(--burgundy);font-size:18px;flex-shrink:0;}
 .tom-text{font-size:13px;color:var(--text-secondary);line-height:1.5;}
@@ -120,10 +121,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .edit-clocks-toggle{font-size:12px;color:var(--burgundy);cursor:pointer;background:none;border:none;font-family:var(--sans);padding:0;margin-left:auto;}
 /* VAULT */
 .vault-ins-lbl{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;}
-.vault-ins-name{font-family:var(--serif);font-size:26px;font-weight:300;font-style:italic;color:#fff;margin-bottom:18px;}
+.vault-ins-name{font-family:var(--serif);font-size:30px;font-weight:300;font-style:italic;color:#fff;margin-bottom:18px;}
 .vault-ins-row{display:flex;justify-content:space-between;align-items:flex-end;}
 .vault-f-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:2px;}
-.vault-f-val{font-size:14px;color:rgba(255,255,255,.85);letter-spacing:.05em;}
+.vault-f-val{font-size:16px;color:rgba(255,255,255,.9);letter-spacing:.05em;font-weight:500;}
 .active-pill{position:absolute;top:18px;right:18px;background:var(--burgundy-pale);color:var(--burgundy);font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;}
 .sec-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;margin-top:20px;}
 .link-btn{font-size:12px;color:var(--burgundy);cursor:pointer;background:none;border:none;font-family:var(--sans);padding:0;}
@@ -131,7 +132,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .em-item:last-child{border-bottom:none;}
 .em-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ic-pink{background:#f5e0e5;}.ic-stone{background:var(--stone);}.ic-cream{background:var(--cream-dark);}
-.em-name{font-size:13px;font-weight:500;}
+.em-name{font-size:13px;font-weight:700;}
 .em-sub{font-size:11px;color:var(--text-muted);}
 .em-ph{font-size:12px;color:var(--text-secondary);margin-left:auto;white-space:nowrap;padding-left:8px;}
 .doc-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--stone);}
@@ -150,34 +151,34 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .vault-em-card{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px;}
 .vault-em-row{display:flex;align-items:center;gap:12px;}
 .vault-em-info{flex:1;}
-.vault-em-name{font-size:13px;font-weight:500;color:var(--text-primary);}
-.vault-em-sub{font-size:11px;color:var(--text-muted);}
-.vault-em-ph{font-size:12px;color:var(--text-secondary);margin-right:8px;}
+.vault-em-name{font-size:16px;font-weight:700;color:var(--text-primary);}
+.vault-em-sub{font-size:13px;color:var(--text-muted);}
+.vault-em-ph{font-size:14px;color:var(--text-secondary);margin-right:8px;font-weight:500;}
 .vault-em-acts{display:flex;gap:5px;flex-shrink:0;}
 .vault-doc-card{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
 /* VAULT NOTES */
 .vault-note-card{background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r-sm);padding:14px;margin-bottom:10px;}
 .vault-note-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
-.vault-note-title{font-weight:500;font-size:14px;color:var(--text-primary);}
-.vault-note-body{font-size:13px;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap;}
+.vault-note-title{font-weight:700;font-size:17px;color:var(--text-primary);}
+.vault-note-body{font-size:15px;color:var(--text-primary);line-height:1.7;white-space:pre-wrap;font-weight:400;}
 .vault-note-acts{display:flex;gap:5px;flex-shrink:0;margin-left:8px;}
 .vault-doc-nm{font-size:13px;flex:1;}
 .vault-doc-acts{display:flex;gap:5px;align-items:center;}
-.mini-btn{padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer;font-family:var(--sans);border:1px solid var(--stone);background:none;color:var(--text-secondary);}
+.mini-btn{padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);border:1px solid var(--stone);background:none;color:var(--text-secondary);font-weight:500;}
 .mini-btn.del{border-color:var(--burgundy);color:var(--burgundy);}
 .mini-btn.edit-btn{border-color:var(--text-muted);}
 /* JOURNAL */
 .j-tabs{display:flex;background:var(--stone);border-radius:var(--r-sm);padding:3px;margin-bottom:16px;}
-.j-tab{flex:1;padding:8px;border:none;background:none;cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--text-secondary);border-radius:8px;transition:all .2s;}
+.j-tab{flex:1;padding:11px 6px;border:none;background:none;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text-secondary);border-radius:10px;transition:all .2s;}
 .j-tab.active{background:var(--card-bg);color:var(--text-primary);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
 .j-card{background:var(--card-bg);border-radius:var(--r);border:1px solid var(--stone);overflow:hidden;margin-bottom:16px;position:relative;}
 .j-card.editing{border-color:var(--burgundy);}
 .j-hero{height:130px;position:relative;overflow:hidden;}
 .j-hero svg{position:absolute;inset:0;width:100%;height:100%;}
 .j-body{padding:14px 16px;}
-.j-date{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px;}
-.j-place{font-family:var(--serif);font-size:22px;margin-bottom:7px;}
-.j-text{font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:10px;}
+.j-date{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:5px;font-weight:600;}
+.j-place{font-family:var(--serif);font-size:28px;margin-bottom:8px;}
+.j-text{font-size:16px;color:var(--text-primary);line-height:1.7;margin-bottom:10px;font-weight:400;}
 .j-tags{display:flex;gap:6px;flex-wrap:wrap;}
 .tag{background:var(--cream-dark);color:var(--text-secondary);font-size:11px;padding:3px 10px;border-radius:20px;}
 .j-top{display:flex;justify-content:space-between;align-items:flex-start;}
@@ -192,13 +193,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .imp-tabs{display:flex;background:var(--stone);border-radius:var(--r-sm);padding:3px;margin-bottom:18px;}
 .imp-tab{flex:1;padding:8px 2px;border:none;background:none;cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--text-secondary);border-radius:8px;transition:all .2s;}
 .imp-tab.active{background:var(--card-bg);color:var(--text-primary);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-.imp-ta{width:100%;min-height:160px;border:1px solid var(--stone);border-radius:var(--r-sm);background:var(--card-bg);padding:14px;font-family:var(--sans);font-size:13px;color:var(--text-primary);resize:vertical;outline:none;line-height:1.6;transition:border-color .2s;}
+.imp-ta{width:100%;min-height:160px;border:2px solid var(--stone);border-radius:var(--r-sm);background:var(--card-bg);padding:14px;font-family:var(--sans);font-size:15px;color:var(--text-primary);resize:vertical;outline:none;line-height:1.7;transition:border-color .2s;}
 .imp-ta:focus{border-color:var(--burgundy);}
 .imp-ta::placeholder{color:var(--text-muted);}
 .imp-hint{font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:8px;}
-.btn-p{width:100%;padding:14px;border-radius:var(--r-sm);border:none;background:var(--burgundy);color:#fff;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;margin-top:12px;}
+.btn-p{width:100%;padding:16px;border-radius:var(--r-sm);border:none;background:var(--burgundy);color:#fff;font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;letter-spacing:.01em;}
 .btn-p:active{opacity:.82;}
-.btn-d{width:100%;padding:14px;border-radius:var(--r-sm);border:none;background:var(--dark-card);color:#fff;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;margin-top:10px;}
+.btn-d{width:100%;padding:16px;border-radius:var(--r-sm);border:none;background:var(--dark-card);color:#fff;font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer;margin-top:10px;}
 .btn-d:active{opacity:.82;}
 .btn-sm{padding:10px 20px;border-radius:var(--r-sm);border:none;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;}
 .btn-sm.primary{background:var(--burgundy);color:#fff;}
@@ -211,7 +212,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 .ok-wrap{text-align:center;padding:18px 0;}
 .ok-check{font-size:26px;color:var(--burgundy);margin-bottom:8px;}
 .ok-txt{font-size:14px;color:var(--text-secondary);}
-.m-inp{width:100%;padding:12px 14px;border:1px solid var(--stone);border-radius:var(--r-sm);background:var(--card-bg);font-family:var(--sans);font-size:14px;color:var(--text-primary);outline:none;transition:border-color .2s;margin-bottom:10px;}
+.m-inp{width:100%;padding:14px 16px;border:2px solid var(--stone);border-radius:var(--r-sm);background:var(--card-bg);font-family:var(--sans);font-size:16px;color:var(--text-primary);outline:none;transition:border-color .2s;margin-bottom:12px;}
 .m-inp:focus{border-color:var(--burgundy);}
 .m-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
 .tpl-card{cursor:pointer;}
@@ -222,12 +223,45 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 #modal-overlay{display:none;position:absolute;inset:0;background:rgba(42,36,32,.55);z-index:200;align-items:flex-end;justify-content:center;}
 #modal-sheet{background:var(--card-bg);border-radius:20px 20px 0 0;width:100%;padding:20px 20px 40px;max-height:88%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-#modal-title{font-family:var(--serif);font-size:24px;font-weight:300;}
+#modal-title{font-family:var(--serif);font-size:30px;font-weight:300;}
 #modal-close{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:22px;line-height:1;padding:0 4px;}
+/* TODAY enhancements */
+#today-cruise-day{font-size:14px;color:var(--burgundy);font-weight:600;letter-spacing:.02em;}
+#today-full-date{font-size:13px;font-weight:600;}
+#today-place-title{font-size:46px;}
+/* Cards baseline padding */
+.card{padding:18px;}
+/* Progress bar thicker */
+.prog-track{height:5px;}
+.prog-dot{width:14px;height:14px;}
+/* Input focus ring higher contrast */
+.m-inp:focus,.imp-ta:focus{border-color:var(--burgundy);box-shadow:0 0 0 3px var(--burgundy-pale);}
+/* Today-pill larger */
+.today-pill{font-size:12px;padding:4px 12px;}
+/* Itin highlight */
+.itin-hl{border-left:4px solid var(--burgundy);padding-left:14px;}
+/* Itin num larger */
+.itin-num{width:30px;height:30px;font-size:13px;}
+/* Btn-sm larger touch */
+.btn-sm{padding:12px 22px;font-size:14px;}
+/* ok-check */
+.ok-check{font-size:36px;}
+.ok-txt{font-size:16px;}
+/* OFFLINE BANNER */
+#offline-banner{display:none;position:absolute;top:0;left:0;right:0;z-index:300;background:#2a1a10;color:#f0e8e0;font-size:13px;font-weight:600;text-align:center;padding:8px 16px;letter-spacing:.03em;}
+#offline-banner span{opacity:.7;font-weight:400;margin-left:6px;font-size:12px;}
+/* ALARM */
+.alarm-preset{background:var(--cream-dark);border:2px solid var(--stone);border-radius:20px;padding:9px 16px;font-size:13px;font-weight:700;color:var(--text-primary);cursor:pointer;transition:all .15s;font-family:var(--sans);}
+.alarm-preset:active,.alarm-preset:hover{background:var(--burgundy-pale);border-color:var(--burgundy);color:var(--burgundy);}
+@keyframes alarm-pulse{from{transform:scale(1);}to{transform:scale(1.15);}}
+#alarm-overlay{display:none;}
+#alarm-overlay.firing{display:flex!important;}
 </style>
 </head>
 <body>
 <div id="app">
+<!-- Offline banner — shown automatically when no internet -->
+<div id="offline-banner">&#x1F6DF; Offline mode<span>Clocks, itinerary &amp; vault work normally &mdash; weather paused</span></div>
 
 <!-- TODAY -->
 <div class="screen active" id="s-today">
@@ -235,11 +269,73 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
     <div>
       <div class="eyebrow" style="margin-bottom:2px;" id="today-date-label">Today</div>
-      <div class="eyebrow" style="margin-bottom:2px;color:var(--burgundy);" id="today-full-date"></div>
+      <div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:2px;" id="today-full-date"></div>
     </div>
-    <div id="today-cruise-day" style="text-align:right;font-size:11px;color:var(--text-muted);line-height:1.5;"></div>
+    <div id="today-cruise-day" style="text-align:right;font-size:14px;color:var(--burgundy);font-weight:600;line-height:1.5;"></div>
   </div>
-  <div style="font-family:var(--serif);font-size:40px;font-weight:300;font-style:italic;color:var(--burgundy);line-height:1.05;margin-bottom:18px;" id="today-place-title">—</div>
+  <!-- Live Weather + Location Card -->
+  <div id="weather-card" style="background:var(--card-bg);border:1px solid var(--stone);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;">
+    <!-- Loading state -->
+    <div id="weather-loading" style="display:flex;align-items:center;gap:10px;">
+      <div style="font-size:22px;">&#x23F3;</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary);">Getting your location&hellip;</div>
+        <div style="font-size:12px;color:var(--text-muted);">Tap Detect if nothing appears</div>
+      </div>
+      <button id="btn-today-detect" style="margin-left:auto;background:var(--burgundy-pale);border:none;border-radius:20px;padding:7px 16px;font-size:13px;color:var(--burgundy);cursor:pointer;font-weight:600;white-space:nowrap;">&#x1F4CD; Detect</button>
+    </div>
+    <!-- Live weather state (hidden until loaded) -->
+    <div id="weather-live" style="display:none;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+        <!-- Left: location + condition -->
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div id="weather-icon" style="font-size:44px;line-height:1;">&#x2600;</div>
+          <div>
+            <div id="weather-temp" style="font-family:var(--serif);font-size:48px;font-weight:300;color:var(--text-primary);line-height:1;">--°</div>
+            <div id="weather-desc" style="font-size:13px;color:var(--text-secondary);margin-top:2px;font-weight:500;"></div>
+          </div>
+        </div>
+        <!-- Right: location + time -->
+        <div style="text-align:right;">
+          <div id="today-location-name" style="font-size:15px;font-weight:700;color:var(--text-primary);"></div>
+          <div id="today-location-tz" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+          <div id="weather-feels" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+          <button id="btn-today-detect" style="display:none;"></button><!-- hidden duplicate for JS compat -->
+        </div>
+      </div>
+      <!-- Extra weather row -->
+      <div id="weather-extras" style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--stone);">
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:18px;">&#x1F4A7;</div>
+          <div id="weather-humidity" style="font-size:13px;font-weight:600;color:var(--text-primary);">--%</div>
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;">Humidity</div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:18px;">&#x1F32C;</div>
+          <div id="weather-wind" style="font-size:13px;font-weight:600;color:var(--text-primary);">-- km/h</div>
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;">Wind</div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:18px;">&#x1F321;</div>
+          <div id="weather-high-low" style="font-size:13px;font-weight:600;color:var(--text-primary);">--/--°</div>
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;">High/Low</div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:18px;" id="weather-uv-icon">&#x1F31E;</div>
+          <div id="weather-uv" style="font-size:13px;font-weight:600;color:var(--text-primary);">--</div>
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;">UV Index</div>
+        </div>
+      </div>
+      <!-- Last updated -->
+      <div id="weather-updated" style="font-size:11px;color:var(--text-muted);text-align:right;margin-top:8px;"></div>
+    </div>
+    <!-- Error state -->
+    <div id="weather-error" style="display:none;text-align:center;padding:8px 0;">
+      <div style="font-size:14px;color:var(--text-muted);">Could not get weather &mdash; check connection</div>
+      <button id="btn-retry-weather" style="margin-top:8px;background:var(--burgundy-pale);border:none;border-radius:20px;padding:6px 16px;font-size:13px;color:var(--burgundy);cursor:pointer;font-weight:600;">Retry</button>
+    </div>
+  </div>
+  <div style="font-family:var(--serif);font-size:44px;font-weight:300;font-style:italic;color:var(--burgundy);line-height:1.05;margin-bottom:18px;" id="today-place-title">—</div>
 
   <div class="hero">
     <svg viewBox="0 0 400 195" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -304,6 +400,74 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
       <span id="today-prog-arr"></span><span id="today-prog-dep"></span>
     </div>
   </div>
+
+  <!-- ── RETURN ALARM ── -->
+  <div class="eyebrow" style="margin-top:4px;">Return Alarm</div>
+  <div class="card" id="alarm-card">
+
+    <!-- No alarm set state -->
+    <div id="alarm-empty">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="font-size:32px;">⏰</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--text-primary);">Set a return reminder</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">Beeps + notification when it's time to head back</div>
+        </div>
+      </div>
+      <!-- Quick presets -->
+      <div class="eyebrow" style="margin-bottom:8px;">Quick set</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+        <button class="alarm-preset" data-mins="30">30 min before</button>
+        <button class="alarm-preset" data-mins="60">1 hr before</button>
+        <button class="alarm-preset" data-mins="90">90 min before</button>
+        <button class="alarm-preset" data-mins="120">2 hrs before</button>
+      </div>
+      <!-- Custom time -->
+      <div class="eyebrow" style="margin-bottom:8px;">Or set exact ship time</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input id="alarm-time-input" type="time" class="m-inp" style="flex:1;margin:0;font-size:20px;font-weight:700;padding:12px 14px;">
+        <button id="btn-set-alarm" class="btn-p" style="margin:0;width:auto;padding:12px 20px;font-size:15px;">Set Alarm</button>
+      </div>
+      <div id="alarm-label-input-wrap" style="margin-top:10px;">
+        <input id="alarm-label-input" type="text" class="m-inp" style="margin:0;" placeholder="Label (e.g. Head back to ship — optional)">
+      </div>
+    </div>
+
+    <!-- Alarm active state -->
+    <div id="alarm-active" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div id="alarm-active-icon" style="font-size:36px;">⏰</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);">Alarm set</div>
+            <div id="alarm-active-time" style="font-family:var(--serif);font-size:40px;font-weight:300;color:var(--text-primary);line-height:1.1;">--:--</div>
+            <div id="alarm-active-label" style="font-size:13px;color:var(--text-secondary);margin-top:2px;"></div>
+          </div>
+        </div>
+        <button id="btn-cancel-alarm" style="background:var(--burgundy-pale);border:none;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:700;color:var(--burgundy);cursor:pointer;">Cancel</button>
+      </div>
+      <!-- Countdown -->
+      <div style="background:var(--cream-dark);border-radius:var(--r-sm);padding:12px 16px;text-align:center;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Time until alarm</div>
+        <div id="alarm-countdown" style="font-family:var(--serif);font-size:36px;font-weight:300;color:var(--text-primary);">--:--:--</div>
+      </div>
+      <!-- Snooze row (hidden until firing) -->
+      <div id="alarm-snooze-row" style="display:none;margin-top:12px;display:none;">
+        <button id="btn-snooze-5" style="width:100%;background:var(--dark-card);border:none;border-radius:var(--r-sm);padding:14px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;">Snooze 5 minutes</button>
+      </div>
+    </div>
+
+    <!-- Firing state (full-screen overlay handled separately) -->
+  </div>
+</div>
+
+<!-- ── ALARM FIRING OVERLAY ── -->
+<div id="alarm-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:var(--burgundy);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px;">
+  <div style="font-size:72px;animation:alarm-pulse 0.6s infinite alternate;">⏰</div>
+  <div style="font-family:var(--serif);font-size:52px;font-weight:300;color:#fff;margin:16px 0 8px;">Time to go!</div>
+  <div id="alarm-overlay-label" style="font-size:18px;color:rgba(255,255,255,.8);margin-bottom:40px;"></div>
+  <button id="btn-dismiss-alarm" style="background:#fff;border:none;border-radius:20px;padding:16px 40px;font-size:18px;font-weight:700;color:var(--burgundy);cursor:pointer;margin-bottom:16px;width:100%;max-width:280px;">Dismiss</button>
+  <button id="btn-snooze-alarm" style="background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.5);border-radius:20px;padding:14px 40px;font-size:16px;font-weight:600;color:#fff;cursor:pointer;width:100%;max-width:280px;">Snooze 5 min</button>
 </div>
 
 <!-- VOYAGE -->
@@ -346,89 +510,106 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
 
 <!-- CLOCKS -->
 <div class="screen" id="s-clocks">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-    <div><div class="eyebrow" style="margin-bottom:2px;">Three Skies</div><div class="big-title" style="margin-bottom:0;">Clocks</div></div>
-    <button id="btn-edit-clocks" class="edit-clocks-toggle" style="margin-top:6px;">Edit</button>
+
+  <!-- Travel mode selector -->
+  <div class="eyebrow" style="margin-bottom:6px;">Travel Mode</div>
+  <div class="j-tabs" style="margin-bottom:18px;">
+    <button class="j-tab active" id="tmode-cruise">&#9875; Cruise</button>
+    <button class="j-tab" id="tmode-land">&#x1F6B6; Land</button>
   </div>
 
   <!-- LIVE view -->
   <div id="clocks-live">
-    <div class="card">
-      <div class="clk-big-wrap">
-        <canvas id="analog" width="92" height="92" style="flex-shrink:0;"></canvas>
-        <div>
-          <div class="clk-lbl"><span class="dot d-ship"></span>SHIP TIME</div>
+    <!-- Primary clock card -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div class="clk-lbl" style="margin:0;"><span class="dot d-ship" id="dot-primary"></span><span id="label-primary">SHIP TIME</span></div>
+        <button id="btn-gps-primary" style="background:var(--burgundy-pale);border:none;border-radius:20px;padding:5px 12px;font-size:12px;color:var(--burgundy);cursor:pointer;font-weight:600;">&#x1F4CD; Auto-detect</button>
+      </div>
+      <div class="clk-big-wrap" style="margin-top:8px;">
+        <canvas id="analog" width="100" height="100" style="flex-shrink:0;"></canvas>
+        <div style="flex:1;">
           <div class="clk-big-time" id="clk-ship">--:--</div>
           <div class="clk-sub" id="clk-ship-label">--</div>
         </div>
       </div>
     </div>
-    <div class="eyebrow" style="margin-top:8px;">Other Timezones</div>
-    <div class="card" style="padding:4px 16px;">
+
+    <!-- Secondary clocks -->
+    <div class="eyebrow" style="margin-top:4px;margin-bottom:10px;" id="secondary-clocks-label">Other Timezones</div>
+    <div class="card" style="padding:8px 16px;margin-bottom:12px;">
       <div class="tz-row">
-        <div><div class="tz-name" id="lv-port-name">Port</div><div class="tz-off" id="lv-port-off">--</div></div>
-        <div class="tz-digits" id="clk-port">--:--</div>
+        <div>
+          <div class="tz-name" id="lv-port-name">Port</div>
+          <div class="tz-off" id="lv-port-off">--</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="tz-digits" id="clk-port">--:--</div>
+          <button id="btn-gps-port" style="background:none;border:none;font-size:11px;color:var(--burgundy);cursor:pointer;padding:2px 0;font-weight:600;">&#x1F4CD; detect</button>
+        </div>
       </div>
-      <div class="tz-row">
-        <div><div class="tz-name" id="lv-home-name">Home</div><div class="tz-off" id="lv-home-off">--</div></div>
+      <div class="tz-row" style="border-bottom:none;">
+        <div>
+          <div class="tz-name" id="lv-home-name">Home</div>
+          <div class="tz-off" id="lv-home-off">--</div>
+        </div>
         <div class="tz-digits" id="clk-home">--:--</div>
       </div>
     </div>
+
+    <!-- GPS status -->
+    <div id="gps-status" style="display:none;font-size:13px;color:var(--text-muted);text-align:center;padding:8px;"></div>
+
+    <button id="btn-edit-clocks" class="btn-p" style="margin-top:4px;background:var(--dark-card);">&#9998; Edit Timezones</button>
   </div>
 
   <!-- EDIT view -->
   <div id="clocks-edit" style="display:none;">
-    <div class="eyebrow">Set Timezones</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="eyebrow" style="margin:0;">Set Your Timezones</div>
+      <button id="btn-clocks-cancel" class="link-btn" style="font-size:14px;">Cancel</button>
+    </div>
 
-    <!-- SHIP -->
-    <div class="card" style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+    <!-- Clock 1: Ship/Current -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <span class="dot d-ship"></span>
-        <span style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);">Ship Time</span>
+        <span style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-primary);" id="ed-label-primary">Ship / Current Location</span>
       </div>
-      <input id="ed-ship-name" class="m-inp" type="text" placeholder="Label (e.g. Mediterranean)" style="margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <label style="font-size:12px;color:var(--text-muted);width:80px;flex-shrink:0;">UTC Offset</label>
-        <input id="ed-ship-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="2" style="width:70px;">
-        <span style="font-size:11px;color:var(--text-muted);">or pick:</span>
-        <select id="ed-ship-tz" class="m-inp" style="flex:1;margin:0;padding:8px 10px;font-size:12px;appearance:auto;-webkit-appearance:auto;"></select>
-      </div>
+      <input id="ed-ship-name" class="m-inp" type="text" placeholder="Label (e.g. Mediterranean / Barcelona)">
+      <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:6px;">Choose city / region:</label>
+      <select id="ed-ship-tz" class="m-inp" style="appearance:auto;-webkit-appearance:auto;font-size:15px;"></select>
+      <label style="font-size:13px;color:var(--text-muted);display:block;margin:8px 0 6px;">Or type UTC offset manually:</label>
+      <input id="ed-ship-offset" class="m-inp" type="number" min="-12" max="14" step="0.5" placeholder="e.g. +2 or -5">
     </div>
 
-    <!-- PORT -->
-    <div class="card" style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+    <!-- Clock 2: Port/Destination -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <span class="dot d-port"></span>
-        <span style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);">Port Time</span>
+        <span style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-primary);" id="ed-label-port">Port / Destination</span>
       </div>
-      <input id="ed-port-name" class="m-inp" type="text" placeholder="Label (e.g. Santorini EEST)" style="margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <label style="font-size:12px;color:var(--text-muted);width:80px;flex-shrink:0;">UTC Offset</label>
-        <input id="ed-port-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="3" style="width:70px;">
-        <span style="font-size:11px;color:var(--text-muted);">or pick:</span>
-        <select id="ed-port-tz" class="m-inp" style="flex:1;margin:0;padding:8px 10px;font-size:12px;appearance:auto;-webkit-appearance:auto;"></select>
-      </div>
+      <input id="ed-port-name" class="m-inp" type="text" placeholder="Label (e.g. Santorini / Paris)">
+      <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:6px;">Choose city / region:</label>
+      <select id="ed-port-tz" class="m-inp" style="appearance:auto;-webkit-appearance:auto;font-size:15px;"></select>
+      <label style="font-size:13px;color:var(--text-muted);display:block;margin:8px 0 6px;">Or type UTC offset manually:</label>
+      <input id="ed-port-offset" class="m-inp" type="number" min="-12" max="14" step="0.5" placeholder="e.g. +3">
     </div>
 
-    <!-- HOME -->
+    <!-- Clock 3: Home -->
     <div class="card" style="margin-bottom:16px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <span class="dot d-home"></span>
-        <span style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);">Home Time</span>
+        <span style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-primary);">Home</span>
       </div>
-      <input id="ed-home-name" class="m-inp" type="text" placeholder="Label (e.g. London BST)" style="margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <label style="font-size:12px;color:var(--text-muted);width:80px;flex-shrink:0;">UTC Offset</label>
-        <input id="ed-home-offset" class="tz-offset-input" type="number" min="-12" max="14" step="0.5" value="-5" style="width:70px;">
-        <span style="font-size:11px;color:var(--text-muted);">or pick:</span>
-        <select id="ed-home-tz" class="m-inp" style="flex:1;margin:0;padding:8px 10px;font-size:12px;appearance:auto;-webkit-appearance:auto;"></select>
-      </div>
+      <input id="ed-home-name" class="m-inp" type="text" placeholder="Label (e.g. London / New York)">
+      <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:6px;">Choose city / region:</label>
+      <select id="ed-home-tz" class="m-inp" style="appearance:auto;-webkit-appearance:auto;font-size:15px;"></select>
+      <label style="font-size:13px;color:var(--text-muted);display:block;margin:8px 0 6px;">Or type UTC offset manually:</label>
+      <input id="ed-home-offset" class="m-inp" type="number" min="-12" max="14" step="0.5" placeholder="e.g. -5">
     </div>
 
-    <div style="display:flex;gap:10px;">
-      <button id="btn-clocks-save" class="btn-sm primary" style="flex:1;">Save</button>
-      <button id="btn-clocks-cancel" class="btn-sm ghost" style="flex:1;">Cancel</button>
-    </div>
+    <button id="btn-clocks-save" class="btn-p">Save Timezones</button>
   </div>
 </div>
 
@@ -586,12 +767,96 @@ Multiple voyages and accented characters supported."></textarea>
 // ── HELPERS ──
 function g(id){return document.getElementById(id);}
 function fmt2(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+
+// ── DST-CORRECT time from IANA timezone ID ──
+// Uses Intl.DateTimeFormat which handles BST/GMT, EDT/EST, CEST/CET automatically
+function ianaTime(ianaId){
+  try{
+    var now=new Date();
+    var parts=new Intl.DateTimeFormat('en-GB',{
+      timeZone:ianaId,
+      hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
+    }).formatToParts(now);
+    var h=0,m=0,s=0;
+    parts.forEach(function(p){
+      if(p.type==='hour')h=parseInt(p.value);
+      else if(p.type==='minute')m=parseInt(p.value);
+      else if(p.type==='second')s=parseInt(p.value);
+    });
+    // return a Date-like object with correct hours/minutes for drawing
+    var d=new Date(now);
+    d.setHours(h,m,s,0);
+    return d;
+  }catch(e){
+    // fallback: fixed offset
+    var n=new Date(),u=n.getTime()+n.getTimezoneOffset()*60000;
+    return new Date(u);
+  }
+}
+
+// Get current UTC offset for an IANA tz (handles DST automatically)
+function ianaOffset(ianaId){
+  try{
+    var now=new Date();
+    var utcDate=new Intl.DateTimeFormat('en-GB',{
+      timeZone:ianaId,
+      year:'numeric',month:'numeric',day:'numeric',
+      hour:'numeric',minute:'numeric',hour12:false
+    }).format(now);
+    // Parse formatted local time
+    var parts=new Intl.DateTimeFormat('en-GB',{
+      timeZone:ianaId,
+      hour:'2-digit',minute:'2-digit',hour12:false
+    }).formatToParts(now);
+    var lh=0,lm=0;
+    parts.forEach(function(p){if(p.type==='hour')lh=parseInt(p.value);else if(p.type==='minute')lm=parseInt(p.value);});
+    var utcParts=new Intl.DateTimeFormat('en-GB',{
+      timeZone:'UTC',
+      hour:'2-digit',minute:'2-digit',hour12:false
+    }).formatToParts(now);
+    var uh=0,um=0;
+    utcParts.forEach(function(p){if(p.type==='hour')uh=parseInt(p.value);else if(p.type==='minute')um=parseInt(p.value);});
+    var diff=(lh*60+lm)-(uh*60+um);
+    if(diff>720)diff-=1440; if(diff<-720)diff+=1440;
+    return Math.round(diff/30)/2; // nearest 0.5h
+  }catch(e){return 0;}
+}
+
+// Format UTC offset sign string e.g. "GMT+1", "GMT-5", "GMT+0"
+function fmtOff(ianaId){
+  var o=ianaOffset(ianaId);
+  return 'GMT'+(o>=0?'+':'')+o;
+}
+
+// Legacy tzTime for backward compat (used in progress bar calc)
 function tzTime(off){var n=new Date(),u=n.getTime()+n.getTimezoneOffset()*60000;return new Date(u+off*3600000);}
 
-// ── TIMEZONE SETTINGS (editable) ──
-var tz={ship:2,port:3,home:-5,shipName:'Mediterranean',portName:'Santorini EEST',homeName:'New York EST'};
-function saveTZ(){try{localStorage.setItem('vk_tz',JSON.stringify(tz));}catch(e){}}
-function loadTZ(){try{var d=localStorage.getItem('vk_tz');if(d){var p=JSON.parse(d);tz.ship=p.ship||2;tz.port=p.port||3;tz.home=p.home||-5;tz.shipName=p.shipName||'Mediterranean';tz.portName=p.portName||'Santorini EEST';tz.homeName=p.homeName||'New York EST';}}catch(e){}}
+// ── TIMEZONE SETTINGS — now stores IANA IDs ──
+// ship = primary clock (ship or current location)
+// port = secondary (port/destination)  
+// home = always home
+var tz={
+  ship:'Europe/London',    shipName:'London (BST/GMT)',
+  port:'Europe/Athens',    portName:'Santorini EEST',
+  home:'Europe/London',    homeName:'London',
+  // legacy offsets for progress bar (updated on save)
+  shipOff:1, portOff:3, homeOff:1
+};
+function saveTZ(){
+  try{localStorage.setItem('vk_tz2',JSON.stringify(tz));}catch(e){}
+}
+function loadTZ(){
+  try{
+    var d=localStorage.getItem('vk_tz2');
+    if(d){
+      var p=JSON.parse(d);
+      tz.ship=p.ship||'Europe/London';      tz.shipName=p.shipName||'London';
+      tz.port=p.port||'Europe/Athens';      tz.portName=p.portName||'Santorini';
+      tz.home=p.home||'Europe/London';      tz.homeName=p.homeName||'London';
+      tz.shipOff=p.shipOff||0; tz.portOff=p.portOff||0; tz.homeOff=p.homeOff||0;
+    }
+  }catch(e){}
+}
 loadTZ();
 
 // ── NAV ──
@@ -602,13 +867,12 @@ document.querySelectorAll('#nav button').forEach(function(btn){
     document.querySelectorAll('#nav button').forEach(function(b){b.classList.remove('active');});
     var sc=g('s-'+id);if(sc)sc.classList.add('active');
     btn.classList.add('active');
-    // Re-render dynamic screens when navigated to
     if(id==='vault'){
-      // find which vault tab is currently active and re-render it
       var activeVTab='ins';
-      ['ins','em','doc'].forEach(function(n){if(g('vaultab-'+n)&&g('vaultab-'+n).classList.contains('active'))activeVTab=n;});
+      ['ins','em','notes'].forEach(function(n){if(g('vaultab-'+n)&&g('vaultab-'+n).classList.contains('active'))activeVTab=n;});
       switchVaultTab(activeVTab);
     }
+    if(id==='clocks') setTimeout(applyTravelMode, 50);
   });
 });
 
@@ -755,65 +1019,465 @@ function renderItin(){
 }
 renderItin();
 
-// ── TIMEZONE LIST for picker ──
+// ── FULL WORLD TIMEZONE LIST ──
 var TZ_LIST=[
-  {l:'UTC',o:0},{l:'London (GMT/BST)',o:0},{l:'Lisbon (WET/WEST)',o:0},
-  {l:'Paris / Rome / Madrid (CET)',o:1},{l:'Amsterdam / Brussels (CET)',o:1},
-  {l:'Athens / Helsinki (EET)',o:2},{l:'Istanbul (TRT)',o:3},
-  {l:'Moscow (MSK)',o:3},{l:'Dubai (GST)',o:4},{l:'Karachi (PKT)',o:5},
-  {l:'Mumbai / Delhi (IST)',o:5.5},{l:'Dhaka (BST)',o:6},
-  {l:'Bangkok / Jakarta (ICT)',o:7},{l:'Singapore / HK (SGT)',o:8},
-  {l:'Tokyo (JST)',o:9},{l:'Sydney (AEST)',o:10},{l:'Auckland (NZST)',o:12},
-  {l:'Azores (AZOT)',o:-1},{l:'Cape Verde (CVT)',o:-1},
-  {l:'New York (EST/EDT)',o:-5},{l:'Chicago (CST/CDT)',o:-6},
-  {l:'Denver (MST/MDT)',o:-7},{l:'Los Angeles (PST/PDT)',o:-8},
-  {l:'Anchorage (AKST)',o:-9},{l:'Honolulu (HST)',o:-10},
-  {l:'Buenos Aires (ART)',o:-3},{l:'São Paulo (BRT)',o:-3},
-  {l:'Casablanca (WET)',o:0},{l:'Cairo (EET)',o:2},
-  {l:'Nairobi (EAT)',o:3},{l:'Lagos (WAT)',o:1}
+  // UTC / GMT
+  {l:'UTC / GMT',o:0,r:'UTC'},
+  // Europe
+  {l:'London, Dublin (GMT/BST)',o:0,r:'Europe/London'},
+  {l:'Lisbon, Reykjavik',o:0,r:'Europe/Lisbon'},
+  {l:'Paris, Rome, Madrid, Berlin (CET/CEST)',o:1,r:'Europe/Paris'},
+  {l:'Amsterdam, Brussels, Vienna (CET)',o:1,r:'Europe/Amsterdam'},
+  {l:'Stockholm, Oslo, Copenhagen (CET)',o:1,r:'Europe/Stockholm'},
+  {l:'Zurich, Bern (CET)',o:1,r:'Europe/Zurich'},
+  {l:'Athens, Helsinki, Riga (EET/EEST)',o:2,r:'Europe/Athens'},
+  {l:'Bucharest, Sofia, Vilnius (EET)',o:2,r:'Europe/Bucharest'},
+  {l:'Istanbul, Ankara (TRT)',o:3,r:'Europe/Istanbul'},
+  {l:'Moscow, St Petersburg (MSK)',o:3,r:'Europe/Moscow'},
+  {l:'Minsk (FET)',o:3,r:'Europe/Minsk'},
+  {l:'Azores (AZOT)',o:-1,r:'Atlantic/Azores'},
+  {l:'Cape Verde (CVT)',o:-1,r:'Atlantic/Cape_Verde'},
+  // Middle East & Africa
+  {l:'Dubai, Abu Dhabi (GST)',o:4,r:'Asia/Dubai'},
+  {l:'Riyadh, Kuwait, Aden (AST)',o:3,r:'Asia/Riyadh'},
+  {l:'Tel Aviv, Beirut, Cairo +DST',o:2,r:'Asia/Jerusalem'},
+  {l:'Cairo, Tripoli (EET)',o:2,r:'Africa/Cairo'},
+  {l:'Casablanca, Accra (WET)',o:0,r:'Africa/Casablanca'},
+  {l:'Lagos, Kinshasa (WAT)',o:1,r:'Africa/Lagos'},
+  {l:'Nairobi, Kampala (EAT)',o:3,r:'Africa/Nairobi'},
+  {l:'Johannesburg, Harare (SAST)',o:2,r:'Africa/Johannesburg'},
+  {l:'Addis Ababa, Mogadishu',o:3,r:'Africa/Addis_Ababa'},
+  // Asia
+  {l:'Tehran (IRST)',o:3.5,r:'Asia/Tehran'},
+  {l:'Kabul (AFT)',o:4.5,r:'Asia/Kabul'},
+  {l:'Karachi, Islamabad (PKT)',o:5,r:'Asia/Karachi'},
+  {l:'Mumbai, Delhi, Kolkata (IST)',o:5.5,r:'Asia/Kolkata'},
+  {l:'Kathmandu (NPT)',o:5.75,r:'Asia/Kathmandu'},
+  {l:'Dhaka, Almaty (BST/ALMT)',o:6,r:'Asia/Dhaka'},
+  {l:'Rangoon / Yangon (MMT)',o:6.5,r:'Asia/Rangoon'},
+  {l:'Bangkok, Hanoi, Jakarta (ICT)',o:7,r:'Asia/Bangkok'},
+  {l:'Kuala Lumpur, Singapore (SGT)',o:8,r:'Asia/Singapore'},
+  {l:'Hong Kong, Beijing, Taipei (HKT/CST)',o:8,r:'Asia/Hong_Kong'},
+  {l:'Perth (AWST)',o:8,r:'Australia/Perth'},
+  {l:'Seoul (KST)',o:9,r:'Asia/Seoul'},
+  {l:'Tokyo, Osaka (JST)',o:9,r:'Asia/Tokyo'},
+  {l:'Vladivostok',o:10,r:'Asia/Vladivostok'},
+  // Oceania
+  {l:'Sydney, Melbourne (AEST/AEDT)',o:10,r:'Australia/Sydney'},
+  {l:'Brisbane (AEST)',o:10,r:'Australia/Brisbane'},
+  {l:'Adelaide (ACST)',o:9.5,r:'Australia/Adelaide'},
+  {l:'Darwin (ACST)',o:9.5,r:'Australia/Darwin'},
+  {l:'Auckland, Wellington (NZST)',o:12,r:'Pacific/Auckland'},
+  {l:'Fiji (FJT)',o:12,r:'Pacific/Fiji'},
+  {l:'Honolulu, Hawaii (HST)',o:-10,r:'Pacific/Honolulu'},
+  {l:'Samoa (SST)',o:-11,r:'Pacific/Samoa'},
+  // Americas
+  {l:'Anchorage (AKST/AKDT)',o:-9,r:'America/Anchorage'},
+  {l:'Los Angeles, Seattle (PST/PDT)',o:-8,r:'America/Los_Angeles'},
+  {l:'Phoenix (MST)',o:-7,r:'America/Phoenix'},
+  {l:'Denver, Salt Lake City (MST/MDT)',o:-7,r:'America/Denver'},
+  {l:'Chicago, Dallas (CST/CDT)',o:-6,r:'America/Chicago'},
+  {l:'Mexico City (CST)',o:-6,r:'America/Mexico_City'},
+  {l:'New York, Miami, Toronto (EST/EDT)',o:-5,r:'America/New_York'},
+  {l:'Bogotá, Lima, Quito (COT/PET)',o:-5,r:'America/Bogota'},
+  {l:'Caracas (VET)',o:-4,r:'America/Caracas'},
+  {l:'Halifax, Santo Domingo (AST)',o:-4,r:'America/Halifax'},
+  {l:'Santiago (CLT)',o:-4,r:'America/Santiago'},
+  {l:'Buenos Aires (ART)',o:-3,r:'America/Argentina/Buenos_Aires'},
+  {l:'São Paulo, Rio (BRT)',o:-3,r:'America/Sao_Paulo'},
+  {l:'Newfoundland (NST)',o:-3.5,r:'America/St_Johns'},
+  {l:'Azores',o:-1,r:'Atlantic/Azores'},
+  // Cruise routes specific
+  {l:'Mediterranean (CEST/CET)',o:2,r:'Europe/Rome'},
+  {l:'Caribbean (AST/EST varies)',o:-4,r:'America/Puerto_Rico'},
+  {l:'Baltic Sea (EEST)',o:3,r:'Europe/Helsinki'},
+  {l:'Norwegian Fjords (CEST)',o:2,r:'Europe/Oslo'},
+  {l:'Canary Islands (WET/WEST)',o:0,r:'Atlantic/Canary'},
+  {l:'Bermuda (AST)',o:-4,r:'Atlantic/Bermuda'},
 ];
-function buildTZSelect(selId, currentOffset) {
-  var sel = g(selId); if(!sel) return;
-  sel.innerHTML = '<option value="">— pick city —</option>';
+
+function buildTZSelect(selId, currentOffset){
+  var sel=g(selId); if(!sel) return;
+  sel.innerHTML='<option value="">— search or pick region —</option>';
+  // Group by region
+  var groups={'UTC / GMT':[],'Europe':[],'Middle East & Africa':[],'Asia':[],'Oceania':[],'Americas':[],'Cruise Routes':[]};
   TZ_LIST.forEach(function(z){
-    var opt = document.createElement('option');
-    opt.value = z.o;
-    opt.textContent = z.l + ' (UTC' + (z.o>=0?'+':'')+z.o+')';
-    if(z.o === currentOffset) opt.selected = true;
-    sel.appendChild(opt);
+    var l=z.l.toLowerCase();
+    var grp='UTC / GMT';
+    if(z.r&&z.r.startsWith('Europe'))grp='Europe';
+    else if(z.r&&(z.r.startsWith('Africa')||z.r.startsWith('Asia/Riyadh')||z.r.startsWith('Asia/Jerusalem')||z.r.startsWith('Asia/Dubai')||z.r.startsWith('Asia/Tehran')||z.r.startsWith('Asia/Kabul')||z.r.startsWith('Asia/Karachi')))grp='Middle East & Africa';
+    else if(z.r&&z.r.startsWith('Asia'))grp='Asia';
+    else if(z.r&&(z.r.startsWith('Australia')||z.r.startsWith('Pacific')))grp='Oceania';
+    else if(z.r&&z.r.startsWith('America'))grp='Americas';
+    else if(l.indexOf('mediterranean')!==-1||l.indexOf('caribbean')!==-1||l.indexOf('baltic')!==-1||l.indexOf('norwegian')!==-1||l.indexOf('canary')!==-1||l.indexOf('bermuda')!==-1)grp='Cruise Routes';
+    if(groups[grp])groups[grp].push(z);
   });
-  sel.addEventListener('change', function(){
-    var v = parseFloat(sel.value);
-    if(isNaN(v)) return;
-    // find which clock this select belongs to and update offset input
-    var prefix = selId.replace('ed-','').replace('-tz','');
-    var inp = g('ed-'+prefix+'-offset');
-    if(inp) inp.value = v;
+  Object.keys(groups).forEach(function(grpName){
+    var items=groups[grpName]; if(!items.length) return;
+    var og=document.createElement('optgroup'); og.label=grpName;
+    items.forEach(function(z){
+      var opt=document.createElement('option');
+      opt.value=z.r||String(z.o); // IANA id as value
+      opt.textContent=z.l+' (UTC'+(z.o>=0?'+':'')+z.o+')';
+      if(z.r&&z.r===currentOffset) opt.selected=true;
+      else if(!z.r&&z.o===parseFloat(currentOffset)) opt.selected=true;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  sel.addEventListener('change',function(){
+    var ianaId=sel.value; if(!ianaId) return;
+    // Update offset input to show current DST-correct offset
+    var prefix=selId.replace('ed-','').replace('-tz','');
+    var inp=g('ed-'+prefix+'-offset');
+    if(inp) inp.value=ianaOffset(ianaId);
   });
 }
 
-// ── APPLY TZ LABELS to live display ──
+// ── TRAVEL MODE ──
+var travelMode='cruise'; // 'cruise' or 'land'
+try{var tm=localStorage.getItem('vk_tmode');if(tm)travelMode=tm;}catch(e){}
+function applyTravelMode(){
+  var isCruise=travelMode==='cruise';
+  g('tmode-cruise').classList.toggle('active',isCruise);
+  g('tmode-land').classList.toggle('active',!isCruise);
+  var pl=g('label-primary'); if(pl)pl.textContent=isCruise?'SHIP TIME':'CURRENT LOCATION';
+  var sl=g('secondary-clocks-label'); if(sl)sl.textContent=isCruise?'Other Timezones':'Other Locations';
+  var pn=g('lv-port-name'); if(pn)pn.textContent=isCruise?('Port · '+tz.portName):('Destination · '+tz.portName);
+  var el=g('ed-label-primary'); if(el)el.textContent=isCruise?'Ship / Current Location':'Current Location';
+  var ep=g('ed-label-port'); if(ep)ep.textContent=isCruise?'Port / Destination':'Next Destination';
+  // Today screen label
+  var tl=g('today-date-label'); if(tl)tl.textContent=isCruise?'Today at sea':'Today';
+}
+g('tmode-cruise').addEventListener('click',function(){travelMode='cruise';try{localStorage.setItem('vk_tmode','cruise');}catch(e){}applyTravelMode();});
+g('tmode-land').addEventListener('click',function(){travelMode='land';try{localStorage.setItem('vk_tmode','land');}catch(e){}applyTravelMode();});
+
+// ── GPS / LOCATION DETECTION — uses device IANA tz (DST-correct) ──
+// On mobile, Intl gives the device's own timezone automatically (e.g. Europe/London with BST)
+// GPS gives lat/lon → reverse geocode via open-meteo for city name + correct IANA id
+
+function detectLocationTZ(targetSlot){
+  var status=g('gps-status');
+  if(!navigator.geolocation){
+    // Fallback: use device timezone without GPS
+    useDeviceTZ(targetSlot, status);
+    return;
+  }
+  if(status){status.style.display='block';status.textContent='\u{1F4CD} Getting your location...';}
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      var lat=pos.coords.latitude.toFixed(4), lon=pos.coords.longitude.toFixed(4);
+      // Store coordinates for weather
+      try{localStorage.setItem('vk_lat',lat);localStorage.setItem('vk_lon',lon);}catch(e){}
+      // Step 1: get IANA timezone from open-meteo (free, no API key)
+      var tzUrl='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&timezone=auto&forecast_days=1&hourly=temperature_2m&current_weather=true';
+      fetch(tzUrl)
+        .then(function(r){return r.json();})
+        .then(function(data){
+          var ianaId=data.timezone||'UTC';
+          var city=ianaId.split('/').pop().replace(/_/g,' ');
+          var label=city;
+          // Try to find a nicer label from our TZ_LIST
+          TZ_LIST.forEach(function(z){
+            if(z.r&&z.r===ianaId)label=z.l;
+            else if(z.r&&ianaId.includes(z.r.split('/')[0])){}
+          });
+          setSlotTZ(targetSlot, ianaId, label, status);
+          // Also fetch and store weather
+          var temp=data.current_weather&&data.current_weather.temperature;
+          var code=data.current_weather&&data.current_weather.weathercode;
+          if(temp!==undefined){
+            try{
+              localStorage.setItem('vk_weather',JSON.stringify({
+                temp:Math.round(temp), code:code||0,
+                city:city, ts:Date.now()
+              }));
+            }catch(e){}
+            updateWeatherDisplay();
+          }
+        })
+        .catch(function(){
+          // offline: fall back to device tz + longitude estimate for city
+          useDeviceTZ(targetSlot, status, lat, lon);
+        });
+    },
+    function(err){
+      // Permission denied or unavailable — use device timezone
+      useDeviceTZ(targetSlot, status);
+    },
+    {timeout:8000, enableHighAccuracy:false}
+  );
+}
+
+function useDeviceTZ(targetSlot, status, lat, lon){
+  // Best fallback: device's own Intl timezone (always DST-correct!)
+  var ianaId='UTC';
+  try{ ianaId=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'; }catch(e){}
+  var city=ianaId.split('/').pop().replace(/_/g,' ');
+  var label=city;
+  TZ_LIST.forEach(function(z){if(z.r===ianaId)label=z.l;});
+  setSlotTZ(targetSlot, ianaId, label, status);
+}
+
+function setSlotTZ(slot, ianaId, label, status){
+  if(slot==='primary'){
+    tz.ship=ianaId; tz.shipName=label;
+    tz.shipOff=ianaOffset(ianaId);
+  } else {
+    tz.port=ianaId; tz.portName=label;
+    tz.portOff=ianaOffset(ianaId);
+  }
+  saveTZ(); applyTZLabels(); applyTravelMode();
+  if(status){
+    status.style.display='block';
+    status.textContent='\u2713 Set to '+label+' ('+fmtOff(ianaId)+')';
+    setTimeout(function(){status.style.display='none';},4000);
+  }
+}
+
+g('btn-gps-primary').addEventListener('click',function(){detectLocationTZ('primary');});
+g('btn-gps-port').addEventListener('click',function(){detectLocationTZ('port');});
+
+// ── WEATHER DISPLAY ──
+// ── WEATHER CODES → icons + descriptions ──
+function weatherInfo(code){
+  if(code===0)return{icon:'☀️',desc:'Clear sky'};
+  if(code<=2)return{icon:'⛅',desc:'Partly cloudy'};
+  if(code===3)return{icon:'☁️',desc:'Overcast'};
+  if(code<=45)return{icon:'🌫️',desc:'Foggy'};
+  if(code<=55)return{icon:'🌦️',desc:'Drizzle'};
+  if(code<=65)return{icon:'🌧️',desc:'Rain'};
+  if(code<=77)return{icon:'❄️',desc:'Snow'};
+  if(code<=82)return{icon:'🌦️',desc:'Rain showers'};
+  if(code<=86)return{icon:'🌨️',desc:'Snow showers'};
+  if(code<=99)return{icon:'⛈️',desc:'Thunderstorm'};
+  return{icon:'🌡️',desc:''};
+}
+
+// ── SHOW WEATHER DATA in the card ──
+function showWeatherData(w){
+  var loading=g('weather-loading'), live=g('weather-live'), err=g('weather-error');
+  if(loading)loading.style.display='none';
+  if(err)err.style.display='none';
+  if(!live)return;
+  live.style.display='block';
+  var info=weatherInfo(w.code||0);
+  var ic=g('weather-icon');       if(ic)ic.textContent=info.icon;
+  var tmp=g('weather-temp');      if(tmp)tmp.textContent=w.temp+'°C';
+  var desc=g('weather-desc');     if(desc)desc.textContent=info.desc;
+  var loc=g('today-location-name'); if(loc)loc.textContent=w.city||'--';
+  var tzl=g('today-location-tz');   if(tzl)tzl.textContent=(w.iana?fmtOff(w.iana):'');
+  var fl=g('weather-feels');      if(fl)fl.textContent=w.feels!==undefined?'Feels '+w.feels+'°C':'';
+  var hum=g('weather-humidity');  if(hum)hum.textContent=(w.humidity!==undefined?w.humidity+'%':'--');
+  var wind=g('weather-wind');     if(wind)wind.textContent=(w.wind!==undefined?w.wind+' km/h':'--');
+  var hl=g('weather-high-low');   if(hl)hl.textContent=(w.high!==undefined&&w.low!==undefined?w.high+'/'+w.low+'°':'--/--°');
+  var uv=g('weather-uv');         if(uv)uv.textContent=(w.uv!==undefined?w.uv:'--');
+  var upd=g('weather-updated');
+  if(upd){
+    var t=new Date(w.ts);
+    upd.textContent='Updated '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  }
+  // Also update legacy today-weather element for any code that references it
+  var legacy=g('today-weather');
+  if(legacy){legacy.innerHTML=info.icon+' <strong>'+w.temp+'°C</strong>';legacy.style.display='block';}
+}
+
+function showWeatherError(){
+  var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error');
+  if(loading)loading.style.display='none';
+  if(live)live.style.display='none';
+  if(err)err.style.display='block';
+}
+
+function updateWeatherDisplay(){
+  try{
+    var w=JSON.parse(localStorage.getItem('vk_weather')||'null');
+    if(w&&w.temp!==undefined) showWeatherData(w);
+    else showWeatherError();
+  }catch(e){showWeatherError();}
+}
+
+// ── FETCH FRESH WEATHER from open-meteo (v1 current API) ──
+function fetchWeather(lat, lon, ianaId, cityName){
+  // Use current_weather=true + current= fields (open-meteo 2024+ API)
+  var url='https://api.open-meteo.com/v1/forecast'
+    +'?latitude='+lat+'&longitude='+lon
+    +'&timezone=auto'
+    +'&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,uv_index'
+    +'&daily=temperature_2m_max,temperature_2m_min,uv_index_max'
+    +'&forecast_days=1';
+  return fetch(url)
+    .then(function(r){
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(data){
+      // open-meteo returns data under data.current (new API) or data.current_weather (legacy)
+      var cur = data.current || data.current_weather || {};
+      var daily = data.daily || {};
+      var w={
+        temp:     Math.round(cur.temperature_2m !== undefined ? cur.temperature_2m : (cur.temperature||0)),
+        feels:    cur.apparent_temperature !== undefined ? Math.round(cur.apparent_temperature) : undefined,
+        code:     cur.weather_code !== undefined ? cur.weather_code : (cur.weathercode||0),
+        wind:     cur.wind_speed_10m !== undefined ? Math.round(cur.wind_speed_10m) : (cur.windspeed !== undefined ? Math.round(cur.windspeed) : undefined),
+        humidity: cur.relative_humidity_2m !== undefined ? Math.round(cur.relative_humidity_2m) : undefined,
+        high:     daily.temperature_2m_max ? Math.round(daily.temperature_2m_max[0]) : undefined,
+        low:      daily.temperature_2m_min ? Math.round(daily.temperature_2m_min[0]) : undefined,
+        uv:       cur.uv_index !== undefined ? Math.round(cur.uv_index) : (daily.uv_index_max ? Math.round(daily.uv_index_max[0]) : undefined),
+        city:     cityName || '',
+        iana:     ianaId || data.timezone || 'UTC',
+        ts:       Date.now()
+      };
+      try{localStorage.setItem('vk_weather',JSON.stringify(w));}catch(e){}
+      showWeatherData(w);
+      return w;
+    });
+}
+
+// ── GET LOCATION VIA IP (works on file://, no GPS needed) ──
+// Uses ip-api.com — free, no API key, works without GPS permission
+function fetchWeatherByIP(){
+  return fetch('https://ip-api.com/json/?fields=lat,lon,city,timezone')
+    .then(function(r){return r.json();})
+    .then(function(geo){
+      if(!geo.lat)throw new Error('no location');
+      var lat=geo.lat.toFixed(4), lon=geo.lon.toFixed(4);
+      var city=geo.city||'Unknown';
+      var iana=geo.timezone||Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+      try{localStorage.setItem('vk_lat',lat);localStorage.setItem('vk_lon',lon);}catch(e){}
+      return fetchWeather(lat, lon, iana, city);
+    });
+}
+
+// ── AUTO-DETECT location + weather ──
+// Strategy: GPS first → IP geolocation fallback → device TZ fallback
+function autoDetectWeather(){
+  var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error');
+  if(loading)loading.style.display='flex';
+  if(live)live.style.display='none';
+  if(err)err.style.display='none';
+
+  function onWeatherSuccess(w){
+    // Sync ship/primary clock to detected location
+    if(w.iana){
+      tz.ship=w.iana;
+      tz.shipName=w.city||w.iana.split('/').pop().replace(/_/g,' ');
+      tz.shipOff=ianaOffset(w.iana);
+      saveTZ(); applyTZLabels();
+    }
+  }
+
+  function fallbackToIP(){
+    // No GPS or permission denied — try IP geolocation (works everywhere incl. file://)
+    fetchWeatherByIP()
+      .then(function(w){ onWeatherSuccess(w); })
+      .catch(function(){
+        // Completely offline — show cached or device TZ
+        updateWeatherDisplay();
+        var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+        var city=devTZ.split('/').pop().replace(/_/g,' ');
+        var lo=g('today-location-name'),ltz=g('today-location-tz');
+        if(lo)lo.textContent=city+' (offline)';
+        if(ltz)ltz.textContent=fmtOff(devTZ);
+        if(loading)loading.style.display='none';
+        // show error only if no cached data
+        try{
+          var cached=JSON.parse(localStorage.getItem('vk_weather')||'null');
+          if(!cached) showWeatherError();
+        }catch(e){showWeatherError();}
+      });
+  }
+
+  if(!navigator.geolocation){
+    fallbackToIP();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      var lat=pos.coords.latitude.toFixed(4), lon=pos.coords.longitude.toFixed(4);
+      try{localStorage.setItem('vk_lat',lat);localStorage.setItem('vk_lon',lon);}catch(e){}
+      var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+      var city=devTZ.split('/').pop().replace(/_/g,' ');
+      fetchWeather(lat, lon, devTZ, city)
+        .then(function(w){ onWeatherSuccess(w); })
+        .catch(function(){ fallbackToIP(); });
+    },
+    function(err2){
+      // GPS denied or unavailable — fall back to IP
+      fallbackToIP();
+    },
+    {timeout:8000, enableHighAccuracy:false}
+  );
+}
+
+// ── REFRESH WEATHER every 30 minutes ──
+var weatherRefreshInterval=null;
+function startWeatherRefresh(){
+  clearInterval(weatherRefreshInterval);
+  weatherRefreshInterval=setInterval(function(){
+    try{
+      var lat=localStorage.getItem('vk_lat'), lon=localStorage.getItem('vk_lon');
+      if(lat&&lon){
+        var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+        fetchWeather(lat, lon, devTZ, devTZ.split('/').pop().replace(/_/g,' ')).catch(function(){});
+      }
+    }catch(e){}
+  }, 30*60*1000); // 30 minutes
+}
+
+// ── DETECT BUTTON (manual trigger) ──
+function wireDetectButton(id){
+  var btn=g(id); if(!btn) return;
+  btn.addEventListener('click',function(){
+    var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error');
+    if(loading)loading.style.display='flex';
+    if(live)live.style.display='none';
+    if(err)err.style.display='none';
+    autoDetectWeather();
+  });
+}
+wireDetectButton('btn-today-detect');
+var retryBtn=g('btn-retry-weather');
+if(retryBtn)retryBtn.addEventListener('click',autoDetectWeather);
+
+// ── INIT WEATHER on page load ──
+(function initWeather(){
+  // Show cached immediately if fresh enough (< 30 min)
+  try{
+    var w=JSON.parse(localStorage.getItem('vk_weather')||'null');
+    if(w&&(Date.now()-w.ts)<1800000){
+      showWeatherData(w); // show cached right away
+    }
+  }catch(e){}
+  // Always try to get fresh data
+  autoDetectWeather();
+  startWeatherRefresh();
+})();
+
+// ── APPLY TZ LABELS to live display (DST-aware via IANA) ──
 function applyTZLabels(){
-  var sign=function(n){return n>=0?'GMT+'+n:'GMT'+n;};
   var se=g('clk-ship-label');
-  if(se)se.innerHTML=tz.shipName+' <span style="color:var(--text-muted);font-size:11px;">&middot; '+sign(tz.ship)+'</span>';
+  if(se)se.innerHTML=tz.shipName+' <span style="color:var(--text-muted);font-size:12px;">&middot; '+fmtOff(tz.ship)+'</span>';
   var pn=g('lv-port-name');if(pn)pn.textContent='Port \u00b7 '+tz.portName;
-  var po=g('lv-port-off');if(po)po.textContent=sign(tz.port);
+  var po=g('lv-port-off');if(po)po.textContent=fmtOff(tz.port);
   var hn=g('lv-home-name');if(hn)hn.textContent='Home \u00b7 '+tz.homeName;
-  var ho=g('lv-home-off');if(ho)ho.textContent=sign(tz.home);
-  // Today screen clock labels
-  var sl=g('t-ship-lbl');if(sl)sl.textContent=tz.shipName.split(' ')[0]||'Ship';
-  var pl=g('t-port-lbl');if(pl)pl.textContent=tz.portName.split(' ')[0]||'Port';
-  var hl=g('t-home-lbl');if(hl)hl.textContent=tz.homeName.split(' ')[0]||'Home';
+  var ho=g('lv-home-off');if(ho)ho.textContent=fmtOff(tz.home);
+  // Today screen clock labels — live DST offset
+  var sl=g('t-ship-lbl');if(sl)sl.textContent=fmtOff(tz.ship);
+  var pl=g('t-port-lbl');if(pl)pl.textContent=fmtOff(tz.port);
+  var hl=g('t-home-lbl');if(hl)hl.textContent=fmtOff(tz.home);
 }
 applyTZLabels();
 
-// ── TICK — update all clocks every second ──
+// ── TICK — DST-correct, updates every second ──
 function tick(){
-  var ship=tzTime(tz.ship),port=tzTime(tz.port),home=tzTime(tz.home);
+  var ship=ianaTime(tz.ship),port=ianaTime(tz.port),home=ianaTime(tz.home);
   function set(id,v){var e=g(id);if(e)e.textContent=v;}
   set('t-ship',fmt2(ship));set('t-port',fmt2(port));set('t-home',fmt2(home));
   set('clk-ship',fmt2(ship));set('clk-port',fmt2(port));set('clk-home',fmt2(home));
+  // Re-apply offset labels every minute (handles DST transitions)
+  if(ship.getSeconds&&ship.getSeconds()===0) applyTZLabels();
   drawClock(ship);
   updateTodayPage();
 }
@@ -974,40 +1638,89 @@ setInterval(tick, 1000);
 updateTodayPage();
 
 // ── CLOCKS EDIT ──
-var editingClocks=false;
-g('btn-edit-clocks').addEventListener('click',function(){
-  editingClocks=!editingClocks;
-  g('clocks-live').style.display=editingClocks?'none':'block';
-  g('clocks-edit').style.display=editingClocks?'block':'none';
-  g('btn-edit-clocks').textContent=editingClocks?'Cancel':'Edit';
-  if(editingClocks){
-    g('ed-ship-offset').value=tz.ship; g('ed-ship-name').value=tz.shipName;
-    g('ed-port-offset').value=tz.port; g('ed-port-name').value=tz.portName;
-    g('ed-home-offset').value=tz.home; g('ed-home-name').value=tz.homeName;
-    buildTZSelect('ed-ship-tz', tz.ship);
-    buildTZSelect('ed-port-tz', tz.port);
-    buildTZSelect('ed-home-tz', tz.home);
-  }
-});
+function openClocksEdit(){
+  g('clocks-live').style.display='none';
+  g('clocks-edit').style.display='block';
+  // Show IANA id (or offset) in offset field as read-only info
+  g('ed-ship-offset').value=ianaOffset(tz.ship); g('ed-ship-name').value=tz.shipName;
+  g('ed-port-offset').value=ianaOffset(tz.port); g('ed-port-name').value=tz.portName;
+  g('ed-home-offset').value=ianaOffset(tz.home); g('ed-home-name').value=tz.homeName;
+  buildTZSelect('ed-ship-tz', tz.ship);
+  buildTZSelect('ed-port-tz', tz.port);
+  buildTZSelect('ed-home-tz', tz.home);
+  applyTravelMode();
+}
+function closeClocksEdit(){
+  g('clocks-live').style.display='block';
+  g('clocks-edit').style.display='none';
+}
+g('btn-edit-clocks').addEventListener('click',openClocksEdit);
 g('btn-clocks-save').addEventListener('click',function(){
-  tz.ship=parseFloat(g('ed-ship-offset').value)||0;
-  tz.port=parseFloat(g('ed-port-offset').value)||0;
-  tz.home=parseFloat(g('ed-home-offset').value)||0;
-  tz.shipName=(g('ed-ship-name').value||'Ship').trim();
-  tz.portName=(g('ed-port-name').value||'Port').trim();
-  tz.homeName=(g('ed-home-name').value||'Home').trim();
-  saveTZ(); applyTZLabels();
-  editingClocks=false;
-  g('clocks-live').style.display='block';
-  g('clocks-edit').style.display='none';
-  g('btn-edit-clocks').textContent='Edit';
+  // Priority: dropdown (IANA id) > manual offset number input
+  function applySlot(selId, offId, nameId, slotKey, nameKey, offKey){
+    var sel=g(selId), offInp=g(offId), nameInp=g(nameId);
+    var selVal=sel?sel.value:''; // IANA id from dropdown
+    if(selVal && selVal!==''){
+      // User picked from dropdown — use IANA id
+      var label=sel.options[sel.selectedIndex]&&sel.options[sel.selectedIndex].textContent.split(' (')[0];
+      var customName=nameInp&&nameInp.value.trim();
+      tz[slotKey]=selVal;
+      tz[nameKey]=customName||label||selVal.split('/').pop().replace(/_/g,' ');
+      tz[offKey]=ianaOffset(selVal);
+    } else if(offInp&&offInp.value!==''){
+      // User typed a manual UTC offset — convert to closest IANA id
+      var manOff=parseFloat(offInp.value);
+      if(!isNaN(manOff)){
+        var best=null,bestD=99;
+        TZ_LIST.forEach(function(z){
+          var d=Math.abs((z.o||0)-manOff);
+          if(d<bestD){bestD=d;best=z;}
+        });
+        var ianaId=best&&best.r?best.r:'UTC';
+        var customName2=nameInp&&nameInp.value.trim();
+        tz[slotKey]=ianaId;
+        tz[nameKey]=customName2||(best?best.l:ianaId);
+        tz[offKey]=manOff;
+      }
+    }
+  }
+  applySlot('ed-ship-tz','ed-ship-offset','ed-ship-name','ship','shipName','shipOff');
+  applySlot('ed-port-tz','ed-port-offset','ed-port-name','port','portName','portOff');
+  applySlot('ed-home-tz','ed-home-offset','ed-home-name','home','homeName','homeOff');
+  saveTZ(); applyTZLabels(); applyTravelMode();
+  closeClocksEdit();
 });
-g('btn-clocks-cancel').addEventListener('click',function(){
-  editingClocks=false;
-  g('clocks-live').style.display='block';
-  g('clocks-edit').style.display='none';
-  g('btn-edit-clocks').textContent='Edit';
-});
+g('btn-clocks-cancel').addEventListener('click',closeClocksEdit);
+
+// ── TODAY LOCATION init (handled by initWeather above) ──
+// Legacy init block — kept for backward compat
+(function(){
+  try{
+    var loc=g('today-location-name');
+    if(loc&&loc.textContent==='Detecting location...'||loc&&!loc.textContent){
+      var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+      loc.textContent=devTZ.split('/').pop().replace(/_/g,' ');
+    }
+  }catch(e){}
+})();
+
+// Init travel mode + auto-detect device timezone for home on first load
+(function(){
+  applyTravelMode();
+  // On first ever launch, set home to device's own timezone
+  try{
+    var saved=localStorage.getItem('vk_tz2');
+    if(!saved){
+      var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+      var devCity=devTZ.split('/').pop().replace(/_/g,' ');
+      var devLabel=devCity;
+      TZ_LIST.forEach(function(z){if(z.r===devTZ)devLabel=z.l;});
+      tz.home=devTZ; tz.homeName=devLabel; tz.homeOff=ianaOffset(devTZ);
+      saveTZ(); applyTZLabels();
+    }
+  }catch(e){}
+  // Fetch weather if we have cached coords — now handled by initWeather()
+})();
 
 // ── MODAL ──
 var overlay=g('modal-overlay'),mTitle=g('modal-title'),mBody=g('modal-body');
@@ -1604,9 +2317,346 @@ var tpls={
 });
 
 // ── SERVICE WORKER (offline) ──
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+// ══════════════════════════════════════════════════
+// ── ALARM SYSTEM ──
+// ══════════════════════════════════════════════════
+var alarm = {
+  active: false,
+  timeStr: '',   // "HH:MM" in ship time
+  label: '',
+  tsMillis: 0,   // absolute ms when alarm fires (using ship clock)
+  snoozeCount: 0,
+  intervalId: null,
+  audioCtx: null,
+  beepIntervalId: null
+};
 
+// Load saved alarm from localStorage
+function loadAlarm(){
+  try{
+    var a=JSON.parse(localStorage.getItem('vk_alarm')||'null');
+    if(a&&a.active&&a.tsMillis>Date.now()){
+      alarm.active=a.active; alarm.timeStr=a.timeStr;
+      alarm.label=a.label||''; alarm.tsMillis=a.tsMillis;
+      alarm.snoozeCount=a.snoozeCount||0;
+      showAlarmActive();
+    }
+  }catch(e){}
+}
+function saveAlarm(){
+  try{localStorage.setItem('vk_alarm',JSON.stringify({
+    active:alarm.active,timeStr:alarm.timeStr,
+    label:alarm.label,tsMillis:alarm.tsMillis,
+    snoozeCount:alarm.snoozeCount
+  }));}catch(e){}
+}
+function clearAlarmStore(){
+  try{localStorage.removeItem('vk_alarm');}catch(e){}
+}
+
+// Convert ship HH:MM today → absolute UTC ms
+function shipTimeToMs(hhmm){
+  var parts=hhmm.split(':');
+  var h=parseInt(parts[0]), m=parseInt(parts[1]);
+  // Use ship timezone (IANA)
+  var now=new Date();
+  var shipNow=ianaTime(tz.ship);
+  // Build a date string in ship's timezone for today at h:m
+  var y=shipNow.getFullYear(), mo=shipNow.getMonth(), d=shipNow.getDate();
+  // Construct UTC ms: we know ianaOffset gives current offset
+  var off=ianaOffset(tz.ship); // hours e.g. 1 for BST
+  var localMs = Date.UTC(y, mo, d, h, m, 0) - off*3600000;
+  // If that time already passed today, schedule for tomorrow
+  if(localMs <= Date.now()) localMs += 86400000;
+  return localMs;
+}
+
+// Request notification permission
+function requestNotifPermission(cb){
+  if(!('Notification' in window)){cb(false);return;}
+  if(Notification.permission==='granted'){cb(true);return;}
+  Notification.requestPermission().then(function(p){cb(p==='granted');});
+}
+
+// Set alarm from HH:MM string
+function setAlarmTime(hhmm, label){
+  alarm.active=true;
+  alarm.timeStr=hhmm;
+  alarm.label=label||'Return to ship';
+  alarm.tsMillis=shipTimeToMs(hhmm);
+  alarm.snoozeCount=0;
+  saveAlarm();
+  requestNotifPermission(function(){});
+  showAlarmActive();
+  startAlarmCountdown();
+}
+
+// Show active alarm UI
+function showAlarmActive(){
+  var empty=g('alarm-empty'), active=g('alarm-active');
+  if(empty)empty.style.display='none';
+  if(active)active.style.display='block';
+  var at=g('alarm-active-time'); if(at)at.textContent=alarm.timeStr;
+  var al=g('alarm-active-label');
+  if(al)al.textContent=alarm.label+(alarm.snoozeCount>0?' (snoozed ×'+alarm.snoozeCount+')':'');
+}
+
+// Show empty alarm UI
+function showAlarmEmpty(){
+  var empty=g('alarm-empty'), active=g('alarm-active');
+  if(empty)empty.style.display='block';
+  if(active)active.style.display='none';
+}
+
+// Countdown tick
+function startAlarmCountdown(){
+  clearInterval(alarm.intervalId);
+  alarm.intervalId=setInterval(function(){
+    if(!alarm.active){clearInterval(alarm.intervalId);return;}
+    var remaining=alarm.tsMillis-Date.now();
+    if(remaining<=0){
+      clearInterval(alarm.intervalId);
+      fireAlarm();
+      return;
+    }
+    var h=Math.floor(remaining/3600000);
+    var m=Math.floor((remaining%3600000)/60000);
+    var s=Math.floor((remaining%60000)/1000);
+    var cd=g('alarm-countdown');
+    if(cd)cd.textContent=
+      String(h).padStart(2,'0')+':'+
+      String(m).padStart(2,'0')+':'+
+      String(s).padStart(2,'0');
+    // Warn at 15 min
+    if(remaining<=900000&&remaining>899000){
+      sendNotification('⚠️ 15 minutes to go!', alarm.label||'Head back to the ship', false);
+    }
+  },1000);
+}
+
+// ── FIRE THE ALARM ──
+function fireAlarm(){
+  alarm.active=false;
+  clearAlarmStore();
+  // Show full-screen overlay
+  var ov=g('alarm-overlay');
+  if(ov){
+    ov.classList.add('firing');
+    var ol=g('alarm-overlay-label');
+    if(ol)ol.textContent=alarm.label||'Time to return to the ship!';
+  }
+  // Beep
+  startBeeping();
+  // Push notification
+  sendNotification('⏰ '+alarm.timeStr+' — Time to go!', alarm.label||'Return to the ship now', true);
+  // Vibrate if supported
+  try{if(navigator.vibrate)navigator.vibrate([400,200,400,200,400,200,800]);}catch(e){}
+}
+
+// ── WEB AUDIO BEEP ──
+function startBeeping(){
+  stopBeeping();
+  function beep(){
+    try{
+      if(!alarm.audioCtx){
+        alarm.audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      }
+      var ctx=alarm.audioCtx;
+      // Three-tone ascending alarm
+      [[880,0],[1047,0.25],[1318,0.5]].forEach(function(pair){
+        var osc=ctx.createOscillator();
+        var gain=ctx.createGain();
+        osc.type='sine';
+        osc.frequency.setValueAtTime(pair[0],ctx.currentTime+pair[1]);
+        gain.gain.setValueAtTime(0.7,ctx.currentTime+pair[1]);
+        gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+pair[1]+0.4);
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.start(ctx.currentTime+pair[1]);
+        osc.stop(ctx.currentTime+pair[1]+0.45);
+      });
+    }catch(e){}
+  }
+  beep();
+  alarm.beepIntervalId=setInterval(beep,1800);
+}
+function stopBeeping(){
+  clearInterval(alarm.beepIntervalId);
+  alarm.beepIntervalId=null;
+}
+
+// ── PUSH NOTIFICATION ──
+function sendNotification(title, body, requireInteraction){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  try{
+    var opts={body:body,icon:'icon-192.png',badge:'icon-192.png',
+      vibrate:[400,200,400],tag:'vk-alarm'};
+    if(requireInteraction)opts.requireInteraction=true;
+    new Notification(title,opts);
+  }catch(e){
+    // Service worker notifications (more reliable on mobile)
+    if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+      navigator.serviceWorker.ready.then(function(reg){
+        reg.showNotification(title,{body:body,icon:'icon-192.png',
+          vibrate:[400,200,400],tag:'vk-alarm',
+          requireInteraction:!!requireInteraction});
+      }).catch(function(){});
+    }
+  }
+}
+
+// ── DISMISS ──
+function dismissAlarm(){
+  stopBeeping();
+  alarm.active=false;
+  clearAlarmStore();
+  var ov=g('alarm-overlay');
+  if(ov)ov.classList.remove('firing');
+  showAlarmEmpty();
+  clearInterval(alarm.intervalId);
+  var cd=g('alarm-countdown');
+  if(cd)cd.textContent='--:--:--';
+}
+
+// ── SNOOZE 5 min ──
+function snoozeAlarm(){
+  stopBeeping();
+  var ov=g('alarm-overlay');
+  if(ov)ov.classList.remove('firing');
+  alarm.snoozeCount++;
+  alarm.active=true;
+  alarm.tsMillis=Date.now()+5*60*1000;
+  saveAlarm();
+  showAlarmActive();
+  startAlarmCountdown();
+}
+
+// ── WIRE UI ──
+// Preset buttons
+document.querySelectorAll('.alarm-preset').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var mins=parseInt(btn.getAttribute('data-mins')||'60');
+    // Calculate ship time minus X minutes from departure
+    var todayStop=null;
+    var todayNorm=normDate(new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    for(var i=0;i<stops.length;i++){
+      if(normDate(stops[i].date)===todayNorm){todayStop=stops[i];break;}
+    }
+    var hhmm='';
+    if(todayStop&&todayStop.dep){
+      var dp=todayStop.dep.split(':');
+      var dh=parseInt(dp[0]),dm=parseInt(dp[1]);
+      var totalMins=dh*60+dm-mins;
+      if(totalMins<0)totalMins+=1440;
+      hhmm=String(Math.floor(totalMins/60)).padStart(2,'0')+':'+String(totalMins%60).padStart(2,'0');
+    } else {
+      // No itinerary — just set X mins from now in ship time
+      var shipNow=ianaTime(tz.ship);
+      var nowMins=shipNow.getHours()*60+shipNow.getMinutes()+mins;
+      nowMins=nowMins%1440;
+      hhmm=String(Math.floor(nowMins/60)).padStart(2,'0')+':'+String(nowMins%60).padStart(2,'0');
+    }
+    var label=g('alarm-label-input');
+    var lv=label?label.value.trim():'';
+    if(!lv)lv=(todayStop&&todayStop.dep)?'All aboard '+todayStop.dep:'Return to ship';
+    setAlarmTime(hhmm, lv);
+  });
+});
+
+// Set button
+g('btn-set-alarm')&&g('btn-set-alarm').addEventListener('click',function(){
+  var t=g('alarm-time-input');
+  if(!t||!t.value){t&&t.focus();return;}
+  var lv=g('alarm-label-input');
+  setAlarmTime(t.value, (lv?lv.value.trim():'')||'Return to ship');
+});
+
+// Cancel button
+g('btn-cancel-alarm')&&g('btn-cancel-alarm').addEventListener('click',function(){
+  dismissAlarm();
+});
+
+// Dismiss overlay
+g('btn-dismiss-alarm')&&g('btn-dismiss-alarm').addEventListener('click',function(){
+  dismissAlarm();
+});
+
+// Snooze overlay
+g('btn-snooze-alarm')&&g('btn-snooze-alarm').addEventListener('click',function(){
+  snoozeAlarm();
+});
+
+// Pre-fill time input with ship's all-aboard time if known
+(function(){
+  var t=g('alarm-time-input');
+  if(!t)return;
+  var todayNorm=normDate(new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  for(var i=0;i<stops.length;i++){
+    if(normDate(stops[i].date)===todayNorm&&stops[i].dep){
+      // Default to 1hr before departure
+      var dp=stops[i].dep.split(':');
+      var dh=parseInt(dp[0]),dm=parseInt(dp[1]);
+      var pre=(dh*60+dm-60+1440)%1440;
+      t.value=String(Math.floor(pre/60)).padStart(2,'0')+':'+String(pre%60).padStart(2,'0');
+      var ll=g('alarm-label-input');
+      if(ll&&!ll.value)ll.value='All aboard '+stops[i].dep;
+      break;
+    }
+  }
 })();
+
+// Load any saved alarm on startup
+loadAlarm();
+
+// ══════════════════════════════════════════════════
+
+// ── OFFLINE / ONLINE DETECTION ──
+function updateOnlineStatus(){
+  var banner = g('offline-banner');
+  if(!banner) return;
+  if(!navigator.onLine){
+    banner.style.display = 'block';
+    // Push screens down to make room for banner
+    document.querySelectorAll('.screen').forEach(function(s){
+      s.style.paddingTop = '52px';
+    });
+  } else {
+    banner.style.display = 'none';
+    document.querySelectorAll('.screen').forEach(function(s){
+      s.style.paddingTop = '20px';
+    });
+    // Back online — refresh weather silently
+    try{
+      var lat=localStorage.getItem('vk_lat'), lon=localStorage.getItem('vk_lon');
+      if(lat && lon){
+        var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+        fetchWeather(lat, lon, devTZ, devTZ.split('/').pop().replace(/_/g,' ')).catch(function(){});
+      }
+    }catch(ex){}
+  }
+}
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus(); // check immediately on load
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(function(reg){
+    // When a new SW is waiting, reload to apply it
+    reg.addEventListener('updatefound', function(){
+      var newWorker = reg.installing;
+      if(newWorker){
+        newWorker.addEventListener('statechange', function(){
+          if(newWorker.state==='installed' && navigator.serviceWorker.controller){
+            // New version ready — silently apply
+            newWorker.postMessage({action:'skipWaiting'});
+          }
+        });
+      }
+    });
+  }).catch(function(){});
+}
+
+})(); // end IIFE
 </script>
 </body>
 </html>
