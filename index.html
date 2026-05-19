@@ -309,7 +309,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
           <div id="today-location-name" style="font-size:15px;font-weight:700;color:var(--text-primary);"></div>
           <div id="today-location-tz" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
           <div id="weather-feels" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
-          <button id="btn-today-detect" style="display:none;"></button><!-- hidden duplicate for JS compat -->
+          <!-- detect handled by main button -->
         </div>
       </div>
       <!-- Extra weather row -->
@@ -470,14 +470,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);font-fa
   </div>
 </div>
 
-<!-- ── ALARM FIRING OVERLAY ── -->
-<div id="alarm-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:var(--burgundy);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px;">
-  <div style="font-size:72px;animation:alarm-pulse 0.6s infinite alternate;">⏰</div>
-  <div style="font-family:var(--serif);font-size:52px;font-weight:300;color:#fff;margin:16px 0 8px;">Time to go!</div>
-  <div id="alarm-overlay-label" style="font-size:18px;color:rgba(255,255,255,.8);margin-bottom:40px;"></div>
-  <button id="btn-dismiss-alarm" style="background:#fff;border:none;border-radius:20px;padding:16px 40px;font-size:18px;font-weight:700;color:var(--burgundy);cursor:pointer;margin-bottom:16px;width:100%;max-width:280px;">Dismiss</button>
-  <button id="btn-snooze-alarm" style="background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.5);border-radius:20px;padding:14px 40px;font-size:16px;font-weight:600;color:#fff;cursor:pointer;width:100%;max-width:280px;">Snooze 5 min</button>
-</div>
+
 
 <!-- VOYAGE -->
 <div class="screen" id="s-voyage">
@@ -825,1062 +818,337 @@ Multiple voyages and accented characters supported."></textarea>
 </nav>
 </div><!-- #app -->
 
+<!-- ── ALARM FIRING OVERLAY ── -->
+<div id="alarm-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:var(--burgundy);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px;">
+  <div style="font-size:72px;animation:alarm-pulse 0.6s infinite alternate;">⏰</div>
+  <div style="font-family:var(--serif);font-size:52px;font-weight:300;color:#fff;margin:16px 0 8px;">Time to go!</div>
+  <div id="alarm-overlay-label" style="font-size:18px;color:rgba(255,255,255,.8);margin-bottom:40px;"></div>
+  <button id="btn-dismiss-alarm" style="background:#fff;border:none;border-radius:20px;padding:16px 40px;font-size:18px;font-weight:700;color:var(--burgundy);cursor:pointer;margin-bottom:16px;width:100%;max-width:280px;">Dismiss</button>
+  <button id="btn-snooze-alarm" style="background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.5);border-radius:20px;padding:14px 40px;font-size:16px;font-weight:600;color:#fff;cursor:pointer;width:100%;max-width:280px;">Snooze 5 min</button>
+</div>
+
 <script>
 (function(){
 'use strict';
 
-// ── HELPERS ──
-function g(id){return document.getElementById(id);}
-function fmt2(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+/* ════════════════════════════════════════════════════════
+   VOYAGEKEEPER — clean single script, correct order
+   1. Helpers & data
+   2. Persistence (load on startup, save on every change)
+   3. Render functions
+   4. UI wiring
+   5. Clocks / weather
+   6. Init
+   ════════════════════════════════════════════════════════ */
 
-// ── DST-CORRECT time from IANA timezone ID ──
-// Uses Intl.DateTimeFormat which handles BST/GMT, EDT/EST, CEST/CET automatically
-function ianaTime(ianaId){
+// ── 1. HELPERS ──────────────────────────────────────────
+function g(id){ return document.getElementById(id); }
+function fmt2(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function escH(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escA(s){ return (s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function ianaTime(id){
   try{
     var now=new Date();
-    var parts=new Intl.DateTimeFormat('en-GB',{
-      timeZone:ianaId,
-      hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
-    }).formatToParts(now);
+    var parts=new Intl.DateTimeFormat('en-GB',{timeZone:id,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(now);
     var h=0,m=0,s=0;
-    parts.forEach(function(p){
-      if(p.type==='hour')h=parseInt(p.value);
-      else if(p.type==='minute')m=parseInt(p.value);
-      else if(p.type==='second')s=parseInt(p.value);
-    });
-    // return a Date-like object with correct hours/minutes for drawing
-    var d=new Date(now);
-    d.setHours(h,m,s,0);
-    return d;
-  }catch(e){
-    // fallback: fixed offset
-    var n=new Date(),u=n.getTime()+n.getTimezoneOffset()*60000;
-    return new Date(u);
-  }
+    parts.forEach(function(p){if(p.type==='hour')h=+p.value;else if(p.type==='minute')m=+p.value;else if(p.type==='second')s=+p.value;});
+    var d=new Date(now); d.setHours(h,m,s,0); return d;
+  }catch(e){ return new Date(); }
 }
-
-// Get current UTC offset for an IANA tz (handles DST automatically)
-function ianaOffset(ianaId){
+function ianaOffset(id){
   try{
     var now=new Date();
-    var utcDate=new Intl.DateTimeFormat('en-GB',{
-      timeZone:ianaId,
-      year:'numeric',month:'numeric',day:'numeric',
-      hour:'numeric',minute:'numeric',hour12:false
-    }).format(now);
-    // Parse formatted local time
-    var parts=new Intl.DateTimeFormat('en-GB',{
-      timeZone:ianaId,
-      hour:'2-digit',minute:'2-digit',hour12:false
-    }).formatToParts(now);
-    var lh=0,lm=0;
-    parts.forEach(function(p){if(p.type==='hour')lh=parseInt(p.value);else if(p.type==='minute')lm=parseInt(p.value);});
-    var utcParts=new Intl.DateTimeFormat('en-GB',{
-      timeZone:'UTC',
-      hour:'2-digit',minute:'2-digit',hour12:false
-    }).formatToParts(now);
-    var uh=0,um=0;
-    utcParts.forEach(function(p){if(p.type==='hour')uh=parseInt(p.value);else if(p.type==='minute')um=parseInt(p.value);});
-    var diff=(lh*60+lm)-(uh*60+um);
-    if(diff>720)diff-=1440; if(diff<-720)diff+=1440;
-    return Math.round(diff/30)/2; // nearest 0.5h
-  }catch(e){return 0;}
+    function getHM(tzId){ var p=new Intl.DateTimeFormat('en-GB',{timeZone:tzId,hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(now); var h=0,m=0; p.forEach(function(x){if(x.type==='hour')h=+x.value;if(x.type==='minute')m=+x.value;}); return h*60+m; }
+    var diff=getHM(id)-getHM('UTC'); if(diff>720)diff-=1440; if(diff<-720)diff+=1440;
+    return Math.round(diff/30)/2;
+  }catch(e){ return 0; }
+}
+function fmtOff(id){ var o=ianaOffset(id); return 'GMT'+(o>=0?'+':'')+o; }
+function tzTime(off){ var n=new Date(),u=n.getTime()+n.getTimezoneOffset()*60000; return new Date(u+off*3600000); }
+function normDate(s){ return (s||'').replace(/\s+/g,' ').trim().toLowerCase().replace(/(\w+)\s+0?(\d+)/,'$1 $2'); }
+function parseStopDate(ds){ try{ var d=new Date(ds+' '+new Date().getFullYear()); return isNaN(d)?null:d; }catch(e){ return null; } }
+
+// ── 2. PERSISTENT DATA ──────────────────────────────────
+// Keys
+var KEY_STOPS   = 'vk_stops_v3';
+var KEY_VAULT   = 'vk_vault_v3';
+var KEY_JOURNAL = 'vk_journal_v3';
+var KEY_TZ      = 'vk_tz2';
+var KEY_TMODE   = 'vk_tmode';
+
+// Stops
+var stops = [];
+function saveStops(){ try{ localStorage.setItem(KEY_STOPS,JSON.stringify(stops)); }catch(e){} }
+function loadStops(){ try{ var d=localStorage.getItem(KEY_STOPS); if(d){ stops=JSON.parse(d); return; } }catch(e){} stops=[]; }
+
+// Vault
+var vaultIns=[], vaultEm=[], vaultNotes=[], nextVid=100;
+function saveVault(){ try{ localStorage.setItem(KEY_VAULT,JSON.stringify({ins:vaultIns,em:vaultEm,notes:vaultNotes,nextVid:nextVid})); }catch(e){} }
+function loadVault(){
+  try{ var d=localStorage.getItem(KEY_VAULT); if(d){ var p=JSON.parse(d); vaultIns=p.ins||[]; vaultEm=p.em||[]; vaultNotes=p.notes||[]; nextVid=p.nextVid||100; return; } }catch(e){}
+  vaultIns=[]; vaultEm=[]; vaultNotes=[]; nextVid=100;
 }
 
-// Format UTC offset sign string e.g. "GMT+1", "GMT-5", "GMT+0"
-function fmtOff(ianaId){
-  var o=ianaOffset(ianaId);
-  return 'GMT'+(o>=0?'+':'')+o;
-}
+// Journal
+var jEntries=[], nextJid=1;
+function saveJournal(){ try{ localStorage.setItem(KEY_JOURNAL,JSON.stringify({entries:jEntries,nextJid:nextJid})); }catch(e){} }
+function loadJournal(){ try{ var d=localStorage.getItem(KEY_JOURNAL); if(d){ var p=JSON.parse(d); jEntries=p.entries||[]; nextJid=p.nextJid||1; return; } }catch(e){} jEntries=[]; nextJid=1; }
 
-// Legacy tzTime for backward compat (used in progress bar calc)
-function tzTime(off){var n=new Date(),u=n.getTime()+n.getTimezoneOffset()*60000;return new Date(u+off*3600000);}
+// Timezones
+var tz={ ship:'Europe/London', shipName:'London', port:'Europe/Athens', portName:'Athens', home:'Europe/London', homeName:'London', shipOff:1, portOff:3, homeOff:0 };
+function saveTZ(){ try{ localStorage.setItem(KEY_TZ,JSON.stringify(tz)); }catch(e){} }
+function loadTZ(){ try{ var d=localStorage.getItem(KEY_TZ); if(d){ var p=JSON.parse(d); Object.keys(p).forEach(function(k){ tz[k]=p[k]; }); } }catch(e){} }
 
-// ── TIMEZONE SETTINGS — now stores IANA IDs ──
-// ship = primary clock (ship or current location)
-// port = secondary (port/destination)  
-// home = always home
-var tz={
-  ship:'Europe/London',    shipName:'London (BST/GMT)',
-  port:'Europe/Athens',    portName:'Santorini EEST',
-  home:'Europe/London',    homeName:'London',
-  // legacy offsets for progress bar (updated on save)
-  shipOff:1, portOff:3, homeOff:1
-};
-function saveTZ(){
-  try{localStorage.setItem('vk_tz2',JSON.stringify(tz));}catch(e){}
-}
-function loadTZ(){
-  try{
-    var d=localStorage.getItem('vk_tz2');
-    if(d){
-      var p=JSON.parse(d);
-      tz.ship=p.ship||'Europe/London';      tz.shipName=p.shipName||'London';
-      tz.port=p.port||'Europe/Athens';      tz.portName=p.portName||'Santorini';
-      tz.home=p.home||'Europe/London';      tz.homeName=p.homeName||'London';
-      tz.shipOff=p.shipOff||0; tz.portOff=p.portOff||0; tz.homeOff=p.homeOff||0;
-    }
-  }catch(e){}
-}
+// Travel mode
+var travelMode='cruise';
+function saveTMode(){ try{ localStorage.setItem(KEY_TMODE,travelMode); }catch(e){} }
+function loadTMode(){ try{ var v=localStorage.getItem(KEY_TMODE); if(v)travelMode=v; }catch(e){} }
+
+// LOAD ALL on startup
+loadStops();
+loadVault();
+loadJournal();
 loadTZ();
+loadTMode();
 
-// ── NAV ──
+// ── 3. TZ LIST ───────────────────────────────────────────
+var TZ_LIST=[
+  {l:'UTC / GMT',o:0,r:'UTC'},
+  {l:'London, Dublin (GMT/BST)',o:0,r:'Europe/London'},
+  {l:'Lisbon (WET/WEST)',o:0,r:'Europe/Lisbon'},
+  {l:'Canary Islands (WET/WEST)',o:0,r:'Atlantic/Canary'},
+  {l:'Paris, Rome, Berlin (CET/CEST)',o:1,r:'Europe/Paris'},
+  {l:'Amsterdam, Brussels (CET)',o:1,r:'Europe/Amsterdam'},
+  {l:'Stockholm, Oslo (CET)',o:1,r:'Europe/Stockholm'},
+  {l:'Athens, Helsinki (EET/EEST)',o:2,r:'Europe/Athens'},
+  {l:'Bucharest, Sofia (EET)',o:2,r:'Europe/Bucharest'},
+  {l:'Istanbul (TRT)',o:3,r:'Europe/Istanbul'},
+  {l:'Moscow (MSK)',o:3,r:'Europe/Moscow'},
+  {l:'Mediterranean Sea (CEST)',o:2,r:'Europe/Rome'},
+  {l:'Norwegian Fjords (CEST)',o:2,r:'Europe/Oslo'},
+  {l:'Baltic Sea (EEST)',o:3,r:'Europe/Helsinki'},
+  {l:'Dubai, Abu Dhabi (GST)',o:4,r:'Asia/Dubai'},
+  {l:'Riyadh, Kuwait (AST)',o:3,r:'Asia/Riyadh'},
+  {l:'Cairo (EET)',o:2,r:'Africa/Cairo'},
+  {l:'Casablanca (WET)',o:0,r:'Africa/Casablanca'},
+  {l:'Lagos (WAT)',o:1,r:'Africa/Lagos'},
+  {l:'Nairobi (EAT)',o:3,r:'Africa/Nairobi'},
+  {l:'Johannesburg (SAST)',o:2,r:'Africa/Johannesburg'},
+  {l:'Tehran (IRST)',o:3.5,r:'Asia/Tehran'},
+  {l:'Karachi (PKT)',o:5,r:'Asia/Karachi'},
+  {l:'Mumbai, Delhi (IST)',o:5.5,r:'Asia/Kolkata'},
+  {l:'Bangkok, Jakarta (ICT)',o:7,r:'Asia/Bangkok'},
+  {l:'Singapore, Hong Kong (SGT)',o:8,r:'Asia/Singapore'},
+  {l:'Tokyo (JST)',o:9,r:'Asia/Tokyo'},
+  {l:'Sydney (AEST/AEDT)',o:10,r:'Australia/Sydney'},
+  {l:'Auckland (NZST)',o:12,r:'Pacific/Auckland'},
+  {l:'Honolulu (HST)',o:-10,r:'Pacific/Honolulu'},
+  {l:'Los Angeles (PST/PDT)',o:-8,r:'America/Los_Angeles'},
+  {l:'Denver (MST/MDT)',o:-7,r:'America/Denver'},
+  {l:'Chicago (CST/CDT)',o:-6,r:'America/Chicago'},
+  {l:'New York, Miami (EST/EDT)',o:-5,r:'America/New_York'},
+  {l:'Buenos Aires (ART)',o:-3,r:'America/Argentina/Buenos_Aires'},
+  {l:'São Paulo (BRT)',o:-3,r:'America/Sao_Paulo'},
+  {l:'Caribbean (AST)',o:-4,r:'America/Puerto_Rico'},
+  {l:'Bermuda (AST)',o:-4,r:'Atlantic/Bermuda'},
+  {l:'Azores (AZOT)',o:-1,r:'Atlantic/Azores'},
+];
+
+function buildTZSelect(selId, currentIana){
+  var sel=g(selId); if(!sel) return;
+  sel.innerHTML='<option value="">— pick region —</option>';
+  TZ_LIST.forEach(function(z){
+    var opt=document.createElement('option');
+    opt.value=z.r||'UTC';
+    opt.textContent=z.l+' (UTC'+(z.o>=0?'+':'')+z.o+')';
+    if(z.r===currentIana) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change',function(){
+    var prefix=selId.replace('ed-','').replace('-tz','');
+    var inp=g('ed-'+prefix+'-offset');
+    if(inp&&sel.value) inp.value=ianaOffset(sel.value);
+  });
+}
+
+// ── 4. NAV ───────────────────────────────────────────────
 document.querySelectorAll('#nav button').forEach(function(btn){
   btn.addEventListener('click',function(){
     var id=btn.getAttribute('data-s');
     document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
     document.querySelectorAll('#nav button').forEach(function(b){b.classList.remove('active');});
-    var sc=g('s-'+id);if(sc)sc.classList.add('active');
+    var sc=g('s-'+id); if(sc) sc.classList.add('active');
     btn.classList.add('active');
-    if(id==='vault'){
-      var activeVTab='ins';
-      ['ins','em','notes'].forEach(function(n){if(g('vaultab-'+n)&&g('vaultab-'+n).classList.contains('active'))activeVTab=n;});
-      switchVaultTab(activeVTab);
-    }
-    if(id==='clocks') setTimeout(applyTravelMode, 50);
+    if(id==='vault'){ var av='ins'; ['ins','em','notes'].forEach(function(n){if(g('vaultab-'+n)&&g('vaultab-'+n).classList.contains('active'))av=n;}); switchVaultTab(av); }
+    if(id==='clocks') applyTravelMode();
+    if(id==='import') updateExportCounts();
   });
 });
 
-// ── ITINERARY ──
-// ══════════════════════════════════════════════════
-// PERSISTENT DATA — all saved to localStorage
-// ══════════════════════════════════════════════════
-var DB_KEY_STOPS    = 'vk_stops_v2';
-var DB_KEY_VAULT    = 'vk_vault_v2';
-var DB_KEY_JOURNAL  = 'vk_journal_v2';
+// ── 5. MODAL ─────────────────────────────────────────────
+var overlay=g('modal-overlay'), mTitle=g('modal-title'), mBody=g('modal-body');
+function openModal(title,html2,cb){ if(!overlay)return; mTitle.textContent=title; mBody.innerHTML=html2; overlay.style.display='flex'; g('modal-sheet').scrollTop=0; if(cb)cb(); }
+function closeModal(){ if(!overlay)return; overlay.style.display='none'; mBody.innerHTML=''; }
+if(g('modal-close')) g('modal-close').addEventListener('click',closeModal);
+if(overlay) overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
 
-// ── STOPS (itinerary) ──
-var SAMPLE_STOPS = []; // start empty — user imports their own
-var stops = [];
-function saveStops(){ try{ localStorage.setItem(DB_KEY_STOPS, JSON.stringify(stops)); }catch(e){} }
-function loadStops(){
-  try{
-    var d = localStorage.getItem(DB_KEY_STOPS);
-    if(d){ stops = JSON.parse(d); return; }
-  }catch(e){}
-  stops = SAMPLE_STOPS.slice(); // fresh install: empty
-}
-loadStops();
-// ── VOYAGE TABS ──
-function switchVTab(name){
-  ['read','edit','add'].forEach(function(n){
-    g('vtab-'+n).classList.toggle('active',n===name);
-    g('vp-'+n).style.display=n===name?'block':'none';
-  });
-  if(name==='edit')renderItinEdit();
-}
-g('vtab-read').addEventListener('click',function(){switchVTab('read');});
-g('vtab-edit').addEventListener('click',function(){switchVTab('edit');});
-g('vtab-add').addEventListener('click',function(){switchVTab('add');});
-
-// ADD STOP
-g('btn-va-save').addEventListener('click',function(){
-  var sea=g('va-sea').checked;
-  var place=(g('va-place').value||'').trim();
-  var country=(g('va-country').value||'').trim();
-  var date=g('va-date').value,arr=g('va-arr').value,dep=g('va-dep').value;
-  if(!place&&!sea)return;
-  var ds=date?(new Date(date+'T12:00:00')).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Day '+(stops.length+1);
-  stops.push({day:stops.length+1,place:sea?'At sea':place,country:country,date:ds,arr:arr||null,dep:dep||null,sea:sea});
-  saveStops();
-  renderItin();
-  ['va-place','va-country','va-date','va-arr','va-dep'].forEach(function(id){var e=g(id);if(e)e.value='';});
-  g('va-sea').checked=false;
-  var out=g('va-out');
-  out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Stop added!</div></div>';
-  setTimeout(function(){out.innerHTML='';switchVTab('read');},1800);
-});
-
-function renderItinEdit(){
-  var el=g('itin-edit-list');if(!el)return;
-  if(!stops.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;">No stops yet. Use Add Stop to begin.</div>';return;}
-  var h='';
-  stops.forEach(function(s,idx){
-    h+='<div class="itin-edit-card" id="iec-'+idx+'">';
-    h+='<div class="itin-edit-header">';
-    h+='<div><div class="itin-edit-place'+(s.sea?' sea':'')+'">'+(s.sea?'<em>'+s.place+'</em>':s.place)+'</div>';
-    h+='<div class="itin-edit-meta">Day '+s.day+' &middot; '+s.date+(s.country?' &middot; '+s.country:'')+(s.arr?' &middot; Arr '+s.arr:'')+(s.dep?' &middot; Dep '+s.dep:'')+'</div></div>';
-    h+='<div style="display:flex;gap:6px;">';
-    h+='<button class="btn-sm ghost iec-edit-btn" data-idx="'+idx+'" style="font-size:11px;padding:5px 10px;">Edit</button>';
-    h+='<button class="btn-sm ghost iec-del-btn" data-idx="'+idx+'" style="font-size:11px;padding:5px 10px;color:var(--burgundy);border-color:var(--burgundy);">Delete</button>';
-    h+='</div></div>';
-    h+='<div id="iec-form-'+idx+'" style="display:none;">';
-    h+='<input class="itin-ed-inp" id="ief-place-'+idx+'" type="text" value="'+s.place+'" placeholder="Place">';
-    h+='<input class="itin-ed-inp" id="ief-country-'+idx+'" type="text" value="'+s.country+'" placeholder="Country">';
-    h+='<input class="itin-ed-inp" id="ief-date-'+idx+'" type="text" value="'+s.date+'" placeholder="Date (e.g. Sep 17)">';
-    h+='<div class="itin-time-grid">';
-    h+='<input class="itin-ed-inp" id="ief-arr-'+idx+'" type="time" value="'+(s.arr||'')+'" style="margin:0;">';
-    h+='<input class="itin-ed-inp" id="ief-dep-'+idx+'" type="time" value="'+(s.dep||'')+'" style="margin:0;">';
-    h+='</div>';
-    h+='<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);cursor:pointer;margin-bottom:10px;">';
-    h+='<input type="checkbox" id="ief-sea-'+idx+'"'+(s.sea?' checked':'')+'>At sea</label>';
-    h+='<div class="itin-edit-actions">';
-    h+='<button class="btn-sm primary iec-save-btn" data-idx="'+idx+'" style="flex:1;">Save</button>';
-    h+='<button class="btn-sm ghost iec-cancel-btn" data-idx="'+idx+'" style="flex:1;">Cancel</button>';
-    h+='</div></div>';
-    h+='</div>';
-  });
-  el.innerHTML=h;
-
-  // wire edit toggle
-  el.querySelectorAll('.iec-edit-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var idx=btn.getAttribute('data-idx');
-      var form=g('iec-form-'+idx);
-      var card=g('iec-'+idx);
-      var isOpen=form.style.display!=='none';
-      // close all
-      el.querySelectorAll('[id^=iec-form-]').forEach(function(f){f.style.display='none';});
-      el.querySelectorAll('.itin-edit-card').forEach(function(c){c.classList.remove('editing');});
-      if(!isOpen){form.style.display='block';card.classList.add('editing');}
-    });
-  });
-
-  // wire cancel
-  el.querySelectorAll('.iec-cancel-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var idx=btn.getAttribute('data-idx');
-      g('iec-form-'+idx).style.display='none';
-      g('iec-'+idx).classList.remove('editing');
-    });
-  });
-
-  // wire save
-  el.querySelectorAll('.iec-save-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var idx=parseInt(btn.getAttribute('data-idx'));
-      var s=stops[idx];if(!s)return;
-      s.place=(g('ief-place-'+idx).value||'').trim()||s.place;
-      s.country=(g('ief-country-'+idx).value||'').trim();
-      s.date=(g('ief-date-'+idx).value||'').trim()||s.date;
-      s.arr=g('ief-arr-'+idx).value||null;
-      s.dep=g('ief-dep-'+idx).value||null;
-      s.sea=g('ief-sea-'+idx).checked;
-      if(s.sea)s.place='At sea';
-      saveStops();
-      renderItin();
-      renderItinEdit();
-    });
-  });
-
-  // wire delete
-  el.querySelectorAll('.iec-del-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var idx=parseInt(btn.getAttribute('data-idx'));
-      if(!confirm('Remove "'+stops[idx].place+'" from itinerary?'))return;
-      stops.splice(idx,1);
-      stops.forEach(function(s,i){s.day=i+1;});
-      saveStops();
-      renderItin();renderItinEdit();
-    });
-  });
-}
-
+// ── 6. ITINERARY RENDER ──────────────────────────────────
 function renderItin(){
-  var el=g('itin-list');if(!el)return;
+  var el=g('itin-list'); if(!el) return;
+  if(!stops.length){ el.innerHTML='<div style="padding:20px;text-align:center;font-size:15px;color:var(--text-muted);">No stops yet — use the Import tab to add your itinerary.</div>'; return; }
   var h='';
   stops.forEach(function(s){
-    var td=!!s.today,t='';
+    var td=!!s.today, t='';
     if(s.arr)t+='<div class="itin-t">&#8595; Arr <span>'+s.arr+'</span></div>';
     if(s.dep)t+='<div class="itin-t">&#8593; Dep <span>'+s.dep+'</span></div>';
     if(td)t+='<span class="today-pill">TODAY</span>';
-    var inner='<div class="itin-place-row"><div class="itin-place'+(s.sea?' sea':'')+'">'+s.place+'</div><div class="itin-date-sm">'+s.date+'</div></div>'
-      +'<div class="itin-country">'+s.country+'</div>'
+    var inner='<div class="itin-place-row"><div class="itin-place'+(s.sea?' sea':'')+'">'+escH(s.place)+'</div><div class="itin-date-sm">'+escH(s.date)+'</div></div>'
+      +'<div class="itin-country">'+escH(s.country)+'</div>'
       +'<div class="itin-times">'+t+'</div>';
-    h+='<div class="itin-item">'
-      +'<div class="itin-num'+(td?' tn':'')+'">'+s.day+'</div>'
-      +'<div class="itin-body">'+(td?'<div class="itin-hl">'+inner+'</div>':inner)+'</div>'
-      +'</div>';
+    h+='<div class="itin-item"><div class="itin-num'+(td?' tn':'')+'">'+s.day+'</div>'
+      +'<div class="itin-body">'+(td?'<div class="itin-hl">'+inner+'</div>':inner)+'</div></div>';
   });
   el.innerHTML=h;
 }
 renderItin();
 
-// ── FULL WORLD TIMEZONE LIST ──
-var TZ_LIST=[
-  // UTC / GMT
-  {l:'UTC / GMT',o:0,r:'UTC'},
-  // Europe
-  {l:'London, Dublin (GMT/BST)',o:0,r:'Europe/London'},
-  {l:'Lisbon, Reykjavik',o:0,r:'Europe/Lisbon'},
-  {l:'Paris, Rome, Madrid, Berlin (CET/CEST)',o:1,r:'Europe/Paris'},
-  {l:'Amsterdam, Brussels, Vienna (CET)',o:1,r:'Europe/Amsterdam'},
-  {l:'Stockholm, Oslo, Copenhagen (CET)',o:1,r:'Europe/Stockholm'},
-  {l:'Zurich, Bern (CET)',o:1,r:'Europe/Zurich'},
-  {l:'Athens, Helsinki, Riga (EET/EEST)',o:2,r:'Europe/Athens'},
-  {l:'Bucharest, Sofia, Vilnius (EET)',o:2,r:'Europe/Bucharest'},
-  {l:'Istanbul, Ankara (TRT)',o:3,r:'Europe/Istanbul'},
-  {l:'Moscow, St Petersburg (MSK)',o:3,r:'Europe/Moscow'},
-  {l:'Minsk (FET)',o:3,r:'Europe/Minsk'},
-  {l:'Azores (AZOT)',o:-1,r:'Atlantic/Azores'},
-  {l:'Cape Verde (CVT)',o:-1,r:'Atlantic/Cape_Verde'},
-  // Middle East & Africa
-  {l:'Dubai, Abu Dhabi (GST)',o:4,r:'Asia/Dubai'},
-  {l:'Riyadh, Kuwait, Aden (AST)',o:3,r:'Asia/Riyadh'},
-  {l:'Tel Aviv, Beirut, Cairo +DST',o:2,r:'Asia/Jerusalem'},
-  {l:'Cairo, Tripoli (EET)',o:2,r:'Africa/Cairo'},
-  {l:'Casablanca, Accra (WET)',o:0,r:'Africa/Casablanca'},
-  {l:'Lagos, Kinshasa (WAT)',o:1,r:'Africa/Lagos'},
-  {l:'Nairobi, Kampala (EAT)',o:3,r:'Africa/Nairobi'},
-  {l:'Johannesburg, Harare (SAST)',o:2,r:'Africa/Johannesburg'},
-  {l:'Addis Ababa, Mogadishu',o:3,r:'Africa/Addis_Ababa'},
-  // Asia
-  {l:'Tehran (IRST)',o:3.5,r:'Asia/Tehran'},
-  {l:'Kabul (AFT)',o:4.5,r:'Asia/Kabul'},
-  {l:'Karachi, Islamabad (PKT)',o:5,r:'Asia/Karachi'},
-  {l:'Mumbai, Delhi, Kolkata (IST)',o:5.5,r:'Asia/Kolkata'},
-  {l:'Kathmandu (NPT)',o:5.75,r:'Asia/Kathmandu'},
-  {l:'Dhaka, Almaty (BST/ALMT)',o:6,r:'Asia/Dhaka'},
-  {l:'Rangoon / Yangon (MMT)',o:6.5,r:'Asia/Rangoon'},
-  {l:'Bangkok, Hanoi, Jakarta (ICT)',o:7,r:'Asia/Bangkok'},
-  {l:'Kuala Lumpur, Singapore (SGT)',o:8,r:'Asia/Singapore'},
-  {l:'Hong Kong, Beijing, Taipei (HKT/CST)',o:8,r:'Asia/Hong_Kong'},
-  {l:'Perth (AWST)',o:8,r:'Australia/Perth'},
-  {l:'Seoul (KST)',o:9,r:'Asia/Seoul'},
-  {l:'Tokyo, Osaka (JST)',o:9,r:'Asia/Tokyo'},
-  {l:'Vladivostok',o:10,r:'Asia/Vladivostok'},
-  // Oceania
-  {l:'Sydney, Melbourne (AEST/AEDT)',o:10,r:'Australia/Sydney'},
-  {l:'Brisbane (AEST)',o:10,r:'Australia/Brisbane'},
-  {l:'Adelaide (ACST)',o:9.5,r:'Australia/Adelaide'},
-  {l:'Darwin (ACST)',o:9.5,r:'Australia/Darwin'},
-  {l:'Auckland, Wellington (NZST)',o:12,r:'Pacific/Auckland'},
-  {l:'Fiji (FJT)',o:12,r:'Pacific/Fiji'},
-  {l:'Honolulu, Hawaii (HST)',o:-10,r:'Pacific/Honolulu'},
-  {l:'Samoa (SST)',o:-11,r:'Pacific/Samoa'},
-  // Americas
-  {l:'Anchorage (AKST/AKDT)',o:-9,r:'America/Anchorage'},
-  {l:'Los Angeles, Seattle (PST/PDT)',o:-8,r:'America/Los_Angeles'},
-  {l:'Phoenix (MST)',o:-7,r:'America/Phoenix'},
-  {l:'Denver, Salt Lake City (MST/MDT)',o:-7,r:'America/Denver'},
-  {l:'Chicago, Dallas (CST/CDT)',o:-6,r:'America/Chicago'},
-  {l:'Mexico City (CST)',o:-6,r:'America/Mexico_City'},
-  {l:'New York, Miami, Toronto (EST/EDT)',o:-5,r:'America/New_York'},
-  {l:'Bogotá, Lima, Quito (COT/PET)',o:-5,r:'America/Bogota'},
-  {l:'Caracas (VET)',o:-4,r:'America/Caracas'},
-  {l:'Halifax, Santo Domingo (AST)',o:-4,r:'America/Halifax'},
-  {l:'Santiago (CLT)',o:-4,r:'America/Santiago'},
-  {l:'Buenos Aires (ART)',o:-3,r:'America/Argentina/Buenos_Aires'},
-  {l:'São Paulo, Rio (BRT)',o:-3,r:'America/Sao_Paulo'},
-  {l:'Newfoundland (NST)',o:-3.5,r:'America/St_Johns'},
-  {l:'Azores',o:-1,r:'Atlantic/Azores'},
-  // Cruise routes specific
-  {l:'Mediterranean (CEST/CET)',o:2,r:'Europe/Rome'},
-  {l:'Caribbean (AST/EST varies)',o:-4,r:'America/Puerto_Rico'},
-  {l:'Baltic Sea (EEST)',o:3,r:'Europe/Helsinki'},
-  {l:'Norwegian Fjords (CEST)',o:2,r:'Europe/Oslo'},
-  {l:'Canary Islands (WET/WEST)',o:0,r:'Atlantic/Canary'},
-  {l:'Bermuda (AST)',o:-4,r:'Atlantic/Bermuda'},
-];
+// Voyage tabs
+function switchVTab(name){
+  ['read','edit','add'].forEach(function(n){ g('vtab-'+n)&&g('vtab-'+n).classList.toggle('active',n===name); var p=g('vp-'+n);if(p)p.style.display=n===name?'block':'none'; });
+  if(name==='edit') renderItinEdit();
+}
+if(g('vtab-read'))g('vtab-read').addEventListener('click',function(){switchVTab('read');});
+if(g('vtab-edit'))g('vtab-edit').addEventListener('click',function(){switchVTab('edit');});
+if(g('vtab-add'))g('vtab-add').addEventListener('click',function(){switchVTab('add');});
 
-function buildTZSelect(selId, currentOffset){
-  var sel=g(selId); if(!sel) return;
-  sel.innerHTML='<option value="">— search or pick region —</option>';
-  // Group by region
-  var groups={'UTC / GMT':[],'Europe':[],'Middle East & Africa':[],'Asia':[],'Oceania':[],'Americas':[],'Cruise Routes':[]};
-  TZ_LIST.forEach(function(z){
-    var l=z.l.toLowerCase();
-    var grp='UTC / GMT';
-    if(z.r&&z.r.startsWith('Europe'))grp='Europe';
-    else if(z.r&&(z.r.startsWith('Africa')||z.r.startsWith('Asia/Riyadh')||z.r.startsWith('Asia/Jerusalem')||z.r.startsWith('Asia/Dubai')||z.r.startsWith('Asia/Tehran')||z.r.startsWith('Asia/Kabul')||z.r.startsWith('Asia/Karachi')))grp='Middle East & Africa';
-    else if(z.r&&z.r.startsWith('Asia'))grp='Asia';
-    else if(z.r&&(z.r.startsWith('Australia')||z.r.startsWith('Pacific')))grp='Oceania';
-    else if(z.r&&z.r.startsWith('America'))grp='Americas';
-    else if(l.indexOf('mediterranean')!==-1||l.indexOf('caribbean')!==-1||l.indexOf('baltic')!==-1||l.indexOf('norwegian')!==-1||l.indexOf('canary')!==-1||l.indexOf('bermuda')!==-1)grp='Cruise Routes';
-    if(groups[grp])groups[grp].push(z);
+function renderItinEdit(){
+  var el=g('itin-edit-list'); if(!el) return;
+  if(!stops.length){el.innerHTML='<div style="padding:12px;font-size:14px;color:var(--text-muted);">No stops yet.</div>';return;}
+  var h='';
+  stops.forEach(function(s,idx){
+    h+='<div class="itin-edit-card" id="iec-'+idx+'">';
+    h+='<div class="itin-edit-header"><div><div class="itin-edit-place'+(s.sea?' sea':'')+'">'+escH(s.place)+'</div>';
+    h+='<div class="itin-edit-meta">Day '+s.day+' &middot; '+escH(s.date)+(s.country?' &middot; '+escH(s.country):'')+(s.arr?' &middot; Arr '+s.arr:'')+(s.dep?' &middot; Dep '+s.dep:'')+'</div></div>';
+    h+='<div style="display:flex;gap:6px;">'
+      +'<button class="btn-sm ghost iec-edit-btn" data-idx="'+idx+'">Edit</button>'
+      +'<button class="btn-sm ghost iec-del-btn" data-idx="'+idx+'" style="color:var(--burgundy);border-color:var(--burgundy);">Delete</button>'
+      +'</div></div>';
+    h+='<div id="iec-form-'+idx+'" style="display:none;">'
+      +'<input class="itin-ed-inp" id="ief-place-'+idx+'" type="text" value="'+escA(s.place)+'" placeholder="Place">'
+      +'<input class="itin-ed-inp" id="ief-country-'+idx+'" type="text" value="'+escA(s.country)+'" placeholder="Country">'
+      +'<input class="itin-ed-inp" id="ief-date-'+idx+'" type="text" value="'+escA(s.date)+'" placeholder="Date (e.g. Jun 10)">'
+      +'<div class="itin-time-grid">'
+      +'<input class="itin-ed-inp" id="ief-arr-'+idx+'" type="time" value="'+(s.arr||'')+'" style="margin:0;">'
+      +'<input class="itin-ed-inp" id="ief-dep-'+idx+'" type="time" value="'+(s.dep||'')+'" style="margin:0;">'
+      +'</div>'
+      +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px;cursor:pointer;"><input type="checkbox" id="ief-sea-'+idx+'"'+(s.sea?' checked':'')+'>At sea</label>'
+      +'<div class="itin-edit-actions">'
+      +'<button class="btn-sm primary iec-save-btn" data-idx="'+idx+'" style="flex:1;">Save</button>'
+      +'<button class="btn-sm ghost iec-cancel-btn" data-idx="'+idx+'" style="flex:1;">Cancel</button>'
+      +'</div></div></div>';
   });
-  Object.keys(groups).forEach(function(grpName){
-    var items=groups[grpName]; if(!items.length) return;
-    var og=document.createElement('optgroup'); og.label=grpName;
-    items.forEach(function(z){
-      var opt=document.createElement('option');
-      opt.value=z.r||String(z.o); // IANA id as value
-      opt.textContent=z.l+' (UTC'+(z.o>=0?'+':'')+z.o+')';
-      if(z.r&&z.r===currentOffset) opt.selected=true;
-      else if(!z.r&&z.o===parseFloat(currentOffset)) opt.selected=true;
-      og.appendChild(opt);
+  el.innerHTML=h;
+  el.querySelectorAll('.iec-edit-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=btn.getAttribute('data-idx');
+      el.querySelectorAll('[id^=iec-form-]').forEach(function(f){f.style.display='none';});
+      el.querySelectorAll('.itin-edit-card').forEach(function(c){c.classList.remove('editing');});
+      var form=g('iec-form-'+idx); if(form)form.style.display='block';
+      var card=g('iec-'+idx); if(card)card.classList.add('editing');
     });
-    sel.appendChild(og);
   });
-  sel.addEventListener('change',function(){
-    var ianaId=sel.value; if(!ianaId) return;
-    // Update offset input to show current DST-correct offset
-    var prefix=selId.replace('ed-','').replace('-tz','');
-    var inp=g('ed-'+prefix+'-offset');
-    if(inp) inp.value=ianaOffset(ianaId);
-  });
-}
-
-// ── TRAVEL MODE ──
-var travelMode='cruise'; // 'cruise' or 'land'
-try{var tm=localStorage.getItem('vk_tmode');if(tm)travelMode=tm;}catch(e){}
-function applyTravelMode(){
-  var isCruise=travelMode==='cruise';
-  g('tmode-cruise').classList.toggle('active',isCruise);
-  g('tmode-land').classList.toggle('active',!isCruise);
-  var pl=g('label-primary'); if(pl)pl.textContent=isCruise?'SHIP TIME':'CURRENT LOCATION';
-  var sl=g('secondary-clocks-label'); if(sl)sl.textContent=isCruise?'Other Timezones':'Other Locations';
-  var pn=g('lv-port-name'); if(pn)pn.textContent=isCruise?('Port · '+tz.portName):('Destination · '+tz.portName);
-  var el=g('ed-label-primary'); if(el)el.textContent=isCruise?'Ship / Current Location':'Current Location';
-  var ep=g('ed-label-port'); if(ep)ep.textContent=isCruise?'Port / Destination':'Next Destination';
-  // Today screen label
-  var tl=g('today-date-label'); if(tl)tl.textContent=isCruise?'Today at sea':'Today';
-}
-g('tmode-cruise').addEventListener('click',function(){travelMode='cruise';try{localStorage.setItem('vk_tmode','cruise');}catch(e){}applyTravelMode();});
-g('tmode-land').addEventListener('click',function(){travelMode='land';try{localStorage.setItem('vk_tmode','land');}catch(e){}applyTravelMode();});
-
-// ── GPS / LOCATION DETECTION — uses device IANA tz (DST-correct) ──
-// On mobile, Intl gives the device's own timezone automatically (e.g. Europe/London with BST)
-// GPS gives lat/lon → reverse geocode via open-meteo for city name + correct IANA id
-
-function detectLocationTZ(targetSlot){
-  var status=g('gps-status');
-  if(!navigator.geolocation){
-    // Fallback: use device timezone without GPS
-    useDeviceTZ(targetSlot, status);
-    return;
-  }
-  if(status){status.style.display='block';status.textContent='\u{1F4CD} Getting your location...';}
-  navigator.geolocation.getCurrentPosition(
-    function(pos){
-      var lat=pos.coords.latitude.toFixed(4), lon=pos.coords.longitude.toFixed(4);
-      // Store coordinates for weather
-      try{localStorage.setItem('vk_lat',lat);localStorage.setItem('vk_lon',lon);}catch(e){}
-      // Step 1: get IANA timezone from open-meteo (free, no API key)
-      var tzUrl='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&timezone=auto&forecast_days=1&hourly=temperature_2m&current_weather=true';
-      fetch(tzUrl)
-        .then(function(r){return r.json();})
-        .then(function(data){
-          var ianaId=data.timezone||'UTC';
-          var city=ianaId.split('/').pop().replace(/_/g,' ');
-          var label=city;
-          // Try to find a nicer label from our TZ_LIST
-          TZ_LIST.forEach(function(z){
-            if(z.r&&z.r===ianaId)label=z.l;
-            else if(z.r&&ianaId.includes(z.r.split('/')[0])){}
-          });
-          setSlotTZ(targetSlot, ianaId, label, status);
-          // Also fetch and store weather
-          var temp=data.current_weather&&data.current_weather.temperature;
-          var code=data.current_weather&&data.current_weather.weathercode;
-          if(temp!==undefined){
-            try{
-              localStorage.setItem('vk_weather',JSON.stringify({
-                temp:Math.round(temp), code:code||0,
-                city:city, ts:Date.now()
-              }));
-            }catch(e){}
-            updateWeatherDisplay();
-          }
-        })
-        .catch(function(){
-          // offline: fall back to device tz + longitude estimate for city
-          useDeviceTZ(targetSlot, status, lat, lon);
-        });
-    },
-    function(err){
-      // Permission denied or unavailable — use device timezone
-      useDeviceTZ(targetSlot, status);
-    },
-    {timeout:8000, enableHighAccuracy:false}
-  );
-}
-
-function useDeviceTZ(targetSlot, status, lat, lon){
-  // Best fallback: device's own Intl timezone (always DST-correct!)
-  var ianaId='UTC';
-  try{ ianaId=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'; }catch(e){}
-  var city=ianaId.split('/').pop().replace(/_/g,' ');
-  var label=city;
-  TZ_LIST.forEach(function(z){if(z.r===ianaId)label=z.l;});
-  setSlotTZ(targetSlot, ianaId, label, status);
-}
-
-function setSlotTZ(slot, ianaId, label, status){
-  if(slot==='primary'){
-    tz.ship=ianaId; tz.shipName=label;
-    tz.shipOff=ianaOffset(ianaId);
-  } else {
-    tz.port=ianaId; tz.portName=label;
-    tz.portOff=ianaOffset(ianaId);
-  }
-  saveTZ(); applyTZLabels(); applyTravelMode();
-  if(status){
-    status.style.display='block';
-    status.textContent='\u2713 Set to '+label+' ('+fmtOff(ianaId)+')';
-    setTimeout(function(){status.style.display='none';},4000);
-  }
-}
-
-g('btn-gps-primary').addEventListener('click',function(){detectLocationTZ('primary');});
-g('btn-gps-port').addEventListener('click',function(){detectLocationTZ('port');});
-
-// ── WEATHER DISPLAY ──
-// ── WEATHER CODES → icons + descriptions ──
-function weatherInfo(code){
-  if(code===0)return{icon:'☀️',desc:'Clear sky'};
-  if(code<=2)return{icon:'⛅',desc:'Partly cloudy'};
-  if(code===3)return{icon:'☁️',desc:'Overcast'};
-  if(code<=45)return{icon:'🌫️',desc:'Foggy'};
-  if(code<=55)return{icon:'🌦️',desc:'Drizzle'};
-  if(code<=65)return{icon:'🌧️',desc:'Rain'};
-  if(code<=77)return{icon:'❄️',desc:'Snow'};
-  if(code<=82)return{icon:'🌦️',desc:'Rain showers'};
-  if(code<=86)return{icon:'🌨️',desc:'Snow showers'};
-  if(code<=99)return{icon:'⛈️',desc:'Thunderstorm'};
-  return{icon:'🌡️',desc:''};
-}
-
-// ── SHOW WEATHER DATA in the card ──
-function showWeatherData(w){
-  var loading=g('weather-loading'), live=g('weather-live'), err=g('weather-error');
-  if(loading)loading.style.display='none';
-  if(err)err.style.display='none';
-  if(!live)return;
-  live.style.display='block';
-  var info=weatherInfo(w.code||0);
-  var ic=g('weather-icon');       if(ic)ic.textContent=info.icon;
-  var tmp=g('weather-temp');      if(tmp)tmp.textContent=w.temp+'°C';
-  var desc=g('weather-desc');     if(desc)desc.textContent=info.desc;
-  var loc=g('today-location-name'); if(loc)loc.textContent=w.city||'--';
-  var tzl=g('today-location-tz');   if(tzl)tzl.textContent=(w.iana?fmtOff(w.iana):'');
-  var fl=g('weather-feels');      if(fl)fl.textContent=w.feels!==undefined?'Feels '+w.feels+'°C':'';
-  var hum=g('weather-humidity');  if(hum)hum.textContent=(w.humidity!==undefined?w.humidity+'%':'--');
-  var wind=g('weather-wind');     if(wind)wind.textContent=(w.wind!==undefined?w.wind+' km/h':'--');
-  var hl=g('weather-high-low');   if(hl)hl.textContent=(w.high!==undefined&&w.low!==undefined?w.high+'/'+w.low+'°':'--/--°');
-  var uv=g('weather-uv');         if(uv)uv.textContent=(w.uv!==undefined?w.uv:'--');
-  var upd=g('weather-updated');
-  if(upd){
-    var t=new Date(w.ts);
-    upd.textContent='Updated '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  }
-  // Also update legacy today-weather element for any code that references it
-  var legacy=g('today-weather');
-  if(legacy){legacy.innerHTML=info.icon+' <strong>'+w.temp+'°C</strong>';legacy.style.display='block';}
-}
-
-function showWeatherError(){
-  var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error');
-  if(loading)loading.style.display='none';
-  if(live)live.style.display='none';
-  if(err)err.style.display='block';
-}
-
-function updateWeatherDisplay(){
-  try{
-    var w=JSON.parse(localStorage.getItem('vk_weather')||'null');
-    if(w&&w.temp!==undefined) showWeatherData(w);
-    else showWeatherError();
-  }catch(e){showWeatherError();}
-}
-
-// ── FETCH FRESH WEATHER from open-meteo (v1 current API) ──
-function fetchWeather(lat, lon, ianaId, cityName){
-  // Use current_weather=true + current= fields (open-meteo 2024+ API)
-  var url='https://api.open-meteo.com/v1/forecast'
-    +'?latitude='+lat+'&longitude='+lon
-    +'&timezone=auto'
-    +'&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,uv_index'
-    +'&daily=temperature_2m_max,temperature_2m_min,uv_index_max'
-    +'&forecast_days=1';
-  return fetch(url)
-    .then(function(r){
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      return r.json();
-    })
-    .then(function(data){
-      // open-meteo returns data under data.current (new API) or data.current_weather (legacy)
-      var cur = data.current || data.current_weather || {};
-      var daily = data.daily || {};
-      var w={
-        temp:     Math.round(cur.temperature_2m !== undefined ? cur.temperature_2m : (cur.temperature||0)),
-        feels:    cur.apparent_temperature !== undefined ? Math.round(cur.apparent_temperature) : undefined,
-        code:     cur.weather_code !== undefined ? cur.weather_code : (cur.weathercode||0),
-        wind:     cur.wind_speed_10m !== undefined ? Math.round(cur.wind_speed_10m) : (cur.windspeed !== undefined ? Math.round(cur.windspeed) : undefined),
-        humidity: cur.relative_humidity_2m !== undefined ? Math.round(cur.relative_humidity_2m) : undefined,
-        high:     daily.temperature_2m_max ? Math.round(daily.temperature_2m_max[0]) : undefined,
-        low:      daily.temperature_2m_min ? Math.round(daily.temperature_2m_min[0]) : undefined,
-        uv:       cur.uv_index !== undefined ? Math.round(cur.uv_index) : (daily.uv_index_max ? Math.round(daily.uv_index_max[0]) : undefined),
-        city:     cityName || '',
-        iana:     ianaId || data.timezone || 'UTC',
-        ts:       Date.now()
-      };
-      try{localStorage.setItem('vk_weather',JSON.stringify(w));}catch(e){}
-      showWeatherData(w);
-      return w;
+  el.querySelectorAll('.iec-cancel-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=btn.getAttribute('data-idx');
+      var f=g('iec-form-'+idx);if(f)f.style.display='none';
+      var c=g('iec-'+idx);if(c)c.classList.remove('editing');
     });
-}
-
-// ── GET LOCATION VIA IP (works on file://, no GPS needed) ──
-// Uses ip-api.com — free, no API key, works without GPS permission
-function fetchWeatherByIP(){
-  return fetch('https://ip-api.com/json/?fields=lat,lon,city,timezone')
-    .then(function(r){return r.json();})
-    .then(function(geo){
-      if(!geo.lat)throw new Error('no location');
-      var lat=geo.lat.toFixed(4), lon=geo.lon.toFixed(4);
-      var city=geo.city||'Unknown';
-      var iana=geo.timezone||Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
-      try{localStorage.setItem('vk_lat',lat);localStorage.setItem('vk_lon',lon);}catch(e){}
-      return fetchWeather(lat, lon, iana, city);
+  });
+  el.querySelectorAll('.iec-save-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=parseInt(btn.getAttribute('data-idx')); var s=stops[idx];if(!s)return;
+      s.place=(g('ief-place-'+idx).value||'').trim()||s.place;
+      s.country=(g('ief-country-'+idx).value||'').trim();
+      s.date=(g('ief-date-'+idx).value||'').trim()||s.date;
+      s.arr=g('ief-arr-'+idx).value||null; s.dep=g('ief-dep-'+idx).value||null;
+      s.sea=g('ief-sea-'+idx).checked; if(s.sea)s.place='At sea';
+      saveStops(); renderItin(); renderItinEdit();
     });
-}
-
-// ── AUTO-DETECT location + weather ──
-// Strategy: GPS first → IP geolocation fallback → device TZ fallback
-function autoDetectWeather(){
-  var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error');
-  if(loading)loading.style.display='flex';
-  if(live)live.style.display='none';
-  if(err)err.style.display='none';
-
-  function onWeatherSuccess(w){
-    // Sync ship/primary clock to detected location
-    if(w.iana){
-      tz.ship=w.iana;
-      tz.shipName=w.city||w.iana.split('/').pop().replace(/_/g,' ');
-      tz.shipOff=ianaOffset(w.iana);
-      saveTZ(); applyTZLabels();
-    }
-  }
-
-  function fallbackToIP(){
-    // No GPS or permission denied — try IP geolocation (works everywhere incl. file://)
-    fetchWeatherByIP()
-      .then(function(w){ onWeatherSuccess(w); })
-      .catch(function(){
-        // Completely offline — show cached or device TZ
-        updateWeatherDisplay();
-        var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
-        var city=devTZ.split('/').pop().replace(/_/g,' ');
-        var lo=g('today-location-name'),ltz=g('today-location-tz');
-        if(lo)lo.textContent=city+' (offline)';
-        if(ltz)ltz.textContent=fmtOff(devTZ);
-        if(loading)loading.style.display='none';
-        // show error only if no cached data
-        try{
-          var cached=JSON.parse(localStorage.getItem('vk_weather')||'null');
-          if(!cached) showWeatherError();
-        }catch(e){showWeatherError();}
-      });
-  }
-
-  if(!navigator.geolocation){
-    fallbackToIP();
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    function(pos){
-      var lat=pos.coords.latitude.toFixed(4), lon=pos.coords.longitude.toFixed(4);
-      try{localStorage.setItem('vk_lat',lat);localStorage.setItem('vk_lon',lon);}catch(e){}
-      var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
-      var city=devTZ.split('/').pop().replace(/_/g,' ');
-      fetchWeather(lat, lon, devTZ, city)
-        .then(function(w){ onWeatherSuccess(w); })
-        .catch(function(){ fallbackToIP(); });
-    },
-    function(err2){
-      // GPS denied or unavailable — fall back to IP
-      fallbackToIP();
-    },
-    {timeout:8000, enableHighAccuracy:false}
-  );
-}
-
-// ── REFRESH WEATHER every 30 minutes ──
-var weatherRefreshInterval=null;
-function startWeatherRefresh(){
-  clearInterval(weatherRefreshInterval);
-  weatherRefreshInterval=setInterval(function(){
-    try{
-      var lat=localStorage.getItem('vk_lat'), lon=localStorage.getItem('vk_lon');
-      if(lat&&lon){
-        var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
-        fetchWeather(lat, lon, devTZ, devTZ.split('/').pop().replace(/_/g,' ')).catch(function(){});
-      }
-    }catch(e){}
-  }, 30*60*1000); // 30 minutes
-}
-
-// ── DETECT BUTTON (manual trigger) ──
-function wireDetectButton(id){
-  var btn=g(id); if(!btn) return;
-  btn.addEventListener('click',function(){
-    var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error');
-    if(loading)loading.style.display='flex';
-    if(live)live.style.display='none';
-    if(err)err.style.display='none';
-    autoDetectWeather();
+  });
+  el.querySelectorAll('.iec-del-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var idx=parseInt(btn.getAttribute('data-idx'));
+      if(!confirm('Delete "'+stops[idx].place+'"?'))return;
+      stops.splice(idx,1); stops.forEach(function(s,i){s.day=i+1;});
+      saveStops(); renderItin(); renderItinEdit();
+    });
   });
 }
-wireDetectButton('btn-today-detect');
-var retryBtn=g('btn-retry-weather');
-if(retryBtn)retryBtn.addEventListener('click',autoDetectWeather);
 
-// ── INIT WEATHER on page load ──
-(function initWeather(){
-  // Show cached immediately if fresh enough (< 30 min)
-  try{
-    var w=JSON.parse(localStorage.getItem('vk_weather')||'null');
-    if(w&&(Date.now()-w.ts)<1800000){
-      showWeatherData(w); // show cached right away
-    }
-  }catch(e){}
-  // Always try to get fresh data
-  autoDetectWeather();
-  startWeatherRefresh();
-})();
-
-// ── APPLY TZ LABELS to live display (DST-aware via IANA) ──
-function applyTZLabels(){
-  var se=g('clk-ship-label');
-  if(se)se.innerHTML=tz.shipName+' <span style="color:var(--text-muted);font-size:12px;">&middot; '+fmtOff(tz.ship)+'</span>';
-  var pn=g('lv-port-name');if(pn)pn.textContent='Port \u00b7 '+tz.portName;
-  var po=g('lv-port-off');if(po)po.textContent=fmtOff(tz.port);
-  var hn=g('lv-home-name');if(hn)hn.textContent='Home \u00b7 '+tz.homeName;
-  var ho=g('lv-home-off');if(ho)ho.textContent=fmtOff(tz.home);
-  // Today screen clock labels — live DST offset
-  var sl=g('t-ship-lbl');if(sl)sl.textContent=fmtOff(tz.ship);
-  var pl=g('t-port-lbl');if(pl)pl.textContent=fmtOff(tz.port);
-  var hl=g('t-home-lbl');if(hl)hl.textContent=fmtOff(tz.home);
-}
-applyTZLabels();
-
-// ── TICK — DST-correct, updates every second ──
-function tick(){
-  var ship=ianaTime(tz.ship),port=ianaTime(tz.port),home=ianaTime(tz.home);
-  function set(id,v){var e=g(id);if(e)e.textContent=v;}
-  set('t-ship',fmt2(ship));set('t-port',fmt2(port));set('t-home',fmt2(home));
-  set('clk-ship',fmt2(ship));set('clk-port',fmt2(port));set('clk-home',fmt2(home));
-  // Re-apply offset labels every minute (handles DST transitions)
-  if(ship.getSeconds&&ship.getSeconds()===0) applyTZLabels();
-  drawClock(ship);
-  updateTodayPage();
-}
-function drawClock(d){
-  var c=g('analog');if(!c)return;
-  var ctx=c.getContext('2d'),cx=46,cy=46,r=40;
-  ctx.clearRect(0,0,92,92);
-  ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.strokeStyle='#d8d0c8';ctx.lineWidth=1;ctx.stroke();
-  for(var i=0;i<12;i++){var a=i*30*Math.PI/180;ctx.beginPath();ctx.moveTo(cx+Math.sin(a)*(r-7),cy-Math.cos(a)*(r-7));ctx.lineTo(cx+Math.sin(a)*(r-3),cy-Math.cos(a)*(r-3));ctx.strokeStyle='#c0b8b0';ctx.lineWidth=1;ctx.stroke();}
-  var hr=(d.getHours()%12)+d.getMinutes()/60,mn=d.getMinutes()+d.getSeconds()/60;
-  function hand(ang,len,w,col){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.sin(ang)*len,cy-Math.cos(ang)*len);ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.stroke();}
-  hand(hr*30*Math.PI/180,24,2.5,'#4a3a36');
-  hand(mn*6*Math.PI/180,33,1.5,'#6a5a56');
-  ctx.beginPath();ctx.arc(cx,cy,3,0,2*Math.PI);ctx.fillStyle='#8b3a52';ctx.fill();
-}
-
-// ── UPDATE TODAY PAGE from stops[] + real clock ──
-function updateTodayPage(){
-  var now = new Date();
-  // Real date display
-  var dateStr = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  var el = g('today-full-date'); if(el) el.textContent = dateStr;
-
-  // Match today's date against stops
-  var todayStop = null, nextStop = null;
-  var todayStr = now.toLocaleDateString('en-US',{month:'short',day:'numeric'}); // e.g. "May 18"
-  var todayNorm = normDate(todayStr);
-
-  for(var i=0;i<stops.length;i++){
-    var sn = normDate(stops[i].date);
-    if(sn === todayNorm){ todayStop = stops[i]; nextStop = stops[i+1]||null; break; }
-  }
-
-  // Cruise day number
-  var dayEl = g('today-cruise-day');
-  if(dayEl){
-    if(todayStop){
-      dayEl.textContent = 'Cruise Day ' + todayStop.day;
-    } else {
-      // Check if today is between first and last stop
-      var first = stops[0], last = stops[stops.length-1];
-      if(first && last){
-        var fd=parseStopDate(first.date), ld=parseStopDate(last.date);
-        if(fd && ld && now >= fd && now <= ld){
-          dayEl.textContent = 'In progress';
-        } else if(fd && now < fd){
-          var diff = Math.ceil((fd - now)/(1000*60*60*24));
-          dayEl.textContent = diff + ' day'+(diff!==1?'s':'')+' to cruise';
-        } else {
-          dayEl.textContent = '';
-        }
-      } else { dayEl.textContent = ''; }
-    }
-  }
-
-  // Place title
-  var pt = g('today-place-title');
-  if(pt){
-    if(todayStop){ pt.textContent = todayStop.place; }
-    else { pt.textContent = 'No port today'; }
-  }
-
-  // Hero info
-  var hc=g('today-hero-country'), hp=g('today-hero-port'), db=g('today-dep-badge'), dt=g('today-dep-time');
-  if(todayStop && !todayStop.sea){
-    if(hc) hc.textContent = (todayStop.country||'').toUpperCase() + (tz.port!==0?' \u00b7 GMT'+(tz.port>0?'+':'')+tz.port:'');
-    if(hp) hp.textContent = todayStop.place;
-    if(db) db.style.display = todayStop.dep ? 'block' : 'none';
-    if(dt && todayStop.dep) dt.textContent = todayStop.dep;
-  } else if(todayStop && todayStop.sea){
-    if(hc) hc.textContent = 'AT SEA';
-    if(hp) hp.textContent = '';
-    if(db) db.style.display = 'none';
-  } else {
-    if(hc) hc.textContent = '';
-    if(hp) hp.textContent = stops.length ? 'Add your itinerary in Import' : '';
-    if(db) db.style.display = 'none';
-  }
-
-  // Next movement
-  var ml=g('today-move-label'), mt=g('today-move-time'), ms=g('today-move-sub');
-  var pf=g('today-prog-track'), pfi=g('today-prog-fill'), pd=g('today-prog-dot');
-  var pa=g('today-prog-arr'), pd2=g('today-prog-dep'), plbls=g('today-prog-lbls');
-  if(todayStop){
-    var shipNow = tzTime(tz.ship);
-    var shipMins = shipNow.getHours()*60 + shipNow.getMinutes();
-
-    if(todayStop.dep && !todayStop.sea){
-      var depParts = todayStop.dep.split(':');
-      var depMins = parseInt(depParts[0])*60 + parseInt(depParts[1]);
-      var arrMins = 0;
-      if(todayStop.arr){ var ap=todayStop.arr.split(':'); arrMins=parseInt(ap[0])*60+parseInt(ap[1]); }
-      var diffMin = depMins - shipMins;
-
-      if(ml) ml.textContent = 'All Aboard';
-      if(mt) mt.textContent = todayStop.dep;
-      if(ms){
-        if(diffMin > 0){
-          var h2=Math.floor(diffMin/60), m2=diffMin%60;
-          ms.textContent = 'Ship time \u00b7 in '+(h2?h2+'h ':'')+m2+'m';
-        } else if(diffMin > -60) {
-          ms.textContent = 'Departing soon';
-        } else {
-          ms.textContent = 'Departed';
-        }
-      }
-      // progress bar
-      if(pf) pf.style.display='block';
-      if(plbls) plbls.style.display='flex';
-      if(arrMins < depMins){
-        var pct = Math.max(0,Math.min(100, (shipMins-arrMins)/(depMins-arrMins)*100));
-        if(pfi) pfi.style.width=pct+'%';
-        if(pd) pd.style.left=pct+'%';
-      }
-      if(pa) pa.textContent = todayStop.arr ? 'Arrived '+todayStop.arr : '';
-      if(pd2) pd2.textContent = 'Depart '+todayStop.dep;
-    } else if(nextStop){
-      if(ml) ml.textContent = 'Next Port';
-      if(mt) mt.textContent = nextStop.place;
-      if(ms) ms.textContent = nextStop.date + (nextStop.arr ? ' \u00b7 Arr '+nextStop.arr : '');
-      if(pf) pf.style.display='none';
-      if(plbls) plbls.style.display='none';
-    } else {
-      if(ml) ml.textContent = 'Voyage';
-      if(mt) mt.textContent = 'Complete';
-      if(ms) ms.textContent = '';
-      if(pf) pf.style.display='none';
-      if(plbls) plbls.style.display='none';
-    }
-  } else {
-    if(ml) ml.textContent = stops.length ? 'No port today' : 'Import itinerary';
-    if(mt) mt.textContent = '';
-    if(ms) ms.textContent = '';
-    if(pf) pf.style.display='none';
-    if(plbls) plbls.style.display='none';
-  }
-}
-
-// Parse stop date string "Jun 10" or "Sep 17" into a Date (current year, or next if past)
-function parseStopDate(ds){
-  if(!ds) return null;
-  try{
-    var d = new Date(ds + ' ' + new Date().getFullYear());
-    if(isNaN(d)) return null;
-    return d;
-  } catch(e){ return null; }
-}
-
-// Normalize date string for comparison: "Jun 10" == "Jun 10", handles padding
-function normDate(s){
-  if(!s) return '';
-  return s.replace(/\s+/g,' ').trim().toLowerCase()
-    .replace(/(\w+)\s+0?(\d+)/,'$1 $2');
-}
-
-tick();
-setInterval(tick, 1000);
-updateTodayPage();
-
-// ── CLOCKS EDIT ──
-function openClocksEdit(){
-  g('clocks-live').style.display='none';
-  g('clocks-edit').style.display='block';
-  // Show IANA id (or offset) in offset field as read-only info
-  g('ed-ship-offset').value=ianaOffset(tz.ship); g('ed-ship-name').value=tz.shipName;
-  g('ed-port-offset').value=ianaOffset(tz.port); g('ed-port-name').value=tz.portName;
-  g('ed-home-offset').value=ianaOffset(tz.home); g('ed-home-name').value=tz.homeName;
-  buildTZSelect('ed-ship-tz', tz.ship);
-  buildTZSelect('ed-port-tz', tz.port);
-  buildTZSelect('ed-home-tz', tz.home);
-  applyTravelMode();
-}
-function closeClocksEdit(){
-  g('clocks-live').style.display='block';
-  g('clocks-edit').style.display='none';
-}
-g('btn-edit-clocks').addEventListener('click',openClocksEdit);
-g('btn-clocks-save').addEventListener('click',function(){
-  // Priority: dropdown (IANA id) > manual offset number input
-  function applySlot(selId, offId, nameId, slotKey, nameKey, offKey){
-    var sel=g(selId), offInp=g(offId), nameInp=g(nameId);
-    var selVal=sel?sel.value:''; // IANA id from dropdown
-    if(selVal && selVal!==''){
-      // User picked from dropdown — use IANA id
-      var label=sel.options[sel.selectedIndex]&&sel.options[sel.selectedIndex].textContent.split(' (')[0];
-      var customName=nameInp&&nameInp.value.trim();
-      tz[slotKey]=selVal;
-      tz[nameKey]=customName||label||selVal.split('/').pop().replace(/_/g,' ');
-      tz[offKey]=ianaOffset(selVal);
-    } else if(offInp&&offInp.value!==''){
-      // User typed a manual UTC offset — convert to closest IANA id
-      var manOff=parseFloat(offInp.value);
-      if(!isNaN(manOff)){
-        var best=null,bestD=99;
-        TZ_LIST.forEach(function(z){
-          var d=Math.abs((z.o||0)-manOff);
-          if(d<bestD){bestD=d;best=z;}
-        });
-        var ianaId=best&&best.r?best.r:'UTC';
-        var customName2=nameInp&&nameInp.value.trim();
-        tz[slotKey]=ianaId;
-        tz[nameKey]=customName2||(best?best.l:ianaId);
-        tz[offKey]=manOff;
-      }
-    }
-  }
-  applySlot('ed-ship-tz','ed-ship-offset','ed-ship-name','ship','shipName','shipOff');
-  applySlot('ed-port-tz','ed-port-offset','ed-port-name','port','portName','portOff');
-  applySlot('ed-home-tz','ed-home-offset','ed-home-name','home','homeName','homeOff');
-  saveTZ(); applyTZLabels(); applyTravelMode();
-  closeClocksEdit();
+// Add stop
+if(g('btn-va-save'))g('btn-va-save').addEventListener('click',function(){
+  var sea=g('va-sea').checked, place=(g('va-place').value||'').trim(), country=(g('va-country').value||'').trim();
+  var date=g('va-date').value, arr=g('va-arr').value, dep=g('va-dep').value;
+  if(!place&&!sea)return;
+  var ds=date?(new Date(date+'T12:00:00')).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Day '+(stops.length+1);
+  stops.push({day:stops.length+1,place:sea?'At sea':place,country:country,date:ds,arr:arr||null,dep:dep||null,sea:sea});
+  saveStops(); renderItin();
+  ['va-place','va-country','va-date','va-arr','va-dep'].forEach(function(id){var e=g(id);if(e)e.value='';});
+  g('va-sea').checked=false;
+  var out=g('va-out');if(out){out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Stop saved!</div></div>';setTimeout(function(){out.innerHTML='';switchVTab('read');},1800);}
 });
-g('btn-clocks-cancel').addEventListener('click',closeClocksEdit);
 
-// ── TODAY LOCATION init (handled by initWeather above) ──
-// Legacy init block — kept for backward compat
-(function(){
-  try{
-    var loc=g('today-location-name');
-    if(loc&&loc.textContent==='Detecting location...'||loc&&!loc.textContent){
-      var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
-      loc.textContent=devTZ.split('/').pop().replace(/_/g,' ');
-    }
-  }catch(e){}
-})();
-
-// Init travel mode + auto-detect device timezone for home on first load
-(function(){
-  applyTravelMode();
-  // On first ever launch, set home to device's own timezone
-  try{
-    var saved=localStorage.getItem('vk_tz2');
-    if(!saved){
-      var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
-      var devCity=devTZ.split('/').pop().replace(/_/g,' ');
-      var devLabel=devCity;
-      TZ_LIST.forEach(function(z){if(z.r===devTZ)devLabel=z.l;});
-      tz.home=devTZ; tz.homeName=devLabel; tz.homeOff=ianaOffset(devTZ);
-      saveTZ(); applyTZLabels();
-    }
-  }catch(e){}
-  // Fetch weather if we have cached coords — now handled by initWeather()
-})();
-
-// ── MODAL ──
-var overlay=g('modal-overlay'),mTitle=g('modal-title'),mBody=g('modal-body');
-function openModal(title,bodyHtml,cb){mTitle.textContent=title;mBody.innerHTML=bodyHtml;overlay.style.display='flex';g('modal-sheet').scrollTop=0;if(cb)cb();}
-function closeModal(){overlay.style.display='none';mBody.innerHTML='';}
-g('modal-close').addEventListener('click',closeModal);
-overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
-
-// ── VAULT DATA (persistent) ──
-var vaultIns=[], vaultEm=[], vaultNotes=[], nextVid=100;
-function saveVault(){
-  try{ localStorage.setItem(DB_KEY_VAULT, JSON.stringify({ins:vaultIns,em:vaultEm,notes:vaultNotes,nextVid:nextVid})); }catch(e){}
-}
-function loadVault(){
-  try{
-    var d=localStorage.getItem(DB_KEY_VAULT);
-    if(d){
-      var p=JSON.parse(d);
-      vaultIns=p.ins||[]; vaultEm=p.em||[]; vaultNotes=p.notes||[];
-      nextVid=p.nextVid||100; return;
-    }
-  }catch(e){}
-  // fresh install defaults
-  vaultIns=[]; vaultEm=[]; vaultNotes=[]; nextVid=100;
-}
-loadVault();
-
-// Vault tab switching
+// ── 7. VAULT ─────────────────────────────────────────────
 function switchVaultTab(name){
   ['ins','em','notes'].forEach(function(n){
-    g('vaultab-'+n).classList.toggle('active',n===name);
-    g('vault-panel-'+n).style.display=n===name?'block':'none';
+    g('vaultab-'+n)&&g('vaultab-'+n).classList.toggle('active',n===name);
+    var p=g('vault-panel-'+n);if(p)p.style.display=n===name?'block':'none';
   });
-  if(name==='ins')renderVaultIns();
-  if(name==='em')renderVaultEm();
+  if(name==='ins') renderVaultIns();
+  if(name==='em')  renderVaultEm();
   if(name==='notes')renderVaultNotes();
 }
-g('vaultab-ins').addEventListener('click',function(){switchVaultTab('ins');});
-g('vaultab-em').addEventListener('click',function(){switchVaultTab('em');});
-g('vaultab-notes').addEventListener('click',function(){switchVaultTab('notes');});
+if(g('vaultab-ins'))  g('vaultab-ins').addEventListener('click',function(){switchVaultTab('ins');});
+if(g('vaultab-em'))   g('vaultab-em').addEventListener('click',function(){switchVaultTab('em');});
+if(g('vaultab-notes'))g('vaultab-notes').addEventListener('click',function(){switchVaultTab('notes');});
 
-// ── RENDER INSURANCE ──
+// Insurance
 function renderVaultIns(){
   var el=g('vault-ins-list');if(!el)return;
-  if(!vaultIns.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center;">No insurance added yet.</div>';return;}
+  if(!vaultIns.length){el.innerHTML='<div style="font-size:14px;color:var(--text-muted);padding:16px 0;text-align:center;">No insurance added yet.</div>';return;}
   var h='';
   vaultIns.forEach(function(ins){
-    h+='<div class="vault-card">';
-    h+='<div class="vault-card-header">';
-    h+='<div><div class="vault-ins-lbl">Travel Insurance</div><div class="vault-ins-name" style="margin-bottom:0;">'+ins.provider+'</div></div>';
-    h+='<div class="vault-card-actions">';
-    h+='<button class="vault-card-btn vins-edit" data-id="'+ins.id+'">Edit</button>';
-    h+='<button class="vault-card-btn del vins-del" data-id="'+ins.id+'">Delete</button>';
-    h+='</div></div>';
-    h+='<div class="vault-ins-row"><div><div class="vault-f-lbl">Policy</div><div class="vault-f-val">'+ins.policy+'</div></div>';
-    h+='<div style="text-align:right;"><div class="vault-f-lbl">Expires</div><div class="vault-f-val">'+ins.to.substring(5).replace('-','/')+'</div></div></div>';
-    if(ins.active)h+='<div class="active-pill" style="position:static;display:inline-block;margin-top:10px;">ACTIVE</div>';
-    h+='</div>';
+    h+='<div class="vault-card">'
+      +'<div class="vault-card-header"><div><div class="vault-ins-lbl">Travel Insurance</div><div class="vault-ins-name" style="margin-bottom:0;">'+escH(ins.provider)+'</div></div>'
+      +'<div class="vault-card-actions">'
+      +'<button class="vault-card-btn vins-edit" data-id="'+ins.id+'">Edit</button>'
+      +'<button class="vault-card-btn del vins-del" data-id="'+ins.id+'">Delete</button>'
+      +'</div></div>'
+      +'<div class="vault-ins-row"><div><div class="vault-f-lbl">Policy</div><div class="vault-f-val">'+escH(ins.policy)+'</div></div>'
+      +'<div style="text-align:right;"><div class="vault-f-lbl">Expires</div><div class="vault-f-val">'+escH(ins.to||'')+'</div></div></div>'
+      +(ins.active?'<div class="active-pill" style="position:static;display:inline-block;margin-top:10px;">ACTIVE</div>':'')
+      +'</div>';
   });
   el.innerHTML=h;
   el.querySelectorAll('.vins-edit').forEach(function(btn){
     btn.addEventListener('click',function(){
       var id=parseInt(btn.getAttribute('data-id'));
-      var ins=vaultIns.find(function(x){return x.id===id;});if(!ins)return;
+      var ins=vaultIns.find(function(x){return x.id===id;}); if(!ins)return;
       openModal('Edit Insurance',
-        '<input id="vi2-provider" class="m-inp" type="text" value="'+ins.provider+'" placeholder="Provider">'
-        +'<input id="vi2-policy" class="m-inp" type="text" value="'+ins.policy+'" placeholder="Policy number">'
-        +'<label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Start date</label>'
-        +'<input id="vi2-from" class="m-inp" type="date" value="'+ins.from+'">'
-        +'<label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Expiry date</label>'
-        +'<input id="vi2-to" class="m-inp" type="date" value="'+ins.to+'">'
-        +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="vi2-active"'+(ins.active?' checked':'')+'>Mark as Active</label>'
-        +'<button id="vi2-save" class="btn-p">Save Changes</button>'
+        '<input id="vi-prov" class="m-inp" type="text" value="'+escA(ins.provider)+'" placeholder="Provider">'
+        +'<input id="vi-pol" class="m-inp" type="text" value="'+escA(ins.policy)+'" placeholder="Policy number">'
+        +'<label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:4px;">Expiry date</label>'
+        +'<input id="vi-to" class="m-inp" type="date" value="'+escA(ins.to||'')+'">'
+        +'<label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:14px;cursor:pointer;"><input type="checkbox" id="vi-act"'+(ins.active?' checked':'')+'>Mark as Active</label>'
+        +'<button id="vi-save" class="btn-p">Save</button>'
       ,function(){
-        g('vi2-save').addEventListener('click',function(){
-          ins.provider=(g('vi2-provider').value||ins.provider).trim();
-          ins.policy=(g('vi2-policy').value||ins.policy).trim();
-          ins.from=g('vi2-from').value||ins.from;
-          ins.to=g('vi2-to').value||ins.to;
-          ins.active=g('vi2-active').checked;
-          saveVault();
-          renderVaultIns();
-          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Insurance updated.</div></div>';
+        g('vi-save').addEventListener('click',function(){
+          ins.provider=(g('vi-prov').value||ins.provider).trim();
+          ins.policy=(g('vi-pol').value||ins.policy).trim();
+          ins.to=g('vi-to').value||ins.to; ins.active=g('vi-act').checked;
+          saveVault(); renderVaultIns();
+          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Saved.</div></div>';
           setTimeout(closeModal,1500);
         });
       });
@@ -1890,71 +1158,57 @@ function renderVaultIns(){
     btn.addEventListener('click',function(){
       var id=parseInt(btn.getAttribute('data-id'));
       if(!confirm('Delete this insurance record?'))return;
-      vaultIns=vaultIns.filter(function(x){return x.id!==id;});
-      saveVault();
-      renderVaultIns();
+      vaultIns=vaultIns.filter(function(x){return x.id!==id;}); saveVault(); renderVaultIns();
     });
   });
 }
-
-// ── ADD INSURANCE ──
-g('btn-add-ins').addEventListener('click',function(){
+if(g('btn-add-ins'))g('btn-add-ins').addEventListener('click',function(){
   openModal('Add Insurance',
-    '<input id="vi-provider" class="m-inp" type="text" placeholder="Provider (e.g. AXA Schengen)">'
-    +'<input id="vi-policy" class="m-inp" type="text" placeholder="Policy number">'
-    +'<label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Start date</label>'
-    +'<input id="vi-from" class="m-inp" type="date">'
-    +'<label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Expiry date</label>'
-    +'<input id="vi-to" class="m-inp" type="date">'
-    +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="vi-active" checked>Mark as Active</label>'
-    +'<button id="vi-save" class="btn-p">Save Insurance</button>'
+    '<input id="ni-prov" class="m-inp" type="text" placeholder="Provider (e.g. AXA Schengen)">'
+    +'<input id="ni-pol" class="m-inp" type="text" placeholder="Policy number">'
+    +'<label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:4px;">Expiry date</label>'
+    +'<input id="ni-to" class="m-inp" type="date">'
+    +'<label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:14px;cursor:pointer;"><input type="checkbox" id="ni-act" checked>Mark as Active</label>'
+    +'<button id="ni-save" class="btn-p">Save Insurance</button>'
   ,function(){
-    g('vi-save').addEventListener('click',function(){
-      var prov=(g('vi-provider').value||'').trim();
-      if(!prov){g('vi-provider').focus();return;}
-      vaultIns.push({id:nextVid++,provider:prov,policy:(g('vi-policy').value||'').trim(),from:g('vi-from').value||'',to:g('vi-to').value||'',active:g('vi-active').checked});
-      saveVault();
-      renderVaultIns();
+    g('ni-save').addEventListener('click',function(){
+      var prov=(g('ni-prov').value||'').trim(); if(!prov){g('ni-prov').focus();return;}
+      vaultIns.push({id:nextVid++,provider:prov,policy:(g('ni-pol').value||'').trim(),to:g('ni-to').value||'',active:g('ni-act').checked,from:''});
+      saveVault(); renderVaultIns();
       mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Insurance saved.</div></div>';
       setTimeout(closeModal,1500);
     });
   });
 });
 
-// ── RENDER EMERGENCY ──
+// Emergency contacts
 function renderVaultEm(){
   var el=g('vault-em-list');if(!el)return;
-  if(!vaultEm.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center;">No contacts yet.</div>';return;}
+  if(!vaultEm.length){el.innerHTML='<div style="font-size:14px;color:var(--text-muted);padding:16px 0;text-align:center;">No contacts yet.</div>';return;}
   var h='';
   vaultEm.forEach(function(em){
-    h+='<div class="vault-em-card">';
-    h+='<div class="vault-em-row">';
-    h+='<div class="em-icon ic-pink" style="flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>';
-    h+='<div class="vault-em-info"><div class="vault-em-name">'+em.name+'</div><div class="vault-em-sub">'+em.sub+'</div></div>';
-    h+='<div class="vault-em-ph">'+em.phone+'</div>';
-    h+='<div class="vault-em-acts">';
-    h+='<button class="mini-btn edit-btn vem-edit" data-id="'+em.id+'">Edit</button>';
-    h+='<button class="mini-btn del vem-del" data-id="'+em.id+'">Del</button>';
-    h+='</div></div></div>';
+    h+='<div class="vault-em-card"><div class="vault-em-row">'
+      +'<div class="em-icon ic-pink"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--burgundy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.08.96.34 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.36 1.85.62 2.81.7A2 2 0 0122 14v2.92z"/></svg></div>'
+      +'<div class="vault-em-info"><div class="vault-em-name">'+escH(em.name)+'</div><div class="vault-em-sub">'+escH(em.sub)+'</div></div>'
+      +'<div class="vault-em-ph">'+escH(em.phone)+'</div>'
+      +'<div class="vault-em-acts"><button class="mini-btn edit-btn vem-edit" data-id="'+em.id+'">Edit</button><button class="mini-btn del vem-del" data-id="'+em.id+'">Del</button></div>'
+      +'</div></div>';
   });
   el.innerHTML=h;
   el.querySelectorAll('.vem-edit').forEach(function(btn){
     btn.addEventListener('click',function(){
       var id=parseInt(btn.getAttribute('data-id'));
-      var em=vaultEm.find(function(x){return x.id===id;});if(!em)return;
+      var em=vaultEm.find(function(x){return x.id===id;}); if(!em)return;
       openModal('Edit Contact',
-        '<input id="ec2-name" class="m-inp" type="text" value="'+em.name+'" placeholder="Name">'
-        +'<input id="ec2-sub" class="m-inp" type="text" value="'+em.sub+'" placeholder="Label (e.g. Spouse)">'
-        +'<input id="ec2-phone" class="m-inp" type="tel" value="'+em.phone+'" placeholder="Phone">'
-        +'<button id="ec2-save" class="btn-p">Save Changes</button>'
+        '<input id="ec-nm" class="m-inp" type="text" value="'+escA(em.name)+'" placeholder="Name">'
+        +'<input id="ec-sub" class="m-inp" type="text" value="'+escA(em.sub)+'" placeholder="Label">'
+        +'<input id="ec-ph" class="m-inp" type="tel" value="'+escA(em.phone)+'" placeholder="Phone">'
+        +'<button id="ec-save" class="btn-p">Save</button>'
       ,function(){
-        g('ec2-save').addEventListener('click',function(){
-          em.name=(g('ec2-name').value||em.name).trim();
-          em.sub=(g('ec2-sub').value||'').trim();
-          em.phone=(g('ec2-phone').value||em.phone).trim();
-          saveVault();
-          renderVaultEm();
-          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Contact updated.</div></div>';
+        g('ec-save').addEventListener('click',function(){
+          em.name=(g('ec-nm').value||em.name).trim(); em.sub=(g('ec-sub').value||'').trim(); em.phone=(g('ec-ph').value||em.phone).trim();
+          saveVault(); renderVaultEm();
+          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Saved.</div></div>';
           setTimeout(closeModal,1500);
         });
       });
@@ -1964,978 +1218,571 @@ function renderVaultEm(){
     btn.addEventListener('click',function(){
       var id=parseInt(btn.getAttribute('data-id'));
       if(!confirm('Delete this contact?'))return;
-      vaultEm=vaultEm.filter(function(x){return x.id!==id;});
-      saveVault();
-      renderVaultEm();
+      vaultEm=vaultEm.filter(function(x){return x.id!==id;}); saveVault(); renderVaultEm();
     });
   });
 }
-
-// ── ADD EMERGENCY CONTACT ──
-g('btn-add-em').addEventListener('click',function(){
+if(g('btn-add-em'))g('btn-add-em').addEventListener('click',function(){
   openModal('Add Emergency Contact',
-    '<input id="ec-name" class="m-inp" type="text" placeholder="Name (e.g. Air Doctor)">'
-    +'<input id="ec-sub" class="m-inp" type="text" placeholder="Label (e.g. Worldwide medical)">'
-    +'<input id="ec-phone" class="m-inp" type="tel" placeholder="Phone number">'
-    +'<button id="ec-save" class="btn-p">Save Contact</button>'
+    '<input id="nc-nm" class="m-inp" type="text" placeholder="Name (e.g. Air Doctor 24/7)">'
+    +'<input id="nc-sub" class="m-inp" type="text" placeholder="Label (e.g. Worldwide medical)">'
+    +'<input id="nc-ph" class="m-inp" type="tel" placeholder="Phone number">'
+    +'<button id="nc-save" class="btn-p">Save Contact</button>'
   ,function(){
-    g('ec-save').addEventListener('click',function(){
-      var nm=(g('ec-name').value||'').trim(),ph=(g('ec-phone').value||'').trim();
-      if(!nm||!ph)return;
-      vaultEm.push({id:nextVid++,name:nm,sub:(g('ec-sub').value||'').trim(),phone:ph});
-      saveVault();
-      renderVaultEm();
-      mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+nm+' added.</div></div>';
+    g('nc-save').addEventListener('click',function(){
+      var nm=(g('nc-nm').value||'').trim(), ph=(g('nc-ph').value||'').trim(); if(!nm||!ph)return;
+      vaultEm.push({id:nextVid++,name:nm,sub:(g('nc-sub').value||'').trim(),phone:ph});
+      saveVault(); renderVaultEm();
+      mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+escH(nm)+' added.</div></div>';
       setTimeout(closeModal,1500);
     });
   });
 });
 
-// ── RENDER DOCUMENTS ──
-// ── NOTES DATA ──
-var vaultNotes=[
-  {id:0, title:'Cabin', body:'Deck 8, Cabin 221'},
-  {id:1, title:'Emergency Policy', body:'AX · 7720 · 8841 — AXA Schengen. Call +1 800 224 1100 (Air Doctor) or +33 1 55 92 26 92 (AXA Claims).'},
-  {id:2, title:'Passport', body:'M. Halden — expires Sep 2028'}
-];
-
+// Notes
 function renderVaultNotes(){
-  var el=g('vault-notes-list'); if(!el) return;
-  if(!vaultNotes.length){
-    el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">No notes yet. Add one below.</div>';
-    return;
-  }
+  var el=g('vault-notes-list');if(!el)return;
+  if(!vaultNotes.length){el.innerHTML='<div style="font-size:14px;color:var(--text-muted);padding:16px 0;text-align:center;">No notes yet. Add one below.</div>';return;}
   var h='';
   vaultNotes.forEach(function(n){
-    h+='<div class="vault-note-card" id="vnc-'+n.id+'">';
-    // View mode
-    h+='<div class="vault-note-view" id="vnv-'+n.id+'">';
-    h+='<div class="vault-note-header">';
-    h+='<div class="vault-note-title">'+escHtml(n.title)+'</div>';
-    h+='<div class="vault-note-acts">';
-    h+='<button class="mini-btn edit-btn vn-edit" data-id="'+n.id+'">Edit</button>';
-    h+='<button class="mini-btn del vn-del" data-id="'+n.id+'">Delete</button>';
-    h+='</div></div>';
-    h+='<div class="vault-note-body">'+escHtml(n.body)+'</div>';
-    h+='</div>';
-    // Edit mode (hidden)
-    h+='<div class="vault-note-edit" id="vne-'+n.id+'" style="display:none;">';
-    h+='<input class="itin-ed-inp vn-title-inp" data-id="'+n.id+'" type="text" value="'+escAttr(n.title)+'" placeholder="Title">';
-    h+='<textarea class="itin-ed-inp vn-body-inp" data-id="'+n.id+'" style="min-height:70px;resize:vertical;">'+escHtml(n.body)+'</textarea>';
-    h+='<div style="display:flex;gap:8px;">';
-    h+='<button class="btn-sm primary vn-save" data-id="'+n.id+'" style="flex:1;">Save</button>';
-    h+='<button class="btn-sm ghost vn-cancel" data-id="'+n.id+'" style="flex:1;">Cancel</button>';
-    h+='</div></div>';
-    h+='</div>';
+    h+='<div class="vault-note-card" id="vnc-'+n.id+'">'
+      +'<div class="vault-note-view" id="vnv-'+n.id+'">'
+      +'<div class="vault-note-header"><div class="vault-note-title">'+escH(n.title)+'</div>'
+      +'<div class="vault-note-acts"><button class="mini-btn edit-btn vn-edit" data-id="'+n.id+'">Edit</button><button class="mini-btn del vn-del" data-id="'+n.id+'">Del</button></div></div>'
+      +'<div class="vault-note-body">'+escH(n.body)+'</div></div>'
+      +'<div class="vault-note-edit" id="vne-'+n.id+'" style="display:none;">'
+      +'<input class="itin-ed-inp vn-title-inp" data-id="'+n.id+'" type="text" value="'+escA(n.title)+'">'
+      +'<textarea class="itin-ed-inp vn-body-inp" data-id="'+n.id+'" style="min-height:70px;resize:vertical;">'+escH(n.body)+'</textarea>'
+      +'<div style="display:flex;gap:8px;"><button class="btn-sm primary vn-save" data-id="'+n.id+'" style="flex:1;">Save</button><button class="btn-sm ghost vn-cancel" data-id="'+n.id+'" style="flex:1;">Cancel</button></div>'
+      +'</div></div>';
   });
   el.innerHTML=h;
-
-  // Wire edit toggles
-  el.querySelectorAll('.vn-edit').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var id=parseInt(btn.getAttribute('data-id'));
-      g('vnv-'+id).style.display='none';
-      g('vne-'+id).style.display='block';
-    });
-  });
-  el.querySelectorAll('.vn-cancel').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var id=parseInt(btn.getAttribute('data-id'));
-      g('vnv-'+id).style.display='block';
-      g('vne-'+id).style.display='none';
-    });
-  });
+  el.querySelectorAll('.vn-edit').forEach(function(btn){btn.addEventListener('click',function(){var id=btn.getAttribute('data-id');g('vnv-'+id).style.display='none';g('vne-'+id).style.display='block';});});
+  el.querySelectorAll('.vn-cancel').forEach(function(btn){btn.addEventListener('click',function(){var id=btn.getAttribute('data-id');g('vnv-'+id).style.display='block';g('vne-'+id).style.display='none';});});
   el.querySelectorAll('.vn-save').forEach(function(btn){
     btn.addEventListener('click',function(){
       var id=parseInt(btn.getAttribute('data-id'));
-      var note=vaultNotes.find(function(x){return x.id===id;});if(!note)return;
-      var newTitle=el.querySelector('.vn-title-inp[data-id="'+id+'"]').value.trim();
-      var newBody=el.querySelector('.vn-body-inp[data-id="'+id+'"]').value.trim();
-      if(!newTitle)return;
-      note.title=newTitle; note.body=newBody;
-      saveVault();
-      renderVaultNotes();
+      var note=vaultNotes.find(function(x){return x.id===id;}); if(!note)return;
+      var ti=el.querySelector('.vn-title-inp[data-id="'+id+'"]'), bo=el.querySelector('.vn-body-inp[data-id="'+id+'"]');
+      if(!ti||!ti.value.trim())return;
+      note.title=ti.value.trim(); note.body=bo?bo.value.trim():'';
+      saveVault(); renderVaultNotes();
     });
   });
   el.querySelectorAll('.vn-del').forEach(function(btn){
     btn.addEventListener('click',function(){
       var id=parseInt(btn.getAttribute('data-id'));
       if(!confirm('Delete this note?'))return;
-      vaultNotes=vaultNotes.filter(function(x){return x.id!==id;});
-      saveVault();
-      renderVaultNotes();
+      vaultNotes=vaultNotes.filter(function(x){return x.id!==id;}); saveVault(); renderVaultNotes();
     });
   });
 }
-
-// ── ADD NOTE (inline, no modal) ──
-g('btn-add-note').addEventListener('click',function(){
-  var title=(g('vn-title').value||'').trim();
-  var body=(g('vn-body').value||'').trim();
-  if(!title){g('vn-title').focus();return;}
-  vaultNotes.push({id:nextVid++, title:title, body:body});
-  saveVault();
-  g('vn-title').value='';
-  g('vn-body').value='';
-  renderVaultNotes();
+if(g('btn-add-note'))g('btn-add-note').addEventListener('click',function(){
+  var ti=g('vn-title'), bo=g('vn-body');
+  var title=(ti?ti.value:'').trim(); if(!title){if(ti)ti.focus();return;}
+  vaultNotes.push({id:nextVid++,title:title,body:(bo?bo.value:'').trim()});
+  saveVault(); if(ti)ti.value=''; if(bo)bo.value=''; renderVaultNotes();
 });
+if(g('vn-title'))g('vn-title').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();if(g('vn-body'))g('vn-body').focus();}});
 
-// Allow Enter in title to move to body
-g('vn-title').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();g('vn-body').focus();}});
+// Init vault panels
+renderVaultIns(); renderVaultEm(); renderVaultNotes();
+switchVaultTab('ins');
 
-// ── HTML ESCAPE HELPERS ──
-function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function escAttr(s){return (s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-
-// Init vault — pre-render all panels so data is ready regardless of display state
-renderVaultIns();
-renderVaultEm();
-renderVaultNotes();
-
-// ── JOURNAL (persistent) ──
-var jEntries=[], nextJid=1;
-function saveJournal(){
-  try{ localStorage.setItem(DB_KEY_JOURNAL, JSON.stringify({entries:jEntries,nextJid:nextJid})); }catch(e){}
-}
-function loadJournal(){
-  try{
-    var d=localStorage.getItem(DB_KEY_JOURNAL);
-    if(d){ var p=JSON.parse(d); jEntries=p.entries||[]; nextJid=p.nextJid||1; return; }
-  }catch(e){}
-  jEntries=[]; nextJid=1;
-}
-loadJournal();
-function jHeroSVG(){return '<svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="130" fill="#e0cdd2"/><circle cx="200" cy="46" r="18" fill="#e8b090" opacity=".7"/><ellipse cx="80" cy="95" rx="80" ry="14" fill="#8a7a85" opacity=".7"/><ellipse cx="330" cy="100" rx="70" ry="12" fill="#8a7a85" opacity=".6"/><path d="M0 105 Q100 100 200 105 Q300 110 400 105 L400 130 L0 130Z" fill="#9a8898" opacity=".65"/><line x1="213" y1="84" x2="213" y2="107" stroke="#3a2e30" stroke-width="2" stroke-linecap="round"/><polygon points="213,106 213,84 230,106" fill="rgba(139,58,82,.75)"/></svg>';}
+// ── 8. JOURNAL ───────────────────────────────────────────
+function jHeroSVG(){ return '<svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="130" fill="#e0cdd2"/><circle cx="200" cy="46" r="18" fill="#e8b090" opacity=".7"/><ellipse cx="80" cy="95" rx="80" ry="14" fill="#8a7a85" opacity=".7"/><ellipse cx="330" cy="100" rx="70" ry="12" fill="#8a7a85" opacity=".6"/><path d="M0 105 Q100 100 200 105 Q300 110 400 105 L400 130 L0 130Z" fill="#9a8898" opacity=".65"/><line x1="213" y1="84" x2="213" y2="107" stroke="#3a2e30" stroke-width="2" stroke-linecap="round"/><polygon points="213,106 213,84 230,106" fill="rgba(139,58,82,.75)"/></svg>'; }
 
 function switchJTab(name){
-  ['read','edit','new'].forEach(function(n){
-    g('jtab-'+n).classList.toggle('active',n===name);
-    g('jp-'+n).style.display=n===name?'block':'none';
-  });
-  if(name==='edit')renderEditList();
+  ['read','edit','new'].forEach(function(n){ g('jtab-'+n)&&g('jtab-'+n).classList.toggle('active',n===name); var p=g('jp-'+n);if(p)p.style.display=n===name?'block':'none'; });
+  if(name==='edit') renderEditList();
 }
-g('jtab-read').addEventListener('click',function(){switchJTab('read');});
-g('jtab-edit').addEventListener('click',function(){switchJTab('edit');});
-g('jtab-new').addEventListener('click',function(){switchJTab('new');});
+if(g('jtab-read')) g('jtab-read').addEventListener('click',function(){switchJTab('read');});
+if(g('jtab-edit')) g('jtab-edit').addEventListener('click',function(){switchJTab('edit');});
+if(g('jtab-new'))  g('jtab-new').addEventListener('click',function(){switchJTab('new');});
 
+function rebuildReadPanel(){
+  var panel=g('jp-read'); if(!panel)return;
+  panel.innerHTML='';
+  if(!jEntries.length){panel.innerHTML='<div style="padding:20px;text-align:center;font-size:15px;color:var(--text-muted);">No journal entries yet.</div>';return;}
+  jEntries.forEach(function(e){
+    var card=document.createElement('div'); card.className='j-card';
+    var tags=e.tags.map(function(t){return '<span class="tag">#'+escH(t)+'</span>';}).join('');
+    card.innerHTML='<div class="j-hero">'+jHeroSVG()+'</div>'
+      +'<div class="j-body"><div class="j-top"><div><div class="j-date">'+escH(e.date)+'</div><div class="j-place">'+escH(e.place)+'</div></div></div>'
+      +'<div class="j-text">'+escH(e.text)+'</div>'+(tags?'<div class="j-tags">'+tags+'</div>':'')+'</div>';
+    panel.appendChild(card);
+  });
+}
 function renderEditList(){
-  var list=g('edit-entries-list');if(!list)return;
-  if(!jEntries.length){list.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:12px 0;">No entries yet.</div>';return;}
+  var list=g('edit-entries-list'); if(!list)return;
+  if(!jEntries.length){list.innerHTML='<div style="padding:12px;font-size:14px;color:var(--text-muted);">No entries yet.</div>';return;}
   var h='';
   jEntries.forEach(function(e){
-    h+='<div class="card" style="margin-bottom:12px;" data-eid="'+e.id+'">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">';
-    h+='<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);">'+e.date+'</div><div style="font-family:var(--serif);font-size:20px;">'+e.place+'</div></div>';
-    h+='<div style="display:flex;gap:8px;">';
-    h+='<button class="btn-sm ghost edit-entry-btn" data-eid="'+e.id+'">Edit</button>';
-    h+='<button class="btn-sm ghost discard-entry-btn" data-eid="'+e.id+'" style="color:var(--burgundy);border-color:var(--burgundy);">Discard</button>';
-    h+='</div></div>';
-    h+='<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">'+e.text.substring(0,80)+(e.text.length>80?'\u2026':'')+'</div>';
-    h+='</div>';
+    h+='<div class="card" style="margin-bottom:12px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'
+      +'<div><div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);">'+escH(e.date)+'</div><div style="font-family:var(--serif);font-size:20px;">'+escH(e.place)+'</div></div>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button class="btn-sm ghost edit-entry-btn" data-eid="'+e.id+'">Edit</button>'
+      +'<button class="btn-sm ghost discard-entry-btn" data-eid="'+e.id+'" style="color:var(--burgundy);border-color:var(--burgundy);">Delete</button>'
+      +'</div></div>'
+      +'<div style="font-size:14px;color:var(--text-secondary);">'+escH(e.text.substring(0,80))+(e.text.length>80?'&hellip;':'')+'</div></div>';
   });
   list.innerHTML=h;
-
-  // Edit buttons
   list.querySelectorAll('.edit-entry-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
       var eid=parseInt(btn.getAttribute('data-eid'));
-      var entry=jEntries.find(function(e){return e.id===eid;});
-      if(!entry)return;
+      var entry=jEntries.find(function(e){return e.id===eid;}); if(!entry)return;
       openModal('Edit Entry',
-        '<input id="ee-place" class="m-inp" type="text" value="'+entry.place+'" placeholder="Place">'
-        +'<textarea id="ee-text" class="imp-ta" style="min-height:100px;">'+entry.text+'</textarea>'
-        +'<input id="ee-tags" class="m-inp" type="text" value="'+entry.tags.join(', ')+'" placeholder="Tags">'
-        +'<button id="ee-save" class="btn-p">Save Changes</button>'
+        '<input id="ee-place" class="m-inp" type="text" value="'+escA(entry.place)+'" placeholder="Place">'
+        +'<textarea id="ee-text" class="imp-ta" style="min-height:100px;">'+escH(entry.text)+'</textarea>'
+        +'<input id="ee-tags" class="m-inp" type="text" value="'+escA(entry.tags.join(', '))+'" placeholder="Tags">'
+        +'<button id="ee-save" class="btn-p">Save</button>'
       ,function(){
         g('ee-save').addEventListener('click',function(){
-          var pl=(g('ee-place').value||"").trim(),tx=(g('ee-text').value||"").trim();
-          if(!pl||!tx)return;
-          entry.place=pl;entry.text=tx;
-          entry.tags=(g('ee-tags').value||"").split(',').map(function(t){return t.trim();}).filter(Boolean);
-          saveJournal();
-          rebuildReadPanel();renderEditList();
-          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Entry updated.</div></div>';
+          var pl=(g('ee-place').value||'').trim(), tx=(g('ee-text').value||'').trim(); if(!pl||!tx)return;
+          entry.place=pl; entry.text=tx; entry.tags=(g('ee-tags').value||'').split(',').map(function(t){return t.trim();}).filter(Boolean);
+          saveJournal(); rebuildReadPanel(); renderEditList();
+          mBody.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Saved.</div></div>';
           setTimeout(closeModal,1500);
         });
       });
     });
   });
-
-  // Discard buttons
   list.querySelectorAll('.discard-entry-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
       var eid=parseInt(btn.getAttribute('data-eid'));
-      if(!confirm('Discard this journal entry? This cannot be undone.'))return;
-      jEntries=jEntries.filter(function(e){return e.id!==eid;});
-      saveJournal();
-      rebuildReadPanel();renderEditList();
+      if(!confirm('Delete this journal entry?'))return;
+      jEntries=jEntries.filter(function(e){return e.id!==eid;}); saveJournal(); rebuildReadPanel(); renderEditList();
     });
   });
 }
-
-function rebuildReadPanel(){
-  var panel=g('jp-read');if(!panel)return;
-  panel.innerHTML='';
-  jEntries.forEach(function(e){
-    var card=document.createElement('div');card.className='j-card';card.setAttribute('data-jid',e.id);
-    var tagsHtml=e.tags.map(function(t){return '<span class="tag">#'+t+'</span>';}).join('');
-    card.innerHTML='<div class="j-hero">'+jHeroSVG()+'</div>'
-      +'<div class="j-body">'
-      +'<div class="j-top"><div><div class="j-date">'+e.date+'</div><div class="j-place">'+e.place+'</div></div></div>'
-      +'<div class="j-text">'+e.text+'</div>'
-      +(tagsHtml?'<div class="j-tags">'+tagsHtml+'</div>':'')+'</div>';
-    panel.appendChild(card);
-  });
-}
-
-// New entry save
-g('btn-save-entry').addEventListener('click',function(){
-  var place=(g('new-place').value||"").trim();
-  var text=(g('new-text').value||"").trim();
-  var tags=(g('new-tags').value||"").split(',').map(function(t){return t.trim();}).filter(Boolean);
-  if(!place||!text)return;
+// New entry
+if(g('btn-save-entry'))g('btn-save-entry').addEventListener('click',function(){
+  var place=(g('new-place').value||'').trim(), text=(g('new-text').value||'').trim(); if(!place||!text)return;
   var today=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  var entry={id:nextJid++,date:'Today \u00b7 '+today,place:place,text:text,tags:tags};
-  jEntries.unshift(entry);
-  saveJournal();
-  rebuildReadPanel();
-  g('new-place').value='';g('new-text').value='';g('new-tags').value='';
-  // show success, switch to read
+  var tags=(g('new-tags').value||'').split(',').map(function(t){return t.trim();}).filter(Boolean);
+  jEntries.unshift({id:nextJid++,date:'Today \u00b7 '+today,place:place,text:text,tags:tags});
+  saveJournal(); rebuildReadPanel();
+  g('new-place').value=''; g('new-text').value=''; g('new-tags').value='';
   switchJTab('read');
 });
+rebuildReadPanel();
 
-// ══════════════════════════════════════════════════════
-// ── TRANSFER SYSTEM (Import + Export) ──
-// ══════════════════════════════════════════════════════
-
-// Top-level tab switch
-function switchTransferTab(name){
-  ['import','export'].forEach(function(n){
-    g('ttab-'+n).classList.toggle('active',n===name);
-    var p=g('transfer-panel-'+n);if(p)p.style.display=n===name?'block':'none';
-  });
-  if(name==='export') updateExportCounts();
+// ── 9. CLOCKS ────────────────────────────────────────────
+function applyTZLabels(){
+  var se=g('clk-ship-label'); if(se)se.innerHTML=tz.shipName+' <span style="color:var(--text-muted);font-size:12px;">&middot; '+fmtOff(tz.ship)+'</span>';
+  var pn=g('lv-port-name'); if(pn)pn.textContent='Port \u00b7 '+tz.portName;
+  var po=g('lv-port-off'); if(po)po.textContent=fmtOff(tz.port);
+  var hn=g('lv-home-name'); if(hn)hn.textContent='Home \u00b7 '+tz.homeName;
+  var ho=g('lv-home-off'); if(ho)ho.textContent=fmtOff(tz.home);
+  var sl=g('t-ship-lbl'); if(sl)sl.textContent=fmtOff(tz.ship);
+  var pl=g('t-port-lbl'); if(pl)pl.textContent=fmtOff(tz.port);
+  var hl=g('t-home-lbl'); if(hl)hl.textContent=fmtOff(tz.home);
 }
-g('ttab-import')&&g('ttab-import').addEventListener('click',function(){switchTransferTab('import');});
-g('ttab-export')&&g('ttab-export').addEventListener('click',function(){switchTransferTab('export');});
+applyTZLabels();
 
-// Import sub-tabs
+function applyTravelMode(){
+  var isCruise=travelMode==='cruise';
+  g('tmode-cruise')&&g('tmode-cruise').classList.toggle('active',isCruise);
+  g('tmode-land')&&g('tmode-land').classList.toggle('active',!isCruise);
+  var pl=g('label-primary'); if(pl)pl.textContent=isCruise?'SHIP TIME':'CURRENT LOCATION';
+  var sl=g('secondary-clocks-label'); if(sl)sl.textContent=isCruise?'Other Timezones':'Other Locations';
+  var pn=g('lv-port-name'); if(pn)pn.textContent=isCruise?('Port \u00b7 '+tz.portName):('Destination \u00b7 '+tz.portName);
+  var el=g('ed-label-primary'); if(el)el.textContent=isCruise?'Ship / Current Location':'Current Location';
+  var ep=g('ed-label-port'); if(ep)ep.textContent=isCruise?'Port / Destination':'Next Destination';
+  var tl=g('today-date-label'); if(tl)tl.textContent=isCruise?'Today':'Today';
+}
+applyTravelMode();
+if(g('tmode-cruise'))g('tmode-cruise').addEventListener('click',function(){travelMode='cruise';saveTMode();applyTravelMode();});
+if(g('tmode-land'))  g('tmode-land').addEventListener('click',function(){travelMode='land';saveTMode();applyTravelMode();});
+
+function tick(){
+  var ship=ianaTime(tz.ship), port=ianaTime(tz.port), home=ianaTime(tz.home);
+  function set(id,v){var e=g(id);if(e)e.textContent=v;}
+  set('t-ship',fmt2(ship));set('t-port',fmt2(port));set('t-home',fmt2(home));
+  set('clk-ship',fmt2(ship));set('clk-port',fmt2(port));set('clk-home',fmt2(home));
+  if(ship.getSeconds&&ship.getSeconds()===0) applyTZLabels();
+  drawClock(ship); updateTodayPage();
+}
+function drawClock(d){
+  var c=g('analog');if(!c)return; var ctx=c.getContext('2d'),cx=46,cy=46,r=40;
+  ctx.clearRect(0,0,92,92);
+  ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.strokeStyle='#d8d0c8';ctx.lineWidth=1;ctx.stroke();
+  for(var i=0;i<12;i++){var a=i*30*Math.PI/180;ctx.beginPath();ctx.moveTo(cx+Math.sin(a)*(r-7),cy-Math.cos(a)*(r-7));ctx.lineTo(cx+Math.sin(a)*(r-3),cy-Math.cos(a)*(r-3));ctx.strokeStyle='#c0b8b0';ctx.lineWidth=1;ctx.stroke();}
+  var hr=(d.getHours()%12)+d.getMinutes()/60, mn=d.getMinutes()+d.getSeconds()/60;
+  function hand(ang,len,w,col){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.sin(ang)*len,cy-Math.cos(ang)*len);ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.stroke();}
+  hand(hr*30*Math.PI/180,24,2.5,'#4a3a36'); hand(mn*6*Math.PI/180,33,1.5,'#6a5a56');
+  ctx.beginPath();ctx.arc(cx,cy,3,0,2*Math.PI);ctx.fillStyle='#8b3a52';ctx.fill();
+}
+tick(); setInterval(tick,1000);
+
+// Clocks edit
+function openClocksEdit(){
+  g('clocks-live').style.display='none'; g('clocks-edit').style.display='block';
+  g('ed-ship-offset').value=ianaOffset(tz.ship); g('ed-ship-name').value=tz.shipName;
+  g('ed-port-offset').value=ianaOffset(tz.port); g('ed-port-name').value=tz.portName;
+  g('ed-home-offset').value=ianaOffset(tz.home); g('ed-home-name').value=tz.homeName;
+  buildTZSelect('ed-ship-tz',tz.ship); buildTZSelect('ed-port-tz',tz.port); buildTZSelect('ed-home-tz',tz.home);
+}
+function closeClocksEdit(){ g('clocks-live').style.display='block'; g('clocks-edit').style.display='none'; }
+if(g('btn-edit-clocks'))g('btn-edit-clocks').addEventListener('click',openClocksEdit);
+if(g('btn-clocks-save'))g('btn-clocks-save').addEventListener('click',function(){
+  function applySlot(selId,offId,nameId,slotKey,nameKey,offKey){
+    var sel=g(selId),offInp=g(offId),nameInp=g(nameId);
+    var selVal=sel?sel.value:'';
+    if(selVal){
+      tz[slotKey]=selVal; tz[offKey]=ianaOffset(selVal);
+      var lbl=sel.options[sel.selectedIndex]&&sel.options[sel.selectedIndex].textContent.split(' (')[0];
+      tz[nameKey]=(nameInp&&nameInp.value.trim())||lbl||selVal.split('/').pop().replace(/_/g,' ');
+    } else if(offInp&&offInp.value!==''){
+      var manOff=parseFloat(offInp.value); if(isNaN(manOff))return;
+      var best=null,bd=99; TZ_LIST.forEach(function(z){var d=Math.abs((z.o||0)-manOff);if(d<bd){bd=d;best=z;}});
+      tz[slotKey]=best&&best.r?best.r:'UTC'; tz[offKey]=manOff;
+      tz[nameKey]=(nameInp&&nameInp.value.trim())||(best?best.l:'UTC');
+    }
+  }
+  applySlot('ed-ship-tz','ed-ship-offset','ed-ship-name','ship','shipName','shipOff');
+  applySlot('ed-port-tz','ed-port-offset','ed-port-name','port','portName','portOff');
+  applySlot('ed-home-tz','ed-home-offset','ed-home-name','home','homeName','homeOff');
+  saveTZ(); applyTZLabels(); applyTravelMode(); closeClocksEdit();
+});
+if(g('btn-clocks-cancel'))g('btn-clocks-cancel').addEventListener('click',closeClocksEdit);
+
+// GPS detect for clocks
+function detectAndSetTZ(slot){
+  var status=g('gps-status');
+  function setFromIana(ianaId,city){
+    var label=city||ianaId.split('/').pop().replace(/_/g,' ');
+    TZ_LIST.forEach(function(z){if(z.r===ianaId)label=z.l;});
+    if(slot==='primary'){tz.ship=ianaId;tz.shipName=label;tz.shipOff=ianaOffset(ianaId);}
+    else{tz.port=ianaId;tz.portName=label;tz.portOff=ianaOffset(ianaId);}
+    saveTZ();applyTZLabels();applyTravelMode();
+    if(status){status.style.display='block';status.textContent='\u2713 Set to '+label+' ('+fmtOff(ianaId)+')';setTimeout(function(){status.style.display='none';},3000);}
+  }
+  // First try device timezone (instant, no permission needed)
+  var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+  setFromIana(devTZ,'');
+  // Then try GPS for better accuracy
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      fetch('https://api.open-meteo.com/v1/forecast?latitude='+pos.coords.latitude.toFixed(2)+'&longitude='+pos.coords.longitude.toFixed(2)+'&timezone=auto&forecast_days=1')
+        .then(function(r){return r.json();})
+        .then(function(d){if(d.timezone)setFromIana(d.timezone,'');})
+        .catch(function(){});
+    },function(){},{timeout:6000});
+  }
+}
+if(g('btn-gps-primary'))g('btn-gps-primary').addEventListener('click',function(){detectAndSetTZ('primary');});
+if(g('btn-gps-port'))   g('btn-gps-port').addEventListener('click',function(){detectAndSetTZ('port');});
+
+// ── 10. TODAY PAGE ───────────────────────────────────────
+function updateTodayPage(){
+  var now=new Date();
+  var dateStr=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var el=g('today-full-date'); if(el)el.textContent=dateStr;
+  var todayNorm=normDate(now.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  var todayStop=null, nextStop=null;
+  for(var i=0;i<stops.length;i++){if(normDate(stops[i].date)===todayNorm){todayStop=stops[i];nextStop=stops[i+1]||null;break;}}
+  var dayEl=g('today-cruise-day');
+  if(dayEl){
+    if(todayStop){dayEl.textContent='Cruise Day '+todayStop.day;}
+    else if(stops.length){
+      var fd=parseStopDate(stops[0].date);
+      if(fd&&now<fd){var diff=Math.ceil((fd-now)/(864e5));dayEl.textContent=diff+' day'+(diff!==1?'s':'')+' to cruise';}
+      else{dayEl.textContent='';}
+    } else {dayEl.textContent='';}
+  }
+  var pt=g('today-place-title');
+  if(pt)pt.textContent=todayStop?todayStop.place:(stops.length?'No port today':'');
+  var hc=g('today-hero-country'),hp=g('today-hero-port'),db=g('today-dep-badge'),dt=g('today-dep-time');
+  if(todayStop&&!todayStop.sea){
+    if(hc)hc.textContent=(todayStop.country||'').toUpperCase();
+    if(hp)hp.textContent=todayStop.place;
+    if(db)db.style.display=todayStop.dep?'block':'none';
+    if(dt&&todayStop.dep)dt.textContent=todayStop.dep;
+  } else {if(hc)hc.textContent=todayStop?'AT SEA':'';if(hp)hp.textContent='';if(db)db&&(db.style.display='none');}
+  // Movement card
+  var ml=g('today-move-label'),mt=g('today-move-time'),ms=g('today-move-sub');
+  var pf=g('today-prog-track'),pfi=g('today-prog-fill'),pd=g('today-prog-dot'),plbls=g('today-prog-lbls');
+  var pa=g('today-prog-arr'),pd2=g('today-prog-dep');
+  if(todayStop&&todayStop.dep&&!todayStop.sea){
+    var shipNow=ianaTime(tz.ship),shipMins=shipNow.getHours()*60+shipNow.getMinutes();
+    var dep=todayStop.dep.split(':'),depMins=+dep[0]*60+ +dep[1];
+    var arr=todayStop.arr?todayStop.arr.split(':'):null,arrMins=arr?(+arr[0]*60+ +arr[1]):0;
+    var diffMin=depMins-shipMins;
+    if(ml)ml.textContent='All Aboard';
+    if(mt)mt.textContent=todayStop.dep;
+    if(ms){var h2=Math.floor(Math.abs(diffMin)/60),m2=Math.abs(diffMin)%60;ms.textContent=diffMin>0?'in '+(h2?h2+'h ':'')+m2+'m':(diffMin>-60?'Departing soon':'Departed');}
+    if(pf)pf.style.display='block'; if(plbls)plbls.style.display='flex';
+    if(arrMins<depMins){var pct=Math.max(0,Math.min(100,(shipMins-arrMins)/(depMins-arrMins)*100));if(pfi)pfi.style.width=pct+'%';if(pd)pd.style.left=pct+'%';}
+    if(pa)pa.textContent=todayStop.arr?'Arrived '+todayStop.arr:'';
+    if(pd2)pd2.textContent='Depart '+todayStop.dep;
+  } else if(nextStop){
+    if(ml)ml.textContent='Next Port'; if(mt)mt.textContent=nextStop.place;
+    if(ms)ms.textContent=nextStop.date+(nextStop.arr?' \u00b7 Arr '+nextStop.arr:'');
+    if(pf)pf.style.display='none'; if(plbls)plbls.style.display='none';
+  } else {
+    if(ml)ml.textContent=stops.length?'No movement':'Import your itinerary'; if(mt)mt.textContent='';if(ms)ms.textContent='';
+    if(pf)pf.style.display='none'; if(plbls)plbls.style.display='none';
+  }
+}
+updateTodayPage();
+
+// ── 11. WEATHER ──────────────────────────────────────────
+function weatherInfo(code){
+  if(code===0)return{icon:'\u2600\ufe0f',desc:'Clear sky'};
+  if(code<=2)return{icon:'\u26c5',desc:'Partly cloudy'};
+  if(code<=3)return{icon:'\u2601\ufe0f',desc:'Overcast'};
+  if(code<=45)return{icon:'\ud83c\udf2b\ufe0f',desc:'Foggy'};
+  if(code<=55)return{icon:'\ud83c\udf26\ufe0f',desc:'Drizzle'};
+  if(code<=65)return{icon:'\ud83c\udf27\ufe0f',desc:'Rain'};
+  if(code<=77)return{icon:'\u2744\ufe0f',desc:'Snow'};
+  if(code<=82)return{icon:'\ud83c\udf26\ufe0f',desc:'Showers'};
+  if(code<=99)return{icon:'\u26c8\ufe0f',desc:'Thunderstorm'};
+  return{icon:'\ud83c\udf21\ufe0f',desc:''};
+}
+function showWeatherData(w){
+  var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error');
+  if(loading)loading.style.display='none'; if(err)err.style.display='none'; if(!live)return;
+  live.style.display='block';
+  var info=weatherInfo(w.code||0);
+  function ws(id,v){var e=g(id);if(e)e.textContent=v;}
+  function wi(id,v){var e=g(id);if(e)e.innerHTML=v;}
+  wi('weather-icon',info.icon); ws('weather-temp',w.temp+'°C'); ws('weather-desc',info.desc);
+  ws('today-location-name',w.city||''); ws('today-location-tz',w.iana?fmtOff(w.iana):'');
+  ws('weather-feels',w.feels!==undefined?'Feels '+w.feels+'°C':'');
+  ws('weather-humidity',w.humidity!==undefined?w.humidity+'%':'--');
+  ws('weather-wind',w.wind!==undefined?w.wind+' km/h':'--');
+  ws('weather-high-low',(w.high!==undefined&&w.low!==undefined)?w.high+'/'+w.low+'°':'--/--°');
+  ws('weather-uv',w.uv!==undefined?w.uv:'--');
+  var upd=g('weather-updated');if(upd&&w.ts)upd.textContent='Updated '+new Date(w.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function showWeatherError(){ var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error'); if(loading)loading.style.display='none'; if(live)live.style.display='none'; if(err)err.style.display='block'; }
+function updateWeatherDisplay(){ try{ var w=JSON.parse(localStorage.getItem('vk_weather')||'null'); if(w&&w.temp!==undefined)showWeatherData(w);else showWeatherError(); }catch(e){showWeatherError();} }
+function fetchWeather(lat,lon,ianaId,city){
+  return fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&timezone=auto&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&forecast_days=1')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var cur=data.current||{},daily=data.daily||{};
+      var w={temp:Math.round(cur.temperature_2m||0),feels:cur.apparent_temperature!==undefined?Math.round(cur.apparent_temperature):undefined,code:cur.weather_code||0,wind:cur.wind_speed_10m!==undefined?Math.round(cur.wind_speed_10m):undefined,humidity:cur.relative_humidity_2m!==undefined?Math.round(cur.relative_humidity_2m):undefined,high:daily.temperature_2m_max?Math.round(daily.temperature_2m_max[0]):undefined,low:daily.temperature_2m_min?Math.round(daily.temperature_2m_min[0]):undefined,city:city||'',iana:ianaId||data.timezone||'UTC',ts:Date.now()};
+      try{localStorage.setItem('vk_weather',JSON.stringify(w));}catch(e){}
+      showWeatherData(w); return w;
+    });
+}
+function autoDetectWeather(){
+  var loading=g('weather-loading'),live=g('weather-live'),err=g('weather-error');
+  if(loading)loading.style.display='flex'; if(live)live.style.display='none'; if(err)err.style.display='none';
+  function tryIP(){
+    fetch('https://ip-api.com/json/?fields=lat,lon,city,timezone').then(function(r){return r.json();}).then(function(geo){
+      if(!geo.lat)throw new Error();
+      try{localStorage.setItem('vk_lat',geo.lat.toFixed(4));localStorage.setItem('vk_lon',geo.lon.toFixed(4));}catch(e){}
+      return fetchWeather(geo.lat.toFixed(4),geo.lon.toFixed(4),geo.timezone||'UTC',geo.city||'');
+    }).catch(function(){ updateWeatherDisplay(); var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'; var lo=g('today-location-name'),ltz=g('today-location-tz'); if(lo)lo.textContent=devTZ.split('/').pop().replace(/_/g,' '); if(ltz)ltz.textContent=fmtOff(devTZ); });
+  }
+  if(!navigator.geolocation){tryIP();return;}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude.toFixed(4),lon=pos.coords.longitude.toFixed(4);
+    try{localStorage.setItem('vk_lat',lat);localStorage.setItem('vk_lon',lon);}catch(e){}
+    var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+    fetchWeather(lat,lon,devTZ,devTZ.split('/').pop().replace(/_/g,' ')).catch(function(){tryIP();});
+  },function(){tryIP();},{timeout:8000,enableHighAccuracy:false});
+}
+// Show cached weather immediately if available
+try{var cw=JSON.parse(localStorage.getItem('vk_weather')||'null');if(cw&&(Date.now()-cw.ts)<1800000)showWeatherData(cw);}catch(e){}
+// Then fetch fresh
+autoDetectWeather();
+setInterval(autoDetectWeather,30*60*1000);
+if(g('btn-today-detect'))g('btn-today-detect').addEventListener('click',autoDetectWeather);
+if(g('btn-retry-weather'))g('btn-retry-weather').addEventListener('click',autoDetectWeather);
+
+// ── 12. SMART PARSER (itinerary import) ─────────────────
+function smartParse(raw){
+  var results=[],dayNum=1,MONTHS='Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec';
+  var inlinePat=new RegExp('(\\d{1,2}-(?:'+MONTHS+'))\\s+((?:(?!\\d{1,2}-(?:'+MONTHS+')).)+)','gi');
+  var m1=inlinePat.exec(raw);
+  if(m1){
+    inlinePat.lastIndex=0; var match;
+    while((match=inlinePat.exec(raw))!==null){
+      var dateRaw=match[1],placeRaw=match[2].trim();
+      var isSea=/\bat\s*sea\b/i.test(placeRaw),arr=null,dep=null;
+      var arrM=placeRaw.match(/\bArr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i); if(arrM)arr=arrM[1];
+      var depM=placeRaw.match(/\bDep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i); if(depM)dep=depM[1];
+      var place='At Sea',country='';
+      if(!isSea){var clean=placeRaw.replace(/\s*\([^)]*\)/g,'').replace(/\b(?:Arr|Dep)(?:ival|arture)?[:\s]+\d{1,2}:\d{2}/gi,'').trim();var parts=clean.split(',').map(function(p){return p.trim();}).filter(Boolean);place=parts[0]||clean;country=parts.length>=2?parts[parts.length-1]:'';}
+      var dm=dateRaw.match(/(\d{1,2})-(\w+)/);var dateFmt=dm?(dm[2].charAt(0).toUpperCase()+dm[2].slice(1).toLowerCase()+' '+dm[1]):dateRaw;
+      results.push({day:dayNum++,date:dateFmt,place:place,country:country,sea:isSea,arr:arr,dep:dep});
+    }
+    return results;
+  }
+  // Line-by-line fallback
+  var lines=raw.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  lines.forEach(function(line){
+    if(/^[jJ]\s*\d{3}/.test(line)||/^[a-zA-Z\s]+[jJ]\s*\d{3}/.test(line))return;
+    var lo=line.toLowerCase(),isSea=/\bat\s*sea\b/.test(lo);
+    var arr=null,dep=null;
+    var arrM=line.match(/\bArr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i); if(arrM)arr=arrM[1];
+    var depM=line.match(/\bDep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i); if(depM)dep=depM[1];
+    var rng=line.match(/\((\d{1,2}:\d{2})\s*[-\u2013]\s*(\d{1,2}:\d{2})\)/); if(rng){if(!arr)arr=rng[1];if(!dep)dep=rng[2];}
+    var dm=line.match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})\b/i)||line.match(/\b(\d{1,2})\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/i);
+    var dateFmt='';
+    if(dm){var mo=dm[1].charAt(0).toUpperCase()+dm[1].slice(1,3).toLowerCase(),dy=dm[2]||(dm[0].match(/\d+/)||[''])[0];if(/^\d/.test(dm[1])){mo=dm[2].charAt(0).toUpperCase()+dm[2].slice(1,3).toLowerCase();dy=dm[1];}dateFmt=mo+' '+dy;}
+    if(isSea){if(dateFmt)results.push({day:dayNum++,date:dateFmt,place:'At Sea',country:'',sea:true,arr:null,dep:null});return;}
+    var placePart=line.replace(/\b(?:Day|Cruise|Port)\s*\d+\b/gi,'').replace(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}\b/gi,'').replace(/\b\d{1,2}\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/gi,'').replace(/\s*\([^)]*\)/g,'').replace(/\b(?:Arr(?:ival)?|Dep(?:arture)?)[:\s]+\d{1,2}:\d{2}/gi,'').replace(/\(?\d{1,2}:\d{2}\s*[-\u2013]\s*\d{1,2}:\d{2}\)?/g,'').replace(/[-\u2013\u2014]/g,' ').trim();
+    var parts=placePart.split(',').map(function(p){return p.trim();}).filter(function(p){return p.length>1;});
+    var place=parts[0]||'',country=parts.length>=2?parts[parts.length-1]:'';
+    if(place.length>1)results.push({day:dayNum++,date:dateFmt||'Day '+dayNum,place:place,country:country,sea:false,arr:arr,dep:dep});
+  });
+  return results;
+}
+
+// Transfer tab
+function switchTransferTab(name){
+  g('transfer-panel-import')&&(g('transfer-panel-import').style.display=name==='import'?'block':'none');
+  g('transfer-panel-export')&&(g('transfer-panel-export').style.display=name==='export'?'block':'none');
+  g('ttab-import')&&g('ttab-import').classList.toggle('active',name==='import');
+  g('ttab-export')&&g('ttab-export').classList.toggle('active',name==='export');
+  if(name==='export')updateExportCounts();
+}
+if(g('ttab-import'))g('ttab-import').addEventListener('click',function(){switchTransferTab('import');});
+if(g('ttab-export'))g('ttab-export').addEventListener('click',function(){switchTransferTab('export');});
+
 function showPanel(name){
   ['text','manual','tpl','restore'].forEach(function(n){
     var p=g('panel-'+n);if(p)p.style.display=n===name?'block':'none';
     var t=g('itab-'+n);if(t)t.classList.toggle('active',n===name);
   });
 }
-g('itab-text')&&g('itab-text').addEventListener('click',function(){showPanel('text');});
-g('itab-manual')&&g('itab-manual').addEventListener('click',function(){showPanel('manual');});
-g('itab-tpl')&&g('itab-tpl').addEventListener('click',function(){showPanel('tpl');});
-g('itab-restore')&&g('itab-restore').addEventListener('click',function(){showPanel('restore');});
+if(g('itab-text'))   g('itab-text').addEventListener('click',function(){showPanel('text');});
+if(g('itab-manual')) g('itab-manual').addEventListener('click',function(){showPanel('manual');});
+if(g('itab-tpl'))    g('itab-tpl').addEventListener('click',function(){showPanel('tpl');});
+if(g('itab-restore'))g('itab-restore').addEventListener('click',function(){showPanel('restore');});
 
-// ── EXPORT COUNT DISPLAY ──
 function updateExportCounts(){
   var s=g('xp-stops-count');  if(s)s.textContent=stops.length+' stop'+(stops.length!==1?'s':'');
-  var v=g('xp-vault-count');
-  if(v){var vc=(vaultIns.length+vaultEm.length+vaultNotes.length);v.textContent=vc+' item'+(vc!==1?'s':'');}
+  var v=g('xp-vault-count');  if(v){var vc=vaultIns.length+vaultEm.length+vaultNotes.length;v.textContent=vc+' item'+(vc!==1?'s':'');}
   var j=g('xp-journal-count');if(j)j.textContent=jEntries.length+' entr'+(jEntries.length!==1?'ies':'y');
 }
 
-// ── BUILD EXPORT PAYLOAD ──
-function buildPayload(){
-  var p={v:'2',ts:Date.now(),app:'VoyageKeeper'};
-  if(g('xp-stops')&&g('xp-stops').checked)   p.stops    = JSON.parse(JSON.stringify(stops));
-  if(g('xp-vault')&&g('xp-vault').checked){
-    p.vaultIns   = JSON.parse(JSON.stringify(vaultIns));
-    p.vaultEm    = JSON.parse(JSON.stringify(vaultEm));
-    p.vaultNotes = JSON.parse(JSON.stringify(vaultNotes));
-  }
-  if(g('xp-journal')&&g('xp-journal').checked)p.jEntries = JSON.parse(JSON.stringify(jEntries));
-  if(g('xp-clocks')&&g('xp-clocks').checked) p.tz        = JSON.parse(JSON.stringify(tz));
-  return p;
-}
-
-function encodePayload(p){
-  try{ return 'VK2:'+btoa(unescape(encodeURIComponent(JSON.stringify(p)))); }
-  catch(e){ return 'VK2:'+btoa(JSON.stringify(p)); }
-}
-function decodePayload(code){
-  code=code.trim();
-  if(!code.startsWith('VK2:')&&!code.startsWith('VK1:')) throw new Error('Not a VoyageKeeper backup');
-  var b=code.slice(4);
-  try{ return JSON.parse(decodeURIComponent(escape(atob(b)))); }
-  catch(e){ return JSON.parse(atob(b)); }
-}
-
-// ── GENERATE EXPORT ──
-g('btn-do-export')&&g('btn-do-export').addEventListener('click',function(){
-  var p=buildPayload();
-  var code=encodePayload(p);
-  var codeEl=g('export-code'); if(codeEl)codeEl.value=code;
-  var res=g('export-result');  if(res)res.style.display='block';
-  var info=g('export-info');
-  if(info){
-    var parts=[];
-    if(p.stops)parts.push(p.stops.length+' stops');
-    if(p.vaultIns)parts.push((p.vaultIns.length+p.vaultEm.length+p.vaultNotes.length)+' vault items');
-    if(p.jEntries)parts.push(p.jEntries.length+' journal entries');
-    if(p.tz)parts.push('clock settings');
-    info.textContent='Includes: '+parts.join(', ')+' — '+(Math.round(code.length/102.4)/10)+' KB';
-  }
-});
-
-// ── COPY CODE ──
-g('btn-copy-code')&&g('btn-copy-code').addEventListener('click',function(){
-  var el=g('export-code');if(!el)return;
-  el.select();
-  var btn=g('btn-copy-code');
-  var copied=function(){if(btn){btn.textContent='Copied ✓';setTimeout(function(){btn.textContent='Copy';},2500);}};
-  try{ if(document.execCommand('copy')){copied();return;} }catch(e){}
-  navigator.clipboard&&navigator.clipboard.writeText(el.value).then(copied).catch(function(){});
-});
-
-// ── SHARE (native) ──
-g('btn-share')&&g('btn-share').addEventListener('click',function(){
-  var code=g('export-code')&&g('export-code').value; if(!code)return;
-  if(navigator.share){
-    navigator.share({title:'VoyageKeeper Backup',text:'Paste this in VoyageKeeper → Transfer → Import → Restore:
-
-'+code}).catch(function(){});
-  } else {
-    navigator.clipboard&&navigator.clipboard.writeText(code).then(function(){
-      alert('Copied! Paste into VoyageKeeper on your other device → Transfer → Import → Restore tab.');
-    });
-  }
-});
-
-// ── EMAIL ──
-g('btn-email')&&g('btn-email').addEventListener('click',function(){
-  var code=g('export-code')&&g('export-code').value; if(!code)return;
-  var subj=encodeURIComponent('VoyageKeeper Backup — '+new Date().toLocaleDateString());
-  var body=encodeURIComponent('VoyageKeeper Backup
-
-To restore:
-1. Open VoyageKeeper
-2. Transfer tab → Import → Restore
-3. Paste the code below
-
----
-'+code+'
----');
-  window.location.href='mailto:?subject='+subj+'&body='+body;
-});
-
-// ── DOWNLOAD FILE ──
-g('btn-dlfile')&&g('btn-dlfile').addEventListener('click',function(){
-  var code=g('export-code')&&g('export-code').value; if(!code)return;
-  var date=new Date().toISOString().slice(0,10);
-  try{
-    var blob=new Blob([code],{type:'text/plain'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url; a.download='VoyageKeeper-backup-'+date+'.txt';
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-  }catch(e){ alert('Download not supported. Use Copy or Share instead.'); }
-});
-
-// ── RESTORE ──
-function doRestore(replace){
-  var raw=(g('restore-input')&&g('restore-input').value)||'';
-  var out=g('restore-out');
-  if(!raw.trim()){
-    if(out)out.innerHTML='<div style="color:var(--burgundy);font-size:14px;font-weight:700;padding:8px 0;">Please paste a backup code first.</div>';
-    return;
-  }
-  try{
-    var p=decodePayload(raw.trim());
-    var ts=p.ts?new Date(p.ts).toLocaleString():'unknown date';
-    if(replace&&!confirm('Replace ALL current data with backup from '+ts+'?'))return;
-
-    var changed=[];
-    if(p.stops){
-      if(replace)stops.length=0;
-      p.stops.forEach(function(s){
-        if(!stops.some(function(x){return x.place===s.place&&x.date===s.date;}))stops.push(s);
-      });
-      stops.forEach(function(s,i){s.day=i+1;});
-      saveStops(); renderItin(); if(typeof renderItinEdit==='function')renderItinEdit();
-      changed.push(p.stops.length+' stops');
-    }
-    if(p.vaultIns){
-      if(replace)vaultIns.length=0;
-      p.vaultIns.forEach(function(x){if(!vaultIns.some(function(e){return e.id===x.id;}))vaultIns.push(x);});
-      changed.push(p.vaultIns.length+' insurance');
-    }
-    if(p.vaultEm){
-      if(replace)vaultEm.length=0;
-      p.vaultEm.forEach(function(x){if(!vaultEm.some(function(e){return e.id===x.id;}))vaultEm.push(x);});
-      changed.push(p.vaultEm.length+' contacts');
-    }
-    if(p.vaultNotes){
-      if(replace)vaultNotes.length=0;
-      p.vaultNotes.forEach(function(x){if(!vaultNotes.some(function(e){return e.id===x.id;}))vaultNotes.push(x);});
-      changed.push(p.vaultNotes.length+' notes');
-    }
-    if(p.vaultIns||p.vaultEm||p.vaultNotes){ saveVault(); renderVaultIns(); renderVaultEm(); renderVaultNotes(); }
-    if(p.jEntries){
-      if(replace)jEntries.length=0;
-      p.jEntries.forEach(function(x){if(!jEntries.some(function(e){return e.id===x.id;}))jEntries.push(x);});
-      saveJournal(); if(typeof rebuildReadPanel==='function')rebuildReadPanel();
-      changed.push(p.jEntries.length+' journal entries');
-    }
-    if(p.tz){
-      Object.keys(p.tz).forEach(function(k){tz[k]=p.tz[k];});
-      saveTZ(); applyTZLabels();
-      changed.push('clock settings');
-    }
-    if(out)out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt"><strong>Restored:</strong> '+changed.join(', ')+'<br><span style="font-size:12px;color:var(--text-muted);">From: '+ts+'</span></div></div>';
-    if(g('restore-input'))g('restore-input').value='';
-  }catch(err){
-    if(out)out.innerHTML='<div style="color:var(--burgundy);font-size:14px;font-weight:700;padding:8px 0;">&#9888; Invalid backup code. Make sure you copied the entire code starting with VK2:</div>';
-  }
-}
-g('btn-restore-merge')&&g('btn-restore-merge').addEventListener('click',function(){doRestore(false);});
-g('btn-restore-replace')&&g('btn-restore-replace').addEventListener('click',function(){doRestore(true);});
-
-// ── SMART PARSER ──
-// Handles formats like: "10-Jun Southampton, England 11-Jun At Sea 12-Jun Lisbon, Portugal"
-// Works with entries glued together on one line or split across lines
-// Also handles: "Day 1 - Barcelona, Spain (Dep 18:00)", "Sep 14 Naples Italy Arr 08:00"
-function smartParse(raw) {
-  var results = [];
-  var dayNum = 1;
-  var MONTHS = 'Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec';
-
-  // ── FORMAT 1: DD-Mon PlaceName (cruise line inline format) ──
-  // Matches: 10-Jun Southampton, England   01-Jul At Sea   etc.
-  var inlinePat = new RegExp(
-    '(\\d{1,2}-(?:' + MONTHS + '))\\s+' +
-    '((?:(?!\\d{1,2}-(?:' + MONTHS + ')).)+)',
-    'gi'
-  );
-  var m1 = inlinePat.exec(raw);
-  if (m1) {
-    // This format detected — parse all matches
-    inlinePat.lastIndex = 0;
-    var match;
-    while ((match = inlinePat.exec(raw)) !== null) {
-      var dateRaw = match[1];
-      var placeRaw = match[2].trim();
-      var isSea = /\bat\s*sea\b/i.test(placeRaw);
-      var place, country, arr = null, dep = null;
-
-      // Extract arr/dep times if present
-      var arrM = placeRaw.match(/\bArr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i);
-      var depM = placeRaw.match(/\bDep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i);
-      if (arrM) arr = arrM[1];
-      if (depM) dep = depM[1];
-
-      if (isSea) {
-        place = 'At Sea'; country = '';
-      } else {
-        // Remove parentheticals like "(Iraklion)" 
-        var clean = placeRaw.replace(/\s*\([^)]*\)/g, '').trim();
-        // Remove arr/dep snippets
-        clean = clean.replace(/\b(?:Arr|Dep)(?:ival|arture)?[:\s]+\d{1,2}:\d{2}/gi, '').trim();
-        var parts = clean.split(',').map(function(p){return p.trim();}).filter(Boolean);
-        if (parts.length >= 2) {
-          place = parts[0]; country = parts[parts.length-1];
-        } else {
-          place = clean; country = '';
-        }
-      }
-
-      // Format date: "10-Jun" -> "Jun 10"
-      var dm = dateRaw.match(/(\d{1,2})-(\w+)/);
-      var dateFmt = dm ? (dm[2].charAt(0).toUpperCase()+dm[2].slice(1).toLowerCase()+' '+dm[1]) : dateRaw;
-
-      results.push({day:dayNum++, date:dateFmt, place:place, country:country, sea:isSea, arr:arr, dep:dep});
-    }
-    return results;
-  }
-
-  // ── FORMAT 2: Line-by-line formats ──
-  // Handles: "Day 1 - Barcelona, Spain", "Sep 14 Naples", "14 September – Lisbon"
-  var lines = raw.split(/\n/).map(function(l){return l.trim();}).filter(Boolean);
-  lines.forEach(function(line) {
-    var lo = line.toLowerCase();
-    // Skip obvious header lines (no date or place content)
-    if (/^[jJ]\s*\d{3}/.test(line)) return;  // voyage code like "J 607"
-    if (/^[a-zA-Z\s]+[jJ]\s*\d{3}/.test(line)) return; // "June Arcadia J 606"
-
-    var isSea = /\bat\s*sea\b/.test(lo);
-    var arr = null, dep = null;
-
-    // Extract times
-    var arrM = line.match(/\bArr(?:ival)?[:\s]+(\d{1,2}:\d{2})/i);
-    var depM = line.match(/\bDep(?:arture)?[:\s]+(\d{1,2}:\d{2})/i);
-    var rng  = line.match(/\((\d{1,2}:\d{2})\s*[-\u2013]\s*(\d{1,2}:\d{2})\)/);
-    if (arrM) arr = arrM[1];
-    if (depM) dep = depM[1];
-    if (!arr && rng) arr = rng[1];
-    if (!dep && rng) dep = rng[2];
-
-    // Extract date: "Sep 14", "14 Sep", "14-Sep", "14 September"
-    var dm = line.match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})\b/i)
-           || line.match(/\b(\d{1,2})\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/i);
-    var dateFmt = '';
-    if (dm) {
-      var mo = dm[1].charAt(0).toUpperCase()+dm[1].slice(1,3).toLowerCase();
-      var dy = dm[2] || dm[0].match(/\d+/)[0];
-      if (/^\d/.test(dm[1])) { mo = dm[2].charAt(0).toUpperCase()+dm[2].slice(1,3).toLowerCase(); dy = dm[1]; }
-      dateFmt = mo+' '+dy;
-    }
-
-    if (isSea) {
-      if (dateFmt) results.push({day:dayNum++,date:dateFmt,place:'At Sea',country:'',sea:true,arr:null,dep:null});
-      return;
-    }
-
-    // Extract place: remove date, day numbers, times, keywords
-    var placePart = line
-      .replace(/\b(?:Day|Cruise|Port)\s*\d+\b/gi,'')
-      .replace(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}\b/gi,'')
-      .replace(/\b\d{1,2}\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/gi,'')
-      .replace(/\s*\([^)]*\)/g,'')
-      .replace(/\b(?:Arr(?:ival)?|Dep(?:arture)?)[:\s]+\d{1,2}:\d{2}/gi,'')
-      .replace(/\(?\d{1,2}:\d{2}\s*[-\u2013]\s*\d{1,2}:\d{2}\)?/g,'')
-      .replace(/[-\u2013\u2014]/g,' ').trim();
-
-    var parts = placePart.split(',').map(function(p){return p.trim();}).filter(function(p){return p.length>1;});
-    var place = parts[0] || '';
-    var country = parts.length>=2 ? parts[parts.length-1] : '';
-
-    if (place.length > 1) {
-      results.push({day:dayNum++,date:dateFmt||('Day '+dayNum),place:place,country:country,sea:false,arr:arr,dep:dep});
-    }
-  });
-
-  return results;
-}
-
-g('btn-parse').addEventListener('click',function(){
-  var raw=(g('imp-input').value||'').trim();
-  if(!raw)return;
-  var results=smartParse(raw);
-  var out=g('parse-out');
-  if(!results.length){
-    out.innerHTML='<div class="parsed-box" style="text-align:center;padding:14px;font-size:13px;color:var(--text-muted);">Could not detect stops. Try the Manual tab or check the format.</div>';
-    return;
-  }
-  var h='<div class="parsed-box">'
-    +'<div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">'+results.length+' stops detected — review before adding</div>';
-  results.forEach(function(r){
-    h+='<div class="parsed-row">'
-      +'<span class="p-lbl">'+(r.sea?'&#9652;':r.day+'.') +' '+r.place+(r.country?', '+r.country:'')+'</span>'
-      +'<span class="p-val">'+r.date+(r.arr?' Arr '+r.arr:'')+(r.dep?' Dep '+r.dep:'')+'</span>'
-      +'</div>';
-  });
-  h+='</div>';
-  // REPLACE button — clears existing stops
-  h+='<div style="display:flex;gap:8px;margin-top:10px;">'
-    +'<button class="btn-p" id="btn-confirm-replace" style="flex:1;background:var(--burgundy);">Replace Itinerary</button>'
-    +'<button class="btn-d" id="btn-confirm-add" style="flex:1;">Append to Existing</button>'
-    +'</div>';
-  out.innerHTML=h;
-
-  function doImport(replace) {
-    if(replace){
-      stops.length=0;
-    }
-    var added=0;
-    results.forEach(function(item){
-      if(!stops.some(function(x){return x.place===item.place&&x.date===item.date;})){
-        stops.push(item);added++;
-      }
-    });
-    stops.forEach(function(s,i){s.day=i+1;});
-    saveStops();
-    renderItin();
-    if(typeof renderItinEdit==='function')renderItinEdit();
-    out.innerHTML='<div class="ok-wrap">'
-      +'<div class="ok-check">&#10003;</div>'
-      +'<div class="ok-txt">'+added+' stop'+(added!==1?'s':'')+' '+(replace?'loaded':'added')+'!</div>'
-      +'<div style="margin-top:10px;">'
-      +'<button class="btn-sm primary" id="btn-go-voyage" style="width:100%;padding:12px;">View Itinerary &#8594;</button>'
-      +'</div></div>';
+// Parse button
+if(g('btn-parse'))g('btn-parse').addEventListener('click',function(){
+  var raw=(g('imp-input').value||'').trim(); if(!raw)return;
+  var results=smartParse(raw), out=g('parse-out');
+  if(!results.length){if(out)out.innerHTML='<div class="parsed-box" style="text-align:center;padding:14px;font-size:14px;color:var(--text-muted);">Could not detect stops. Try the Manual tab.</div>';return;}
+  var h='<div class="parsed-box"><div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">'+results.length+' stops detected</div>';
+  results.forEach(function(r){h+='<div class="parsed-row"><span class="p-lbl">'+(r.sea?'&#9652;':r.day+'.') +' '+escH(r.place+(r.country?', '+r.country:''))+'</span><span class="p-val">'+r.date+(r.arr?' Arr '+r.arr:'')+(r.dep?' Dep '+r.dep:'')+'</span></div>';});
+  h+='</div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn-p" id="btn-import-replace" style="flex:1;background:var(--burgundy);">Replace Itinerary</button><button class="btn-d" id="btn-import-add" style="flex:1;">Append</button></div>';
+  if(out)out.innerHTML=h;
+  function doImport(replace){
+    if(replace)stops.length=0;
+    results.forEach(function(item){if(!stops.some(function(x){return x.place===item.place&&x.date===item.date;}))stops.push(item);});
+    stops.forEach(function(s,i){s.day=i+1;}); saveStops(); renderItin();
+    if(out)out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">'+results.length+' stops '+(replace?'loaded':'added')+'!</div><div style="margin-top:10px;"><button class="btn-sm primary" id="btn-go-voyage" style="width:100%;padding:12px;">View Itinerary &#8594;</button></div></div>';
+    if(g('btn-go-voyage'))g('btn-go-voyage').addEventListener('click',function(){document.querySelector('#nav button[data-s="voyage"]').click();});
     g('imp-input').value='';
-    g('btn-go-voyage').addEventListener('click',function(){
-      var vBtn=document.querySelector('#nav button[data-s="voyage"]');
-      if(vBtn)vBtn.click();
-    });
   }
-
-  g('btn-confirm-replace').addEventListener('click',function(){doImport(true);});
-  g('btn-confirm-add').addEventListener('click',function(){doImport(false);});
+  if(g('btn-import-replace'))g('btn-import-replace').addEventListener('click',function(){doImport(true);});
+  if(g('btn-import-add'))    g('btn-import-add').addEventListener('click',function(){doImport(false);});
 });
 
-// ── MANUAL ──
-g('btn-manual').addEventListener('click',function(){
-  var sea=g('m-sea').checked;
-  var place=(g('m-place').value||"").trim();
-  var country=(g('m-country').value||"").trim();
-  var date=g('m-date').value,arr=g('m-arr').value,dep=g('m-dep').value;
+// Manual add
+if(g('btn-manual'))g('btn-manual').addEventListener('click',function(){
+  var sea=g('m-sea').checked, place=(g('m-place').value||'').trim(), country=(g('m-country').value||'').trim();
+  var date=g('m-date').value, arr=g('m-arr').value, dep=g('m-dep').value;
   if(!place&&!sea)return;
   var ds=date?(new Date(date+'T12:00:00')).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Day '+(stops.length+1);
   stops.push({day:stops.length+1,place:sea?'At sea':place,country:country,date:ds,arr:arr||null,dep:dep||null,sea:sea});
-  renderItin();
+  saveStops(); renderItin();
   ['m-place','m-country','m-date','m-arr','m-dep'].forEach(function(id){var e=g(id);if(e)e.value='';});
   g('m-sea').checked=false;
-  var out=g('manual-out');
-  out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Stop added!</div></div>';
-  setTimeout(function(){out.innerHTML='';},2000);
+  var out=g('manual-out');if(out){out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt">Stop added!</div></div>';setTimeout(function(){out.innerHTML='';},2000);}
 });
 
-// ── TEMPLATES ──
-var tpls={
-  'tpl-msc':'Day 1 \u2013 Sep 14 \u2013 Barcelona, Spain (Dep 18:00)\nDay 2 \u2013 Sep 15 \u2013 At sea (Balearic)\nDay 3 \u2013 Sep 16 \u2013 Naples, Italy (Arr 08:00, Dep 19:00)\nDay 4 \u2013 Sep 17 \u2013 Santorini, Greece (Arr 07:00, Dep 18:00)',
-  'tpl-royal':'Barcelona \u00b7 Spain \u00b7 Sep 14 (18:00\u2013)\nAt Sea \u00b7 Balearic \u00b7 Sep 15\nNaples \u00b7 Italy \u00b7 Sep 16 (08:00\u201319:00)\nSantorini \u00b7 Greece \u00b7 Sep 17 (07:00\u201318:00)',
-  'tpl-generic':'14 September \u2013 Barcelona, Spain. Depart 18:00\n15 September \u2013 At sea\n16 September \u2013 Naples, Italy. Arrive 08:00, Depart 19:00\n17 September \u2013 Santorini, Greece. Arrive 07:00, Depart 18:00'
-};
-['tpl-msc','tpl-royal','tpl-generic'].forEach(function(id){
-  var el=g(id);if(el)el.addEventListener('click',function(){var ta=g('imp-input');if(ta)ta.value=tpls[id];showPanel('text');});
+// Templates
+var tpls={'tpl-msc':'Day 1 \u2013 Jun 10 \u2013 Southampton, England (Dep 18:00)\nDay 2 \u2013 Jun 11 \u2013 At sea\nDay 3 \u2013 Jun 13 \u2013 Lisbon, Portugal (Arr 08:00, Dep 19:00)','tpl-royal':'Southampton \u00b7 England \u00b7 Jun 10 (18:00\u2013)\nAt Sea \u00b7 Jun 11\nLisbon \u00b7 Portugal \u00b7 Jun 13 (08:00\u201319:00)','tpl-generic':'10 June \u2013 Southampton, England. Depart 18:00\n11 June \u2013 At sea\n13 June \u2013 Lisbon, Portugal. Arrive 08:00, Depart 19:00'};
+['tpl-msc','tpl-royal','tpl-generic'].forEach(function(id){var el=g(id);if(el)el.addEventListener('click',function(){var ta=g('imp-input');if(ta)ta.value=tpls[id];showPanel('text');});});
+
+// ── 13. EXPORT / RESTORE ────────────────────────────────
+function encodePayload(p){ try{return 'VK2:'+btoa(unescape(encodeURIComponent(JSON.stringify(p))));}catch(e){return 'VK2:'+btoa(JSON.stringify(p));} }
+function decodePayload(code){ code=code.trim(); if(!code.startsWith('VK2:')&&!code.startsWith('VK1:'))throw new Error('Not a backup'); var b=code.slice(4); try{return JSON.parse(decodeURIComponent(escape(atob(b))));}catch(e){return JSON.parse(atob(b));} }
+
+if(g('btn-do-export'))g('btn-do-export').addEventListener('click',function(){
+  var p={v:'2',ts:Date.now(),app:'VoyageKeeper'};
+  if(g('xp-stops')&&g('xp-stops').checked)    p.stops=JSON.parse(JSON.stringify(stops));
+  if(g('xp-vault')&&g('xp-vault').checked)    {p.vaultIns=JSON.parse(JSON.stringify(vaultIns));p.vaultEm=JSON.parse(JSON.stringify(vaultEm));p.vaultNotes=JSON.parse(JSON.stringify(vaultNotes));}
+  if(g('xp-journal')&&g('xp-journal').checked) p.jEntries=JSON.parse(JSON.stringify(jEntries));
+  if(g('xp-clocks')&&g('xp-clocks').checked)  {p.tz=JSON.parse(JSON.stringify(tz));p.travelMode=travelMode;}
+  var code=encodePayload(p);
+  var codeEl=g('export-code');if(codeEl)codeEl.value=code;
+  var res=g('export-result');if(res)res.style.display='block';
+  var info=g('export-info');if(info){var parts=[];if(p.stops)parts.push(p.stops.length+' stops');if(p.vaultIns)parts.push((p.vaultIns.length+p.vaultEm.length+p.vaultNotes.length)+' vault items');if(p.jEntries)parts.push(p.jEntries.length+' journal entries');if(p.tz)parts.push('clock settings');info.textContent='Includes: '+parts.join(', ')+' \u2014 '+(Math.round(code.length/102.4)/10)+' KB';}
+  updateExportCounts();
 });
-
-// ── SERVICE WORKER (offline) ──
-// ══════════════════════════════════════════════════
-// ── ALARM SYSTEM ──
-// ══════════════════════════════════════════════════
-var alarm = {
-  active: false,
-  timeStr: '',   // "HH:MM" in ship time
-  label: '',
-  tsMillis: 0,   // absolute ms when alarm fires (using ship clock)
-  snoozeCount: 0,
-  intervalId: null,
-  audioCtx: null,
-  beepIntervalId: null
-};
-
-// Load saved alarm from localStorage
-function loadAlarm(){
+if(g('btn-copy-code'))g('btn-copy-code').addEventListener('click',function(){
+  var el=g('export-code');if(!el)return; el.select();
+  var btn=g('btn-copy-code');var ok=function(){if(btn){btn.textContent='Copied \u2713';setTimeout(function(){btn.textContent='Copy';},2500);}};
+  try{if(document.execCommand('copy')){ok();return;}}catch(e){}
+  navigator.clipboard&&navigator.clipboard.writeText(el.value).then(ok).catch(function(){});
+});
+if(g('btn-share'))g('btn-share').addEventListener('click',function(){
+  var code=g('export-code')&&g('export-code').value;if(!code)return;
+  if(navigator.share){navigator.share({title:'VoyageKeeper Backup',text:'Paste into VoyageKeeper \u2192 Transfer \u2192 Import \u2192 Restore:\n\n'+code}).catch(function(){});}
+  else{navigator.clipboard&&navigator.clipboard.writeText(code).then(function(){alert('Copied! Paste in VoyageKeeper on other device \u2192 Transfer \u2192 Restore.');});}
+});
+if(g('btn-email'))g('btn-email').addEventListener('click',function(){
+  var code=g('export-code')&&g('export-code').value;if(!code)return;
+  window.location.href='mailto:?subject='+encodeURIComponent('VoyageKeeper Backup')+'&body='+encodeURIComponent('To restore:\n1. Open VoyageKeeper\n2. Transfer \u2192 Import \u2192 Restore tab\n3. Paste code below\n\n'+code);
+});
+if(g('btn-dlfile'))g('btn-dlfile').addEventListener('click',function(){
+  var code=g('export-code')&&g('export-code').value;if(!code)return;
+  try{var blob=new Blob([code],{type:'text/plain'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='VoyageKeeper-backup-'+new Date().toISOString().slice(0,10)+'.txt';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}catch(e){alert('Use Copy or Share instead.');}
+});
+function doRestore(replace){
+  var raw=(g('restore-input')&&g('restore-input').value)||'',out=g('restore-out');
+  if(!raw.trim()){if(out)out.innerHTML='<div style="color:var(--burgundy);font-size:14px;font-weight:700;padding:8px 0;">Paste a backup code first.</div>';return;}
   try{
-    var a=JSON.parse(localStorage.getItem('vk_alarm')||'null');
-    if(a&&a.active&&a.tsMillis>Date.now()){
-      alarm.active=a.active; alarm.timeStr=a.timeStr;
-      alarm.label=a.label||''; alarm.tsMillis=a.tsMillis;
-      alarm.snoozeCount=a.snoozeCount||0;
-      showAlarmActive();
-    }
-  }catch(e){}
+    var p=decodePayload(raw.trim()),ts=p.ts?new Date(p.ts).toLocaleString():'unknown';
+    if(replace&&!confirm('Replace ALL current data with backup from '+ts+'?'))return;
+    var changed=[];
+    if(p.stops){if(replace)stops.length=0;p.stops.forEach(function(s){if(!stops.some(function(x){return x.place===s.place&&x.date===s.date;}))stops.push(s);});stops.forEach(function(s,i){s.day=i+1;});saveStops();renderItin();changed.push(p.stops.length+' stops');}
+    if(p.vaultIns){if(replace)vaultIns.length=0;p.vaultIns.forEach(function(x){if(!vaultIns.some(function(e){return e.id===x.id;}))vaultIns.push(x);});changed.push(p.vaultIns.length+' insurance');}
+    if(p.vaultEm){if(replace)vaultEm.length=0;p.vaultEm.forEach(function(x){if(!vaultEm.some(function(e){return e.id===x.id;}))vaultEm.push(x);});changed.push(p.vaultEm.length+' contacts');}
+    if(p.vaultNotes){if(replace)vaultNotes.length=0;p.vaultNotes.forEach(function(x){if(!vaultNotes.some(function(e){return e.id===x.id;}))vaultNotes.push(x);});changed.push(p.vaultNotes.length+' notes');}
+    if(p.vaultIns||p.vaultEm||p.vaultNotes){saveVault();renderVaultIns();renderVaultEm();renderVaultNotes();}
+    if(p.jEntries){if(replace)jEntries.length=0;p.jEntries.forEach(function(x){if(!jEntries.some(function(e){return e.id===x.id;}))jEntries.push(x);});saveJournal();rebuildReadPanel();changed.push(p.jEntries.length+' journal entries');}
+    if(p.tz){Object.keys(p.tz).forEach(function(k){tz[k]=p.tz[k];});saveTZ();applyTZLabels();changed.push('clock settings');}
+    if(p.travelMode){travelMode=p.travelMode;saveTMode();applyTravelMode();}
+    if(out)out.innerHTML='<div class="ok-wrap"><div class="ok-check">&#10003;</div><div class="ok-txt"><strong>Restored:</strong> '+changed.join(', ')+'<br><span style="font-size:12px;color:var(--text-muted);">From: '+ts+'</span></div></div>';
+    if(g('restore-input'))g('restore-input').value='';
+  }catch(err){if(out)out.innerHTML='<div style="color:var(--burgundy);font-size:14px;font-weight:700;padding:8px 0;">&#9888; Invalid backup code. Copy the entire code starting with VK2:</div>';}
 }
-function saveAlarm(){
-  try{localStorage.setItem('vk_alarm',JSON.stringify({
-    active:alarm.active,timeStr:alarm.timeStr,
-    label:alarm.label,tsMillis:alarm.tsMillis,
-    snoozeCount:alarm.snoozeCount
-  }));}catch(e){}
-}
-function clearAlarmStore(){
-  try{localStorage.removeItem('vk_alarm');}catch(e){}
-}
+if(g('btn-restore-merge'))  g('btn-restore-merge').addEventListener('click',function(){doRestore(false);});
+if(g('btn-restore-replace'))g('btn-restore-replace').addEventListener('click',function(){doRestore(true);});
 
-// Convert ship HH:MM today → absolute UTC ms
-function shipTimeToMs(hhmm){
-  var parts=hhmm.split(':');
-  var h=parseInt(parts[0]), m=parseInt(parts[1]);
-  // Use ship timezone (IANA)
-  var now=new Date();
-  var shipNow=ianaTime(tz.ship);
-  // Build a date string in ship's timezone for today at h:m
-  var y=shipNow.getFullYear(), mo=shipNow.getMonth(), d=shipNow.getDate();
-  // Construct UTC ms: we know ianaOffset gives current offset
-  var off=ianaOffset(tz.ship); // hours e.g. 1 for BST
-  var localMs = Date.UTC(y, mo, d, h, m, 0) - off*3600000;
-  // If that time already passed today, schedule for tomorrow
-  if(localMs <= Date.now()) localMs += 86400000;
-  return localMs;
-}
-
-// Request notification permission
-function requestNotifPermission(cb){
-  if(!('Notification' in window)){cb(false);return;}
-  if(Notification.permission==='granted'){cb(true);return;}
-  Notification.requestPermission().then(function(p){cb(p==='granted');});
-}
-
-// Set alarm from HH:MM string
-function setAlarmTime(hhmm, label){
-  alarm.active=true;
-  alarm.timeStr=hhmm;
-  alarm.label=label||'Return to ship';
-  alarm.tsMillis=shipTimeToMs(hhmm);
-  alarm.snoozeCount=0;
-  saveAlarm();
-  requestNotifPermission(function(){});
-  showAlarmActive();
-  startAlarmCountdown();
-}
-
-// Show active alarm UI
-function showAlarmActive(){
-  var empty=g('alarm-empty'), active=g('alarm-active');
-  if(empty)empty.style.display='none';
-  if(active)active.style.display='block';
-  var at=g('alarm-active-time'); if(at)at.textContent=alarm.timeStr;
-  var al=g('alarm-active-label');
-  if(al)al.textContent=alarm.label+(alarm.snoozeCount>0?' (snoozed ×'+alarm.snoozeCount+')':'');
-}
-
-// Show empty alarm UI
-function showAlarmEmpty(){
-  var empty=g('alarm-empty'), active=g('alarm-active');
-  if(empty)empty.style.display='block';
-  if(active)active.style.display='none';
-}
-
-// Countdown tick
-function startAlarmCountdown(){
-  clearInterval(alarm.intervalId);
-  alarm.intervalId=setInterval(function(){
-    if(!alarm.active){clearInterval(alarm.intervalId);return;}
-    var remaining=alarm.tsMillis-Date.now();
-    if(remaining<=0){
-      clearInterval(alarm.intervalId);
-      fireAlarm();
-      return;
-    }
-    var h=Math.floor(remaining/3600000);
-    var m=Math.floor((remaining%3600000)/60000);
-    var s=Math.floor((remaining%60000)/1000);
-    var cd=g('alarm-countdown');
-    if(cd)cd.textContent=
-      String(h).padStart(2,'0')+':'+
-      String(m).padStart(2,'0')+':'+
-      String(s).padStart(2,'0');
-    // Warn at 15 min
-    if(remaining<=900000&&remaining>899000){
-      sendNotification('⚠️ 15 minutes to go!', alarm.label||'Head back to the ship', false);
-    }
-  },1000);
-}
-
-// ── FIRE THE ALARM ──
-function fireAlarm(){
-  alarm.active=false;
-  clearAlarmStore();
-  // Show full-screen overlay
-  var ov=g('alarm-overlay');
-  if(ov){
-    ov.classList.add('firing');
-    var ol=g('alarm-overlay-label');
-    if(ol)ol.textContent=alarm.label||'Time to return to the ship!';
-  }
-  // Beep
-  startBeeping();
-  // Push notification
-  sendNotification('⏰ '+alarm.timeStr+' — Time to go!', alarm.label||'Return to the ship now', true);
-  // Vibrate if supported
-  try{if(navigator.vibrate)navigator.vibrate([400,200,400,200,400,200,800]);}catch(e){}
-}
-
-// ── WEB AUDIO BEEP ──
-function startBeeping(){
-  stopBeeping();
-  function beep(){
-    try{
-      if(!alarm.audioCtx){
-        alarm.audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-      }
-      var ctx=alarm.audioCtx;
-      // Three-tone ascending alarm
-      [[880,0],[1047,0.25],[1318,0.5]].forEach(function(pair){
-        var osc=ctx.createOscillator();
-        var gain=ctx.createGain();
-        osc.type='sine';
-        osc.frequency.setValueAtTime(pair[0],ctx.currentTime+pair[1]);
-        gain.gain.setValueAtTime(0.7,ctx.currentTime+pair[1]);
-        gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+pair[1]+0.4);
-        osc.connect(gain);gain.connect(ctx.destination);
-        osc.start(ctx.currentTime+pair[1]);
-        osc.stop(ctx.currentTime+pair[1]+0.45);
-      });
-    }catch(e){}
-  }
-  beep();
-  alarm.beepIntervalId=setInterval(beep,1800);
-}
-function stopBeeping(){
-  clearInterval(alarm.beepIntervalId);
-  alarm.beepIntervalId=null;
-}
-
-// ── PUSH NOTIFICATION ──
-function sendNotification(title, body, requireInteraction){
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
-  try{
-    var opts={body:body,icon:'icon-192.png',badge:'icon-192.png',
-      vibrate:[400,200,400],tag:'vk-alarm'};
-    if(requireInteraction)opts.requireInteraction=true;
-    new Notification(title,opts);
-  }catch(e){
-    // Service worker notifications (more reliable on mobile)
-    if(navigator.serviceWorker&&navigator.serviceWorker.ready){
-      navigator.serviceWorker.ready.then(function(reg){
-        reg.showNotification(title,{body:body,icon:'icon-192.png',
-          vibrate:[400,200,400],tag:'vk-alarm',
-          requireInteraction:!!requireInteraction});
-      }).catch(function(){});
-    }
-  }
-}
-
-// ── DISMISS ──
-function dismissAlarm(){
-  stopBeeping();
-  alarm.active=false;
-  clearAlarmStore();
-  var ov=g('alarm-overlay');
-  if(ov)ov.classList.remove('firing');
-  showAlarmEmpty();
-  clearInterval(alarm.intervalId);
-  var cd=g('alarm-countdown');
-  if(cd)cd.textContent='--:--:--';
-}
-
-// ── SNOOZE 5 min ──
-function snoozeAlarm(){
-  stopBeeping();
-  var ov=g('alarm-overlay');
-  if(ov)ov.classList.remove('firing');
-  alarm.snoozeCount++;
-  alarm.active=true;
-  alarm.tsMillis=Date.now()+5*60*1000;
-  saveAlarm();
-  showAlarmActive();
-  startAlarmCountdown();
-}
-
-// ── WIRE UI ──
-// Preset buttons
-document.querySelectorAll('.alarm-preset').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    var mins=parseInt(btn.getAttribute('data-mins')||'60');
-    // Calculate ship time minus X minutes from departure
-    var todayStop=null;
-    var todayNorm=normDate(new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-    for(var i=0;i<stops.length;i++){
-      if(normDate(stops[i].date)===todayNorm){todayStop=stops[i];break;}
-    }
-    var hhmm='';
-    if(todayStop&&todayStop.dep){
-      var dp=todayStop.dep.split(':');
-      var dh=parseInt(dp[0]),dm=parseInt(dp[1]);
-      var totalMins=dh*60+dm-mins;
-      if(totalMins<0)totalMins+=1440;
-      hhmm=String(Math.floor(totalMins/60)).padStart(2,'0')+':'+String(totalMins%60).padStart(2,'0');
-    } else {
-      // No itinerary — just set X mins from now in ship time
-      var shipNow=ianaTime(tz.ship);
-      var nowMins=shipNow.getHours()*60+shipNow.getMinutes()+mins;
-      nowMins=nowMins%1440;
-      hhmm=String(Math.floor(nowMins/60)).padStart(2,'0')+':'+String(nowMins%60).padStart(2,'0');
-    }
-    var label=g('alarm-label-input');
-    var lv=label?label.value.trim():'';
-    if(!lv)lv=(todayStop&&todayStop.dep)?'All aboard '+todayStop.dep:'Return to ship';
-    setAlarmTime(hhmm, lv);
-  });
-});
-
-// Set button
-g('btn-set-alarm')&&g('btn-set-alarm').addEventListener('click',function(){
-  var t=g('alarm-time-input');
-  if(!t||!t.value){t&&t.focus();return;}
-  var lv=g('alarm-label-input');
-  setAlarmTime(t.value, (lv?lv.value.trim():'')||'Return to ship');
-});
-
-// Cancel button
-g('btn-cancel-alarm')&&g('btn-cancel-alarm').addEventListener('click',function(){
-  dismissAlarm();
-});
-
-// Dismiss overlay
-g('btn-dismiss-alarm')&&g('btn-dismiss-alarm').addEventListener('click',function(){
-  dismissAlarm();
-});
-
-// Snooze overlay
-g('btn-snooze-alarm')&&g('btn-snooze-alarm').addEventListener('click',function(){
-  snoozeAlarm();
-});
-
-// Pre-fill time input with ship's all-aboard time if known
-(function(){
-  var t=g('alarm-time-input');
-  if(!t)return;
-  var todayNorm=normDate(new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-  for(var i=0;i<stops.length;i++){
-    if(normDate(stops[i].date)===todayNorm&&stops[i].dep){
-      // Default to 1hr before departure
-      var dp=stops[i].dep.split(':');
-      var dh=parseInt(dp[0]),dm=parseInt(dp[1]);
-      var pre=(dh*60+dm-60+1440)%1440;
-      t.value=String(Math.floor(pre/60)).padStart(2,'0')+':'+String(pre%60).padStart(2,'0');
-      var ll=g('alarm-label-input');
-      if(ll&&!ll.value)ll.value='All aboard '+stops[i].dep;
-      break;
-    }
-  }
-})();
-
-// Load any saved alarm on startup
-loadAlarm();
-
-// ══════════════════════════════════════════════════
-
-// ── OFFLINE / ONLINE DETECTION ──
+// ── 14. OFFLINE ──────────────────────────────────────────
 function updateOnlineStatus(){
-  var banner = g('offline-banner');
-  if(!banner) return;
-  if(!navigator.onLine){
-    banner.style.display = 'block';
-    // Push screens down to make room for banner
-    document.querySelectorAll('.screen').forEach(function(s){
-      s.style.paddingTop = '52px';
-    });
-  } else {
-    banner.style.display = 'none';
-    document.querySelectorAll('.screen').forEach(function(s){
-      s.style.paddingTop = '20px';
-    });
-    // Back online — refresh weather silently
-    try{
-      var lat=localStorage.getItem('vk_lat'), lon=localStorage.getItem('vk_lon');
-      if(lat && lon){
-        var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
-        fetchWeather(lat, lon, devTZ, devTZ.split('/').pop().replace(/_/g,' ')).catch(function(){});
-      }
-    }catch(ex){}
+  var banner=g('offline-banner'); if(!banner)return;
+  banner.style.display=navigator.onLine?'none':'block';
+  if(navigator.onLine){ try{var lat=localStorage.getItem('vk_lat'),lon=localStorage.getItem('vk_lon');if(lat&&lon){var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';fetchWeather(lat,lon,devTZ,devTZ.split('/').pop().replace(/_/g,' ')).catch(function(){});}}catch(ex){} }
+}
+window.addEventListener('online',updateOnlineStatus);
+window.addEventListener('offline',updateOnlineStatus);
+updateOnlineStatus();
+
+// ── 15. SERVICE WORKER ───────────────────────────────────
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+
+// ── 16. FIRST LAUNCH: set home TZ to device ──────────────
+try{
+  if(!localStorage.getItem(KEY_TZ)){
+    var devTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+    var devLabel=devTZ.split('/').pop().replace(/_/g,' ');
+    TZ_LIST.forEach(function(z){if(z.r===devTZ)devLabel=z.l;});
+    tz.home=devTZ; tz.homeName=devLabel; tz.homeOff=ianaOffset(devTZ);
+    saveTZ(); applyTZLabels();
   }
-}
-window.addEventListener('online',  updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-updateOnlineStatus(); // check immediately on load
+}catch(e){}
 
-// ── SERVICE WORKER ──
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').then(function(reg){
-    // When a new SW is waiting, reload to apply it
-    reg.addEventListener('updatefound', function(){
-      var newWorker = reg.installing;
-      if(newWorker){
-        newWorker.addEventListener('statechange', function(){
-          if(newWorker.state==='installed' && navigator.serviceWorker.controller){
-            // New version ready — silently apply
-            newWorker.postMessage({action:'skipWaiting'});
-          }
-        });
-      }
-    });
-  }).catch(function(){});
-}
-
-})(); // end IIFE
+})(); // end
 </script>
 </body>
 </html>
